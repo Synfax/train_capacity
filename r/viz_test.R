@@ -7,8 +7,9 @@ library(mapgl)
 #download.file("https://yimby-mel.s3.ap-southeast-2.amazonaws.com/rmd_data.qs",destfile = 'data/rmd_data.qs')
 
 #data <- qs::qread_url("https://yimby-mel.s3.ap-southeast-2.amazonaws.com/rmd_data.qs")
-
+saveRDS(data, 'data.Rdata')
 library(data.table)
+
 #st_write(data, 'data/rmd_data.shp')
 
 yimby_colours <- list(
