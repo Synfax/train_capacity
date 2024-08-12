@@ -1,0 +1,17 @@
+{
+  "hash": "e26f6ae936f1df3d9bdb818321d20cc6",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Station Capacity\"\nauthor: \"Paul S\"\ndate: \"6/6/24\"\nparams: \n  station: \"Brunswick\"\nformat: \n  html: \n    theme: zephyr\n    fig-width: 8\n    fig-height: 8\n    code-fold: false\n    toc: true\n    toc-depth: 4\n    toc-location: left\n    page-layout: full\n---\n\n\n\noutput Brunswick\n\ntodo: what line does the station serve (could be multiple?)\n\nwhere does this station rank within its line? where does it rank in the overall network?\n\nwhen is this station busiest? \n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\n\nstation = params$station\n\nhourly_factors = readRDS('../r_objects/hourly_factors.Rdata')\n\n to_plot <- hourly_factors %>% filter(Station_Name == station)\n  \n  p <- ggplot(to_plot, mapping = aes(x = hour_of_day, y = avg_patronage)) + geom_point()\n  \n  p + facet_grid(rows = vars(dir)) + theme_bw(base_size = 15)\n```\n\n::: {.cell-output-display}\n![](run_for_station_files/figure-html/unnamed-chunk-1-1.png){width=768}\n:::\n:::",
+    "supporting": [
+      "run_for_station_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

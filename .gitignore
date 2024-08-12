@@ -1,7 +1,3 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
+shapefiles/
 data/
-shapefiles/suburb_boundaries/
-/.quarto/
+r/data.Rdata
