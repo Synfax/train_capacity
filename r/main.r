@@ -36,14 +36,43 @@ hourly_factors <- patronage_data %>%
   group_by(hour_of_day, Station_Name, Direction) %>%
   summarise(capacity_factor = mean(capacity_factor), avg_patronage = mean(Passenger_Departure_Load))
 
-patronage_data %>%
-  group_by(Station_Name, Line_Name, Day_Type) %>%
-  summarise(n = n())
-
 saveRDS(hourly_factors, '../r_objects/hourly_factors.Rdata')
 
+frequency_by_stationday <- patronage_data %>%
+  group_by(Station_Name, Line_Name, Business_Date, Day_Type) %>%
+  summarise(n = n())
 
 
+frequency_by_stationday = frequency_by_stationday %>%
+  group_by(Day_Type, Line_Name, Station_Name) %>%
+  summarise(avg_freq = mean(n)) %>%
+  group_by(Day_Type, Station_Name) %>%
+  summarise(avg_freq_all_lines = sum(avg_freq))
+
+library(chron)
+
+times <- patronage_data %>%
+  filter(Station_Name == 'Brunswick') %>%
+  filter(Day_Type == "Normal Weekday") %>%
+  select(Departure_Time_Scheduled) %>%
+  unlist() %>%
+  unname()
+
+times_chron = chron(times = times)
+times_posixt = as.POSIXct(times,format="%H:%M:%S",tz="Australia/Sydney")
+
+tdf <- data.frame(times)
+tdf <- tdf[order(tdf$times), ]
+
+tdf = data.frame(dep = chron(times = tdf))
+
+normal_times = (tdf %>% group_by(dep) %>%
+                  summarise(n = n()) %>% filter(n > 10) %>% select(dep))
+
+tdf = tdf %>%
+  filter(dep %in% as.vector(normal_times) )
+
+ggplot(as.data.frame(tdf), aes(x = tdf)) + geom_histogram()
 
 # patronage_by_station <- patronage_data %>%
 #   filter(Mode=='Metro') %>%
