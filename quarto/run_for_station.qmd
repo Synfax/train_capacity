@@ -1,0 +1,130 @@
+---
+title: "Station Capacity"
+author: "Paul S"
+date: "6/6/24"
+params: 
+  station: "Brunswick"
+format: 
+  html: 
+    theme: zephyr
+    fig-width: 8
+    fig-height: 8
+    code-fold: false
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    page-layout: full
+---
+
+```{r}
+
+
+library(knitr)
+library(tidyverse)
+library(sf)
+library(leaflet)
+devtools::install_github("walkerke/mapgl")
+library(mapgl)
+library(htmltools)
+library(htmlwidgets)
+
+
+yimby_colours <- list(
+  hero = "#10461B",
+  body = "#000000",
+  background  = "#FDFFEE",
+  green_base  = "#10461B",
+  blue_base   = "#283696",
+  red_base    = "#BA1B21",
+  yellow_base = "#F6AE00",
+  green_palette  = c("#10461B", "#2C6F3A", "#579A64", "#8FC49A", "#D6EFDB"),
+  blue_palette   = c("#1A235F", "#283696", "#9EA7E2", "#D0D6FF", "#E8ECFF"),
+  red_palette    = c("#D92127", "#BA1B21", "#8E3437", "#C6A2A3", "#E3BABB"),
+  yellow_palette = c("#F6AE00", "#DE9B00", "#C79E3E", "#F2DCA5", "#FFF7E3")
+)
+
+specified_colors <- c("Already developed"                       = "#989898",
+                      "Housing not permitted"                   = "#b1b1b1",
+                      "Civic use makes development less likely" = "#cacaca", 
+                      "Low density residential"                 = yimby_colours$blue_palette[5],
+                      "2 storeys (NRZ)"                         = yimby_colours$blue_palette[4],
+                      "3 storeys (GRZ)"                         = yimby_colours$blue_palette[3],
+                      "4 storeys (RGZ)"                         = yimby_colours$blue_palette[2],
+                      "4+ storeys (Mixed use zones)"            = yimby_colours$blue_palette[1],
+                      "6 storeys (Missing middle)"              = yimby_colours$green_palette[3]
+)
+
+```
+
+output `r params$station `
+
+todo: what line does the station serve (could be multiple?)
+
+where does this station rank within its line? where does it rank in the overall network?
+
+when is this station busiest? 
+
+## Info
+
+
+
+## `r params$station`
+
+```{r, results='hide', warning=FALSE,message=FALSE}
+#| echo: false 
+
+
+station = params$station
+
+station = 'Brunswick'
+
+hourly_factors = readRDS('../r_objects/hourly_factors.Rdata')
+
+to_plot <- hourly_factors %>% filter(Station_Name == station)
+  
+p <- ggplot(to_plot, mapping = aes(x = hour_of_day, y = avg_patronage)) + geom_point()
+  
+p + facet_grid(rows = vars(Direction)) + theme_bw(base_size = 15)
+
+```
+
+## map
+
+``` {r}
+
+locations = readRDS('../r_objects/locations.Rdata')
+
+station_location = locations %>%
+  filter(Station_Name == station) %>%
+  st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
+
+buffer = st_buffer(station_location, dist = 500)
+
+dwelling_data = readRDS('../data/data.Rdata')
+
+dwelling_data = st_transform(dwelling_data, 'wgs84')
+
+near_station = st_within(dwelling_data, buffer, sparse = F)
+near_station = dwelling_data %>%
+  filter(near_station) %>% mutate( old_color = specified_colors[category], new_color = specified_colors[category_new] )
+
+# m1 <- mapgl::maplibre(style = mapgl::carto_style('positron')) %>%
+#   mapgl::add_fill_extrusion_layer(id = 'brunswick', source = near_station,
+#                            fill_extrusion_opacity = 0.85,
+#                            fill_extrusion_color = c('get', 'old_color'),
+#                            fill_extrusion_height = c("get", "old_height") ) %>%
+#     mapgl::fly_to(
+#       center = c(145.063115,-37.814175),
+#       zoom = 9,
+#       pitch = 40
+#     )
+# 
+# m1
+
+#palTest = colorFactor(palette = 'Dark2', domain = near_station$category)
+leaflet(near_station) %>%
+  addProviderTiles('CartoDB.Positron') %>%
+  addPolygons(fillColor = as.vector(near_station$new_color), color = NA, weight = 0, fillOpacity = 0.7) %>%
+  addLegend(position = 'bottomright', pal = as.vector(near_station$new_color) , values = near_station$category )
+
+```

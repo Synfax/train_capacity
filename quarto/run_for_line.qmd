@@ -1,0 +1,117 @@
+---
+title: "Line Capacity"
+author: "Paul S"
+date: "6/6/24"
+params: 
+  line: "Upfield"
+format: 
+  html: 
+    theme: zephyr
+    fig-width: 8
+    fig-height: 8
+    code-fold: false
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    page-layout: full
+---
+
+
+
+## `r params$line`
+
+
+### Boarding and Alighting Information
+
+The section below shows how boarding and alighting are distributed across the stations on the `r params$line` line. It is split into four categories: weekdays and weekends, and boarding and alighting (getting off). Each category contains further information about whether the train is going towards flinders street, or away from flinders street.
+
+The y-variable is a percentage of total boardings for that day of week, boarding or alighting and direction, so, each subplot has values which sum to one.
+
+```{r, results='hide', warning=FALSE,message=FALSE}
+#| echo: false 
+
+library(tidyverse)
+
+by_line_data = readRDS('../r_objects/by_line_data.Rdata')
+
+upf = by_line_data %>%
+  filter(Line_Name == 'Upfield') %>%
+  arrange(Station_Chainage) %>% filter(n > 1000)
+```
+
+::: {.panel-tabset}
+
+## Weekdays - Boarding
+
+```{r, results='hide', warning=FALSE,message=FALSE}
+#| echo: false 
+
+ggplot(upf %>% filter(!isWeekend), mapping = aes(x = reorder(Station_Name, Station_Chainage, decreasing = F), y = pc_boardings) ) +
+  geom_col() + scale_x_discrete(guide = guide_axis(angle = 45)) + facet_grid(rows = vars(Direction))
+
+
+```
+
+## Weekdays - Alighting
+
+```{r, results='hide', warning=FALSE,message=FALSE}
+#| echo: false 
+
+ggplot(upf %>% filter(!isWeekend), mapping = aes(x = reorder(Station_Name, Station_Chainage, decreasing = F), y = pc_alightings) ) +
+  geom_col() + scale_x_discrete(guide = guide_axis(angle = 45)) + facet_grid(rows = vars(Direction))
+
+```
+
+## Weekends - Boarding
+
+```{r, results='hide', warning=FALSE,message=FALSE}
+#| echo: false 
+
+ggplot(upf %>% filter(isWeekend), mapping = aes(x = reorder(Station_Name, Station_Chainage, decreasing = F), y = pc_boardings) ) +
+  geom_col() + scale_x_discrete(guide = guide_axis(angle = 45)) + facet_grid(rows = vars(Direction))
+
+
+```
+
+## Weekends - Alighting
+
+```{r, results='hide', warning=FALSE,message=FALSE}
+#| echo: false 
+
+
+ggplot(upf %>% filter(isWeekend), mapping = aes(x = reorder(Station_Name, Station_Chainage, decreasing = F), y = pc_alightings) ) +
+  geom_col() + scale_x_discrete(guide = guide_axis(angle = 45)) + facet_grid(rows = vars(Direction))
+
+```
+
+:::
+
+### Typical Service Profile
+
+::: {.panel-tabset}
+
+## Weekdays
+
+```{r, results='hide', warning=FALSE,message=FALSE}
+#| echo: false 
+plot <- ggplot(upf %>% filter(!isWeekend), mapping = aes(x = reorder(Station_Name, Station_Chainage, decreasing = T), y = median_departing_load) ) +
+  geom_point() + scale_x_discrete(guide = guide_axis(angle = 45))
+
+plot + facet_grid(rows = vars(Direction))
+
+```
+
+## Weekends
+
+```{r, results='hide', warning=FALSE,message=FALSE}
+#| echo: false 
+
+plot <- ggplot(upf %>% filter(isWeekend), mapping = aes(x = reorder(Station_Name, Station_Chainage, decreasing = T), y = median_departing_load) ) +
+  geom_point() + scale_x_discrete(guide = guide_axis(angle = 45))
+
+plot + facet_grid(rows = vars(Direction))
+
+```
+
+:::
+

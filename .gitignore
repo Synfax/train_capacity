@@ -1,3 +1,5 @@
 shapefiles/
 data/
 r/data.Rdata
+/.quarto/
+.Rproj.user
