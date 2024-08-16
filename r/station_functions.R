@@ -2,7 +2,10 @@
 return_information <- function(station) {
   
   return(c(
-    "grz_nrz_percentage" = find_zoning_suitability(station)
+    "grz_nrz_percentage" = find_zoning_suitability(station),
+    "capacity_delta" = find_zoned_capacity(station),
+    "heritage_pc" = find_heritage_pc(station),
+    "average_peak_service_freq" = get_peak_service_frequency(station)
   ))
   
 }
@@ -74,8 +77,84 @@ split_by_zone_type <- function(near_properties) {
   
 }
 
-find_zoned_capacity <- function() {
+find_zoned_capacity <- function(station) {
+
+  near_properties = get_near_properties(station)
   
+  #TODO: FIXXXXXXXXXXXXXXXX, either both net or neither net.
   
+  current_capacity = near_properties %>%
+    as.data.frame() %>%
+    select(dwellings_est) %>%
+    sum()
+  
+  current_zoned_capacity = near_properties %>%
+    as.data.frame() %>%
+    select(buxton_yeilds_corrected_net) %>%
+    sum()
+
+  missing_middle_zoned_capacity = near_properties %>%
+    as.data.frame() %>%
+    select(mm_yield_net) %>%
+    sum()
+  
+  delta <- missing_middle_zoned_capacity - current_zoned_capacity
+  
+  return(delta)
+}
+
+find_heritage_pc <- function(station) {
+  
+  near_properties = get_near_properties(station) %>% as.data.frame()
+  
+  percent_heritage <- near_properties %>%
+    st_drop_geometry() %>%
+    filter(zoning_permits_housing == 'Housing permitted', !feature_preventing_development) %>%
+    count(heritage) %>%
+    filter(heritage == TRUE) %>% select(n) /
+    ( near_properties %>%
+    st_drop_geometry() %>%
+    filter(zoning_permits_housing == 'Housing permitted', !feature_preventing_development) %>% nrow() ) %>%
+    as.numeric(.) 
+  
+  return(percent_heritage$n[1])
   
 }
+
+get_peak_service_frequency <- function(station, fromQuarto = F) {
+  
+  prefix_dir = ifelse(fromQuarto, '../', '')
+  
+  peak_morning = 7:10
+  peak_evening = 4:7
+ 
+  service_frequencies = readRDS(paste0(prefix_dir, 'r_objects/service_frequencies.Rdata')) %>%
+    filter(Station_Name == station)
+  
+  morning_to_flinders = service_frequencies %>%
+    filter(Direction == 'Towards Flinders',
+           as.numeric(hour_of_day) %in% peak_morning,
+           Day_Type == 'Normal Weekday') %>%
+    select(sph) %>% 
+    unlist() %>%
+    unname() %>% mean()
+  
+  evening_away_from_flinders = service_frequencies %>%
+    filter(Direction == 'Away from Flinders',
+           as.numeric(hour_of_day) %in% peak_evening,
+           Day_Type == 'Normal Weekday') %>%
+    select(sph) %>% 
+    unlist() %>%
+    unname() %>% mean()
+  
+  return(mean(morning_to_flinders, evening_away_from_flinders))
+}
+
+
+
+
+
+
+
+
+
