@@ -27,6 +27,10 @@ devtools::install_github("walkerke/mapgl")
 library(mapgl)
 library(htmltools)
 library(htmlwidgets)
+library(reactablefmtr)
+
+
+source('../r/station_functions.R')
 
 
 yimby_colours <- list(
@@ -67,8 +71,9 @@ when is this station busiest?
 ## Info
 
 
+::: {.panel-tabset}
 
-## `r params$station`
+## Average Patronage
 
 ```{r, results='hide', warning=FALSE,message=FALSE}
 #| echo: false 
@@ -78,7 +83,8 @@ station = params$station
 
 station = 'Brunswick'
 
-hourly_factors = readRDS('../r_objects/hourly_factors.Rdata')
+hourly_factors = readRDS('../r_objects/hourly_factors.Rdata') %>%
+  as.data.frame()
 
 to_plot <- hourly_factors %>% filter(Station_Name == station)
   
@@ -88,25 +94,71 @@ p + facet_grid(rows = vars(Direction)) + theme_bw(base_size = 15)
 
 ```
 
+## Frequency and Load Factors
+
+
+```{r  warning=FALSE,message=FALSE}
+#| echo: false 
+
+service_frequencies = readRDS('../r_objects/service_frequencies.Rdata')
+
+  for_select_station = service_frequencies %>% filter(Station_Name == station)
+  
+  coeff = ( max(for_select_station %>%
+                   filter(Day_Type == 'Normal Weekday') %>%
+                   select(sph) ) /
+              max( hourly_factors %>% filter(Station_Name == station) %>% select(capacity_factor)  ))
+
+  ggplot( ) +
+    geom_line(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph, group = 1)) +
+    geom_point(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph, group = 1)) +
+    geom_line(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor * coeff, group = 1), col = 'red') +
+    geom_point(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor * coeff, group = 1), col = 'red') +
+    scale_y_continuous(
+
+      # Features of the first axis
+      name = "Services Per Hour",
+
+      # Add a second axis and specify its features
+      sec.axis = sec_axis(~.*(1/coeff), name="Capacity Factor")
+    ) + facet_grid(rows = vars(Direction))
+  
+  # max_capacity = for_select_station %>%
+  #   filter(Day_Type == 'Normal Weekday') %>%
+  #   select(sph) %>%
+  #   max()
+  # 
+  # ggplot( ) +
+  #   geom_line(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph/max_capacity, group = 1)) +
+  #   geom_point(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph/max_capacity, group = 1)) +
+  #   geom_line(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor, group = 1), col = 'red') +
+  #   geom_point(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor, group = 1), col = 'red') +
+  #   facet_grid(rows = vars(Direction)) + theme_bw()
+  # 
+  # ratio = for_select_station %>%
+  #   filter(Day_Type == 'Normal Weekday') %>% left_join(
+  #           (hourly_factors %>%
+  #              filter(Station_Name == station)), by = c('hour_of_day', 'Direction') )
+  # 
+  # ratio = ratio %>% mutate(rt = capacity_factor /  (sph/max_capacity) )
+  # 
+  # ggplot() + geom_line(ratio, mapping = aes(x = hour_of_day, y = rt, group = 1 )) + facet_grid(rows = vars(Direction))
+
+
+```
+
+:::
+
+
+
 ## map
 
-``` {r}
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
 
-locations = readRDS('../r_objects/locations.Rdata')
+near_station = get_near_properties(station, fromQuarto = T)
 
-station_location = locations %>%
-  filter(Station_Name == station) %>%
-  st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
-
-buffer = st_buffer(station_location, dist = 500)
-
-dwelling_data = readRDS('../data/data.Rdata')
-
-dwelling_data = st_transform(dwelling_data, 'wgs84')
-
-near_station = st_within(dwelling_data, buffer, sparse = F)
-near_station = dwelling_data %>%
-  filter(near_station) %>% mutate( old_color = specified_colors[category], new_color = specified_colors[category_new] )
+# %>% mutate( old_color = specified_colors[category], new_color = specified_colors[category_new] )
 
 # m1 <- mapgl::maplibre(style = mapgl::carto_style('positron')) %>%
 #   mapgl::add_fill_extrusion_layer(id = 'brunswick', source = near_station,
@@ -124,7 +176,38 @@ near_station = dwelling_data %>%
 #palTest = colorFactor(palette = 'Dark2', domain = near_station$category)
 leaflet(near_station) %>%
   addProviderTiles('CartoDB.Positron') %>%
-  addPolygons(fillColor = as.vector(near_station$new_color), color = NA, weight = 0, fillOpacity = 0.7) %>%
-  addLegend(position = 'bottomright', pal = as.vector(near_station$new_color) , values = near_station$category )
+  addPolygons(fillColor = , color = NA, weight = 0, fillOpacity = 0.7) 
 
 ```
+
+### Land Use Distribution
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+split_by_zone = split_by_zone_type(near_station)
+
+bar_chart <- function(label, width = "100%", height = "1rem", fill = "#00bfc4", background = NULL) {
+  bar <- div(style = list(background = fill, width = width, height = height))
+  chart <- div(style = list(flexGrow = 1, marginLeft = "0.5rem", background = background), bar)
+  div(style = list(display = "flex", alignItems = "center"), label, chart)
+}
+
+near_station %>%
+  reactable(
+    defaultSorted = list('ttl_area' = "desc"),
+    theme = sandstone(),
+    columns = list(
+      type_short = colDef(name = "Type Short"),
+      ttl_area = colDef(name = "Total Area", cell = function(value) {
+          width <- paste0(value / max(.$ttl_area) * 100, "%")
+          bar_chart(value, width = width)
+        })
+      
+    ))
+
+
+
+```
+
+
