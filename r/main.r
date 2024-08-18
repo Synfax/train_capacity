@@ -37,11 +37,11 @@ patronage_data = patronage_data %>%
 ## per station data
 
 hourly_factors <- patronage_data %>%
-  group_by(hour_of_day, Station_Name, Direction) %>%
+  group_by(hour_of_day, Station_Name, Direction, Day_Type) %>%
   summarise(capacity_factor = mean(capacity_factor), avg_patronage = mean(Passenger_Departure_Load)) %>%
   as.data.frame()
 
-saveRDS(hourly_factors, '../r_objects/hourly_factors.Rdata')
+saveRDS(hourly_factors, 'r_objects/hourly_factors.Rdata')
 
 
 number_of_each_days <- patronage_data %>%
@@ -62,9 +62,6 @@ service_frequencies <- patronage_data %>%
   as.data.frame()
 
 saveRDS(service_frequencies, 'r_objects/service_frequencies.Rdata' )
-
-
-
 
 
 

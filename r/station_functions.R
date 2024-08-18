@@ -2,10 +2,12 @@
 return_information <- function(station) {
   
   return(c(
+    "station" = station,
     "grz_nrz_percentage" = find_zoning_suitability(station),
     "capacity_delta" = find_zoned_capacity(station),
     "heritage_pc" = find_heritage_pc(station),
-    "average_peak_service_freq" = get_peak_service_frequency(station)
+    "average_peak_service_freq" = get_peak_service_frequency(station),
+    "average_peak_service_cap" = get_peak_service_capacity(station)
   ))
   
 }
@@ -126,7 +128,7 @@ get_peak_service_frequency <- function(station, fromQuarto = F) {
   prefix_dir = ifelse(fromQuarto, '../', '')
   
   peak_morning = 7:10
-  peak_evening = 4:7
+  peak_evening = 14:19
  
   service_frequencies = readRDS(paste0(prefix_dir, 'r_objects/service_frequencies.Rdata')) %>%
     filter(Station_Name == station)
@@ -150,9 +152,33 @@ get_peak_service_frequency <- function(station, fromQuarto = F) {
   return(mean(morning_to_flinders, evening_away_from_flinders))
 }
 
-
-
-
+get_peak_service_capacity <- function(station, fromQuarto = F) {
+  
+  peak_morning = 7:10
+  peak_evening = 14:19
+  
+  prefix_dir = ifelse(fromQuarto, '../', '')
+  
+  hourly_factors = readRDS(paste0(prefix_dir, 'r_objects/hourly_factors.Rdata'))
+  
+  avg_peak_morning_load = hourly_factors %>%
+    filter(Station_Name == station, Direction == 'Towards Flinders') %>%
+    filter(as.numeric(hour_of_day) %in% peak_morning) %>%
+    select(capacity_factor) %>%
+    unlist() %>%
+    unname() %>%
+    mean()
+  
+  avg_peak_evening_load = hourly_factors %>%
+    filter(Station_Name == station, Direction == 'Away from Flinders') %>%
+    filter(as.numeric(hour_of_day) %in% peak_evening) %>%
+    select(capacity_factor) %>%
+    unlist() %>%
+    unname() %>%
+    mean()
+  
+  return(mean(avg_peak_evening_load, avg_peak_morning_load))
+}
 
 
 
