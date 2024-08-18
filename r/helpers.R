@@ -5,3 +5,12 @@ v = function(x) {
 adf = function(x) {
   return(as.data.frame(x))
 }
+
+mp = function(x) {
+  leaflet(x) %>% addProviderTiles('CartoDB.Positron') %>% addPolygons()
+}
+
+mc = function(x) {
+  leaflet(x) %>% addProviderTiles('CartoDB.Positron') %>% addCircleMarkers()
+}
+

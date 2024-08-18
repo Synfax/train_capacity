@@ -7,10 +7,17 @@ return_information <- function(station) {
     "capacity_delta" = find_zoned_capacity(station),
     "heritage_pc" = find_heritage_pc(station),
     "average_peak_service_freq" = get_peak_service_frequency(station),
-    "average_peak_service_cap" = get_peak_service_capacity(station)
+    "average_peak_service_cap" = get_peak_service_capacity(station),
+    "walkability_score" = get_walkability_score(station)
   ))
   
 }
+
+radius = 1000
+peak_morning = 7:10
+peak_evening = 14:19
+
+
 
 find_zoning_suitability <- function(station) {
  
@@ -32,7 +39,6 @@ find_zoning_suitability <- function(station) {
 get_near_properties <- function(station, fromQuarto = F) {
   
   prefix_dir = ifelse(fromQuarto, '../', '')
-  radius = 1000
   
   #check if near properties are saved
   
@@ -107,7 +113,8 @@ find_zoned_capacity <- function(station) {
 
 find_heritage_pc <- function(station) {
   
-  near_properties = get_near_properties(station) %>% as.data.frame()
+  near_properties = get_near_properties(station) %>%
+    as.data.frame()
   
   percent_heritage <- near_properties %>%
     st_drop_geometry() %>%
@@ -127,9 +134,6 @@ get_peak_service_frequency <- function(station, fromQuarto = F) {
   
   prefix_dir = ifelse(fromQuarto, '../', '')
   
-  peak_morning = 7:10
-  peak_evening = 14:19
- 
   service_frequencies = readRDS(paste0(prefix_dir, 'r_objects/service_frequencies.Rdata')) %>%
     filter(Station_Name == station)
   
@@ -154,9 +158,6 @@ get_peak_service_frequency <- function(station, fromQuarto = F) {
 
 get_peak_service_capacity <- function(station, fromQuarto = F) {
   
-  peak_morning = 7:10
-  peak_evening = 14:19
-  
   prefix_dir = ifelse(fromQuarto, '../', '')
   
   hourly_factors = readRDS(paste0(prefix_dir, 'r_objects/hourly_factors.Rdata'))
@@ -180,7 +181,58 @@ get_peak_service_capacity <- function(station, fromQuarto = F) {
   return(mean(avg_peak_evening_load, avg_peak_morning_load))
 }
 
+get_walkability_score <- function(station) {
+  
+  walkability = get_near_osm(station)
+  
+  walkability = walkability %>%
+    st_drop_geometry() %>%
+    select(ends_with('500m')) 
+  
+  average_walkability_score = walkability %>%
+    summarise(across(dplyr::everything(), mean)) %>%
+    mutate(avg = mean( c_across(dplyr::everything()))) %>%
+    select(avg) %>%
+    unlist() %>%
+    as.vector()
 
+}
 
-
+get_near_osm <- function(station, fromQuarto = F) {
+  
+  prefix_dir = ifelse(fromQuarto, '../', '')
+  
+  file_dir = paste0(prefix_dir, 'station_walkability_info/', station, ".Rdata")
+  
+  if(file.exists(file_dir)) {
+    
+    readRDS(file_dir) %>% return()
+    
+  } else {
+    
+    locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
+    
+    station_location = locations %>%
+      filter(Station_Name == station) %>%
+      st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
+    
+    buffer = st_buffer(station_location, dist = radius)
+    
+    walkability = read_parquet('data/walkability_by_node.parquet')%>%
+      janitor::clean_names() %>%
+      st_set_geometry('geometry') %>%
+      st_set_crs('wgs84')
+    
+    within_nodes <- st_within(walkability, buffer, sparse = F)
+    
+    walkability_near_station = walkability %>%
+      filter(within_nodes)
+    
+    saveRDS(walkability_near_station, file_dir)
+    
+    return(walkability_near_station)
+    
+  }
+  
+}
 
