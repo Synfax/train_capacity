@@ -15,8 +15,26 @@ format:
     page-layout: full
 ---
 
+## Top Ranked Stations
+
 ```{r, results='hide', warning=FALSE,message=FALSE}
 
+library(reactablefmtr)
+
+scores <- readRDS('../r_objects/transformed_scores.Rdata')
+
+scores %>%
+  reactable( pagination = T,
+    theme = sandstone(),
+             columns = list(
+               station = colDef(name = "Station"),
+               grz_nrz_percentage = colDef(name = "GRZ/NRZ %"),
+               capacity_delta = colDef(name = "Delta"),
+               heritage_pc = colDef(name = "Heritage"),
+               average_peak_service_freq = colDef(name = 'Service Frequency'),
+               average_peak_service_cap = colDef(name = 'Average load'),
+               walkability_score = colDef(name = 'Walkability')
+             ) )
 
 
 ```

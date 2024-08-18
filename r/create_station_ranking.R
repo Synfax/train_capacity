@@ -1,7 +1,5 @@
 source('r/station_functions.R')
 
-stations = c('Brunswick', 'Carnegie', 'Merri')
-
 if(!dir.exists('station_zoning_info')) {
   dir.create('station_zoning_info')
 }
