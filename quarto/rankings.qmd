@@ -16,9 +16,9 @@ format:
     page-layout: full
 ---
 
-This page contains information about the ranking of stations for priority upzoning. It contains the list of 'raw' scores, and the transformation into scaled scores used for final ranking.
+This page contains information about the ranking of stations for priority upzoning.
 
-todo: some explanation of how scores are transformed and how ranks are assigned.
+The page contains first the raw scores for each train station. Then, a section explaining how scores are transformed, and then the transformed scores are show in full.
 
 ## Raw Scores
 
@@ -28,12 +28,15 @@ todo: some explanation of how scores are transformed and how ranks are assigned.
 library(tidyverse)
 library(reactablefmtr)
 
+source('../r/station_functions.R')
+
 station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
   mutate(across(-station, as.numeric)) %>%
   mutate(across(where(is.numeric), .fns = function(x) {round(x,2)}))
 
 station_rankings %>%
-  reactable( theme = sandstone(),
+  reactable( pagination = T,
+    theme = sandstone(),
              columns = list(
                station = colDef(name = "Station"),
                grz_nrz_percentage = colDef(name = "GRZ/NRZ %"),
@@ -45,6 +48,36 @@ station_rankings %>%
              ) )
 
 ```
+
+## How does the transformation work?
+
+Each raw score is in different units, so the first task is to transform all the metrics into something that can be summed into one total score. 
+
+This is achieved by scaling each column (of all the scores) so that each value is its percent of the largest number, e.g., the highest score gets a value of one. 
+
+The second problem is that some metrics are beneficial, e.g. NRZ/GRZ Percentage. However, some metrics are detrimental, e.g. heritage percentage. 
+
+So, we need to denote which columns are 'bad'. When we sum the scores up together, these columns are subtracted instead of added.
+
+<!-- ## Example Transformation -->
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+example_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+  filter(station %in% c('Brunswick', 'Merri', 'Carnegie')) %>%
+  mutate(across(-station, as.numeric)) %>%
+  mutate(across(where(is.numeric), .fns = function(x) {round(x,2)}))
+
+#example_rankings %>% reactable()
+
+example_transformed = transform_scores(example_rankings)
+
+#example_transformed %>% reactable()
+
+
+```
+
 ## Transformed Scores
 
 ```{r warning=FALSE,message=FALSE}
