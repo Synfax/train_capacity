@@ -124,9 +124,11 @@ find_heritage_pc <- function(station) {
     ( near_properties %>%
     st_drop_geometry() %>%
     filter(zoning_permits_housing == 'Housing permitted', !feature_preventing_development) %>% nrow() ) %>%
-    as.numeric(.) 
+    as.numeric(.)
   
-  return(percent_heritage$n[1])
+  percent_heritage = ifelse(is.na(percent_heritage$n[1]), 0, percent_heritage$n[1])
+  
+  return(percent_heritage)
   
 }
 

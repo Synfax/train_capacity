@@ -9,6 +9,7 @@ library(quarto)
 library(dtplyr)
 library(janitor)
 library(arrow)
+library(stringr)
 
 source('r/helpers.r')
 source('r/main_functions.r')

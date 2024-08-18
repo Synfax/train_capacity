@@ -1,0 +1,74 @@
+---
+title: "Full Station Rankings"
+author: "Paul S"
+date: "6/6/24"
+params: 
+  station: "Brunswick"
+format: 
+  html: 
+    theme: zephyr
+    fig-width: 8
+    fig-height: 8
+    code-fold: false
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    page-layout: full
+---
+
+This page contains information about the ranking of stations for priority upzoning. It contains the list of 'raw' scores, and the transformation into scaled scores used for final ranking.
+
+todo: some explanation of how scores are transformed and how ranks are assigned.
+
+## Raw Scores
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+library(tidyverse)
+library(reactablefmtr)
+
+station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+  mutate(across(-station, as.numeric)) %>%
+  mutate(across(where(is.numeric), .fns = function(x) {round(x,2)}))
+
+station_rankings %>%
+  reactable( theme = sandstone(),
+             columns = list(
+               station = colDef(name = "Station"),
+               grz_nrz_percentage = colDef(name = "GRZ/NRZ %"),
+               capacity_delta = colDef(name = "Delta"),
+               heritage_pc = colDef(name = "Heritage"),
+               average_peak_service_freq = colDef(name = 'Service Frequency'),
+               average_peak_service_cap = colDef(name = 'Average load'),
+               walkability_score = colDef(name = 'Walkability')
+             ) )
+
+```
+## Transformed Scores
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+transformed_scores = readRDS('../r_objects/transformed_scores.Rdata') %>%
+  mutate(across(-station, as.numeric)) %>%
+  mutate(across(where(is.numeric), .fns = function(x) {round(x,2)}))
+
+transformed_scores %>%
+  reactable( theme = sandstone(),
+             defaultSorted = 'score',
+             defaultSortOrder = 'desc',
+             columns = list(
+               station = colDef(name = "Station"),
+               grz_nrz_percentage = colDef(name = "GRZ/NRZ %"),
+               capacity_delta = colDef(name = "Delta"),
+               heritage_pc = colDef(name = "Heritage"),
+               average_peak_service_freq = colDef(name = 'Service Frequency'),
+               average_peak_service_cap = colDef(name = 'Average load'),
+               walkability_score = colDef(name = 'Walkability'),
+               score = colDef(name = "Total Score"),
+               n_metrics = colDef(show = F),
+               percent_score = colDef(show = F)
+             ) )
+
+```
