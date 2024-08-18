@@ -185,11 +185,15 @@ get_peak_service_capacity <- function(station, fromQuarto = F) {
 
 get_walkability_score <- function(station) {
   
+  #todo: fix
+  critical_variables = c('restaurant', 'grocery', 'cafe', 'bar', 'school', 'child_care', 'park')
+  
   walkability = get_near_osm(station)
   
   walkability = walkability %>%
     st_drop_geometry() %>%
-    select(ends_with('500m')) 
+    select(ends_with('500m')) %>%
+    select(starts_with(critical_variables))
   
   average_walkability_score = walkability %>%
     summarise(across(dplyr::everything(), mean)) %>%
@@ -221,7 +225,6 @@ get_near_osm <- function(station, fromQuarto = F) {
       st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
     
     buffer = st_buffer(station_location, dist = radius)
-    
     walkability = read_parquet('data/walkability_by_node.parquet')%>%
       janitor::clean_names() %>%
       st_set_geometry('geometry') %>%
@@ -237,6 +240,20 @@ get_near_osm <- function(station, fromQuarto = F) {
     return(walkability_near_station)
     
   }
+  
+}
+
+get_distance_to_flinders <- function(station) {
+  
+  locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
+  
+  station_location = locations %>%
+    filter(Station_Name == station) %>%
+    st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
+  
+}
+
+get_bus_and_tram_stops <- function(station) {
   
 }
 
