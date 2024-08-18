@@ -4,7 +4,7 @@ stations = patronage_data %>%
   filter(Mode == 'Metro') %>%
   select(Station_Name) %>%
   distinct() %>%
-  slice_sample(prop = 0.05) %>%
+  slice_sample(prop = 1) %>%
   unlist() %>% 
   as.vector()
 
