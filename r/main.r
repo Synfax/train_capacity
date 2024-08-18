@@ -20,6 +20,7 @@ source('r/main_functions.r')
 if(!dir.exists('r_objects') ) {
   dir.create('r_objects')
 }
+
 if(!dir.exists('data') ) {
   dir.create('data')
 }
