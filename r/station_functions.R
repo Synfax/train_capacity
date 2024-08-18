@@ -195,6 +195,8 @@ get_walkability_score <- function(station) {
     select(avg) %>%
     unlist() %>%
     as.vector()
+  
+  return(average_walkability_score)
 
 }
 
