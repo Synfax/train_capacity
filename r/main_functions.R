@@ -36,7 +36,7 @@ load_and_clean_patronage_data <- function() {
 generate_hourly_information = function() {
   
   hourly_factors <- patronage_data %>%
-    group_by(hour_of_day, Station_Name, Direction, Day_Type) %>%
+    group_by(hour_of_day, Station_Name, Direction, Day_Type, Line_Name) %>%
     summarise(capacity_factor = mean(capacity_factor), avg_patronage = mean(Passenger_Departure_Load)) %>%
     as.data.frame()
   
@@ -125,7 +125,7 @@ generate_station_stop_number <- function() {
   #   ungroup() %>%
   #   select(Line_Name, rn)
   
-  city_loop_stations = c('Flagstaff', 'Parliament', 'Melbourne Central', 'Flinders Street', 'Southern Cross')
+  
   
   #this is broken because of trips on the wrong line, like Footscray on upfield...
   

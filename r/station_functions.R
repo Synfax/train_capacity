@@ -7,7 +7,7 @@ return_information <- function(station) {
     "capacity_delta" = find_zoned_capacity(station),
     #"heritage_pc" = find_heritage_pc(station),
     "average_peak_service_freq" = get_peak_service_frequency(station),
-    "average_peak_service_cap" = get_peak_service_capacity(station),
+    "average_peak_service_cap" = get_line_peak_capacity_at_closest_station(station),
     "walkability_score" = get_walkability_score(station),
     "distance" = get_distance_to_flinders(station),
     "n_bus_tram" = get_bus_and_tram_stops(station)
@@ -173,6 +173,7 @@ get_peak_service_frequency <- function(station, fromQuarto = F) {
 
 get_peak_service_capacity <- function(station, fromQuarto = F) {
   
+  
   prefix_dir = ifelse(fromQuarto, '../', '')
   
   hourly_factors = readRDS(paste0(prefix_dir, 'r_objects/hourly_factors.Rdata'))
@@ -184,7 +185,7 @@ get_peak_service_capacity <- function(station, fromQuarto = F) {
     unlist() %>%
     unname() %>%
     mean()
-  
+
   avg_peak_evening_load = hourly_factors %>%
     filter(Station_Name == station, Direction == 'Away from Flinders') %>%
     filter(as.numeric(hour_of_day) %in% peak_evening) %>%
@@ -193,7 +194,21 @@ get_peak_service_capacity <- function(station, fromQuarto = F) {
     unname() %>%
     mean()
   
+  # hourly_factors %>%
+  #   filter(Station_Name == station, Day_Type == 'Normal Weekday') %>%
+  #   mutate(peak_type = ifelse(hour_of_day %in% peak_morning, 'm', NA),
+  #          peak_type = ifelse(hour_of_day %in% peak_evening, 'e', peak_type)) %>%
+  #   group_by(Line_Name, Direction, peak_type) %>%
+  #   summarise(avg_capacity = mean(capacity_factor)) %>%
+  #   filter(!is.na(peak_type)) %>%
+  #   filter( !(peak_type == "e" & Direction == 'Towards Flinders') ) %>%
+  #   filter( !(peak_type == "m" & Direction == 'Away from Flinders') ) %>%
+  #   pull(avg_capacity) %>%
+  #   mean() %>%
+  #   return()
+  
   return(mean(avg_peak_evening_load, avg_peak_morning_load))
+  
 }
 
 get_walkability_score <- function(station) {
@@ -287,7 +302,8 @@ get_distance_to_flinders <- function(station) {
     group_by(Line_Name) %>%
     summarise(city_start_chainage = max(Station_Chainage))
     
-  avg_distance = chainage_info %>% filter(Line_Name %in% lines) %>%
+  avg_distance = chainage_info %>%
+    filter(Line_Name %in% lines) %>%
     filter(Station_Name == station) %>%
     left_join(city_start_chainage, by = 'Line_Name') %>%
     mutate(distance = Station_Chainage - city_start_chainage) %>%
@@ -342,4 +358,46 @@ get_number_of_stops_to_flinders <- function(station) {
   
   return(avg_number_of_stops)
       
+}
+
+get_line_peak_capacity_at_closest_station <- function(station) {
+  
+  city_loop_stations = c('Flagstaff', 'Parliament', 'Melbourne Central', 'Flinders Street', 'Southern Cross')
+  
+  chainage_info = readRDS('r_objects/station_chainages.Rdata') 
+  
+  hourly_factors = readRDS(paste0(prefix_dir, 'r_objects/hourly_factors.Rdata'))
+  
+  lines = patronage_data %>%
+    filter(Station_Name == station) %>%
+    select(Line_Name) %>%
+    distinct() %>%
+    pull()
+  
+  #check if target_station can ever return multiple results without taking the first
+  
+  target_station = chainage_info %>%
+    filter(Line_Name %in% lines) %>%
+    filter(!(Station_Name %in% city_loop_stations)) %>%
+    group_by(Line_Name) %>%
+    arrange(Station_Chainage) %>%
+    slice_head(n=1) %>%
+    ungroup() %>%
+    pull(Station_Name) %>%
+    first()
+  
+  hourly_factors %>%
+    ungroup() %>%
+    filter(Station_Name == target_station, Day_Type == 'Normal Weekday') %>%
+    filter(Line_Name %in% lines) %>%
+    mutate(peak_type = ifelse(hour_of_day %in% peak_morning, 'm', NA),
+           peak_type = ifelse(hour_of_day %in% peak_evening, 'e', peak_type)) %>%
+    group_by(Line_Name, Direction, peak_type) %>%
+    summarise(avg_capacity = mean(capacity_factor)) %>%
+    filter(!is.na(peak_type)) %>%
+    filter( !(peak_type == "e" & Direction == 'Towards Flinders') ) %>%
+    filter( !(peak_type == "m" & Direction == 'Away from Flinders') ) %>%
+    pull(avg_capacity) %>%
+    mean() %>%
+    return()
 }

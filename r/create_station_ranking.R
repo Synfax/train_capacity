@@ -43,7 +43,7 @@ write_csv(station_rankings %>% filter(distance > 3000, distance < 25000), 'data/
 
 #saveRDS(station_rankings, 'r_objects/station_rankings.Rdata')
 
-station_rankings = readRDS('r_objects/station_rankings.Rdata') 
+#station_rankings = readRDS('r_objects/station_rankings.Rdata') 
 
 transformed_scores = transform_scores_xminxmax(station_rankings)
 

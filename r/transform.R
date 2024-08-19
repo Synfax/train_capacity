@@ -93,10 +93,10 @@ ranked_by_lga = function() {
     mutate(pc_of_total = (n / slice_n)*100)
   
   xminmaxtransform %>%
+    slice_head(n = 25) %>%
     rename(Station_Name = 'station') %>%
     dplyr::left_join(locations, by = 'Station_Name') %>%
     st_as_sf(coords = c('lng','lat'), crs = 'wgs84') %>%
-    slice_head(n = 25) %>%
     mc(.)
   
 }

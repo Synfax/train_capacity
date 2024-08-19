@@ -10,6 +10,7 @@ library(dtplyr)
 library(janitor)
 library(arrow)
 library(stringr)
+library(DescTools)
 library(geosphere)
 
 source('r/helpers.r')
