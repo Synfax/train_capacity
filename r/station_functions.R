@@ -9,7 +9,8 @@ return_information <- function(station) {
     "average_peak_service_freq" = get_peak_service_frequency(station),
     "average_peak_service_cap" = get_peak_service_capacity(station),
     "walkability_score" = get_walkability_score(station),
-    "distance" = get_distance_to_flinders(station)
+    "distance" = get_distance_to_flinders(station),
+    "n_bus_tram" = get_bus_and_tram_stops(station)
   ))
   
 }
@@ -278,7 +279,37 @@ get_distance_to_flinders <- function(station) {
 }
 
 get_bus_and_tram_stops <- function(station) {
+ 
+  bus_stops = read_sf('shapefiles/ptv/PTV_METRO_BUS_STOP.shp')
+  tram_stops = read_sf('shapefiles/ptv/PTV_METRO_TRAM_STOP.shp')
   
+  locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
+  
+  station_location = locations %>%
+    filter(Station_Name == station) %>%
+    st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
+  
+  buffer = st_buffer(station_location, dist = radius) %>%
+    st_transform(crs = 7844)
+  
+  near_bus_vector <- st_within(bus_stops, buffer, sparse = F)
+  
+  bus_stops_near_station = bus_stops %>%
+    filter(near_bus_vector) %>% nrow()
+  
+  near_tram_vector <- st_within(tram_stops, buffer, sparse = F)
+  
+  tram_stops_near_station = tram_stops %>%
+    filter(near_tram_vector) %>% nrow()
+
+  tram_weight = 2
+  bus_weight = 1
+  
+  #its much more important to be near trams than busses. given their infrequency
+  
+  total_number = (tram_stops_near_station*tram_weight) + (bus_stops_near_station * bus_weight)
+
+  return(total_number)     
 }
 
 get_number_of_stops_to_flinders <- function(station) {

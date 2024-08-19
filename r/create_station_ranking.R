@@ -39,11 +39,14 @@ station_rankings <- stations %>%
   mutate(across(-station, as.numeric)) %>%
   filter(!is.nan(walkability_score))
 
+write_csv(station_rankings %>% filter(distance > 3000, distance < 25000), 'data/csv_output.csv')
+
 #saveRDS(station_rankings, 'r_objects/station_rankings.Rdata')
 
 station_rankings = readRDS('r_objects/station_rankings.Rdata') 
 
-transformed_scores = transform_scores(station_rankings)
+transformed_scores = transform_scores_xminxmax(station_rankings)
 
 saveRDS(transformed_scores, 'r_objects/transformed_scores.Rdata')
+
 
