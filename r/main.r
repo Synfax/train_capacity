@@ -10,6 +10,7 @@ library(dtplyr)
 library(janitor)
 library(arrow)
 library(stringr)
+library(geosphere)
 
 source('r/helpers.r')
 source('r/main_functions.r')
@@ -38,3 +39,39 @@ generate_station_location_info()
 
 
 #
+
+inner_lgas <- c("Melbourne",
+                "Yarra",
+                "Port Phillip",
+                "Stonnington",
+                "Maribyrnong")
+
+middle_lgas <- c("Boroondara",
+                 "Darebin",
+                 "Glen Eira",
+                 "Merri-bek",
+                 "Banyule",
+                 "Bayside",
+                 "Hobsons Bay",
+                 "Kingston",
+                 "Manningham",
+                 "Monash",
+                 "Moonee Valley",
+                 "Whitehorse",
+                 "Maroondah",
+                 "Brimbank"
+)
+
+outer_lgas <- c("Knox",
+                "Mornington Peninsula",
+                "Nillumbik",
+                "Yarra Ranges",
+                "Greater Dandenong",
+                "Frankston")
+
+greenfield <- c("Cardinia",
+                "Casey",
+                "Hume",
+                "Melton",
+                "Whittlesea",
+                "Wyndham")

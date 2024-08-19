@@ -8,7 +8,8 @@ return_information <- function(station) {
     "heritage_pc" = find_heritage_pc(station),
     "average_peak_service_freq" = get_peak_service_frequency(station),
     "average_peak_service_cap" = get_peak_service_capacity(station),
-    "walkability_score" = get_walkability_score(station)
+    "walkability_score" = get_walkability_score(station),
+    "distance" = get_distance_to_flinders(station)
   ))
   
 }
@@ -58,9 +59,6 @@ get_near_properties <- function(station, fromQuarto = F) {
     
     buffer = st_buffer(station_location, dist = radius)
     
-    dwelling_data = readRDS(paste0(prefix_dir, 'data/data.Rdata'))
-    
-    dwelling_data = st_transform(dwelling_data, 'wgs84')
     
     near_properties = st_within(dwelling_data, buffer, sparse = F)
     near_properties = dwelling_data %>%
@@ -94,17 +92,17 @@ find_zoned_capacity <- function(station) {
   current_capacity = near_properties %>%
     as.data.frame() %>%
     select(dwellings_est) %>%
-    sum()
+    sum(., na.rm = T)
   
   current_zoned_capacity = near_properties %>%
     as.data.frame() %>%
     select(buxton_yeilds_corrected_net) %>%
-    sum()
+    sum(., na.rm = T)
 
   missing_middle_zoned_capacity = near_properties %>%
     as.data.frame() %>%
     select(mm_yield_net) %>%
-    sum()
+    sum(.,na.rm = T)
   
   delta <- missing_middle_zoned_capacity - current_zoned_capacity
   
@@ -225,10 +223,6 @@ get_near_osm <- function(station, fromQuarto = F) {
       st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
     
     buffer = st_buffer(station_location, dist = radius)
-    walkability = read_parquet('data/walkability_by_node.parquet')%>%
-      janitor::clean_names() %>%
-      st_set_geometry('geometry') %>%
-      st_set_crs('wgs84')
     
     within_nodes <- st_within(walkability, buffer, sparse = F)
     
@@ -247,9 +241,18 @@ get_distance_to_flinders <- function(station) {
   
   locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
   
-  station_location = locations %>%
+  distance = locations %>%
     filter(Station_Name == station) %>%
-    st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
+    mutate(cbd_lon = 144.9671,
+           cbd_lat = -37.8183) %>%
+    rowwise() %>% 
+    mutate(flinders_dist = distHaversine(c(lng, lat), 
+                                    c(cbd_lon, cbd_lat))) %>%
+    select(flinders_dist) %>%
+    unlist() %>%
+    as.vector()
+   
+  return(distance)
   
 }
 
@@ -259,7 +262,7 @@ get_bus_and_tram_stops <- function(station) {
 
 transform_scores <- function(station_rankings) {
   
-  bad_columns = c('heritage_pc', 'average_peak_service_cap')
+  bad_columns = c('heritage_pc', 'average_peak_service_cap', 'distance')
   
   transformed_station_rankings = station_rankings %>%
     mutate( across(-station, ~ as.numeric(.) )) %>%

@@ -3,5 +3,4 @@ data/
 r/data.Rdata
 /.quarto/
 .Rproj.user
-station_zoning_info/
-station_walkability_info/
+com_fixed.Rdata

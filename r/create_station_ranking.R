@@ -23,11 +23,25 @@ stations = list.files('station_zoning_info/') %>%
 
 ##
 
+#set globals
+
+walkability = read_parquet('data/walkability_by_node.parquet')%>%
+  janitor::clean_names() %>%
+  st_set_geometry('geometry') %>%
+  st_set_crs('wgs84')
+
+dwelling_data = readRDS(paste0(prefix_dir, 'data/final_dwelling_data.Rdata')) %>%
+  st_transform( 'wgs84')
+
 station_rankings <- stations %>%
   map(~ as_tibble(as.list(return_information(.x))), .progress = T) %>%
   list_rbind()
 
-saveRDS(station_rankings, 'r_objects/station_rankings.Rdata')
+#saveRDS(station_rankings, 'r_objects/station_rankings.Rdata')
+
+station_rankings = readRDS('r_objects/station_rankings.Rdata') %>%
+  mutate(across(-station, as.numeric)) %>%
+  filter(!is.nan(walkability_score))
 
 transformed_scores = transform_scores(station_rankings)
 

@@ -14,3 +14,6 @@ mc = function(x) {
   leaflet(x) %>% addProviderTiles('CartoDB.Positron') %>% addCircleMarkers()
 }
 
+sdg = function(x) {
+  return(st_drop_geometry(x))
+}
