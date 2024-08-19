@@ -37,6 +37,16 @@ transform_scores_normal <- function(station_rankings) {
   return(transformed_station_rankings)
 }
 
+weights = c(
+  "grz_nrz_pc" = 1,
+  "capacity_delta" = 2,
+  'average_peak_service_freq' = 1,
+  'average_peak_service_cap' = 2,
+  'walkability_score' = 1,
+  'distance' = 1, 
+  'n_bus_tram' = 2
+)
+
 transform_scores_xminxmax <- function(station_rankings) {
   
   bad_columns = c('heritage_pc', 'average_peak_service_cap', 'distance')
@@ -46,14 +56,49 @@ transform_scores_xminxmax <- function(station_rankings) {
     filter(distance < 25000, distance > 3000) %>%
     mutate( across(-station, .fns = function(x) { ( x - min(x, na.rm= T)) / ( max(x, na.rm= T) - min(x, na.rm= T)  ) } )) %>%
     mutate(across(any_of(bad_columns), .fns = function(x) {-x} )) %>%
+    mutate(across(-station, .fns = function(x) { x*(weights[cur_column()] %>% as.vector())  }  )) %>%
     rowwise() %>%
-    mutate(score =sum(across(-station)))
+    mutate(score = sum(across(-station))) %>%
+    arrange(desc(score))
   
-  # print(transformed_station_rankings %>%
-  #         select(station, score) %>%
-  #         tibble())
+  print(transformed_station_rankings %>%
+          select(station, score) %>%
+          tibble())
   
   return(xminmaxtransform)
+}
+
+
+ranked_by_lga = function() {
+  
+  lgas <- read_sf('shapefiles/lga_boundaries/LGA_2023_AUST_GDA2020.shp') %>%
+    select(LGA_NAME23) %>%
+    rename(lga = 'LGA_NAME23') %>%
+    st_transform('wgs84')
+  
+  by_lga = xminmaxtransform %>%
+    rename(Station_Name = 'station') %>%
+    dplyr::left_join(locations, by = 'Station_Name') %>%
+    st_as_sf(coords = c('lng','lat'), crs = 'wgs84') %>%
+    st_transform('wgs84') %>%
+    sf::st_join(lgas) %>%
+    st_drop_geometry()
+  
+  slice_n = 25
+  
+  by_lga %>%
+    slice_head(n = slice_n) %>%
+    count(lga) %>%
+    arrange(desc(n)) %>%
+    mutate(pc_of_total = (n / slice_n)*100)
+  
+  xminmaxtransform %>%
+    rename(Station_Name = 'station') %>%
+    dplyr::left_join(locations, by = 'Station_Name') %>%
+    st_as_sf(coords = c('lng','lat'), crs = 'wgs84') %>%
+    slice_head(n = 25) %>%
+    mc(.)
+  
 }
 
 

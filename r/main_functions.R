@@ -10,7 +10,16 @@ load_and_clean_patronage_data <- function() {
   interchange_stations = c('North Melbourne', 'South Yarra', 'Richmond')
   weekends = c('Saturday', 'Sunday')
   
+  busted_stations = patronage_data %>%
+    filter(Mode == 'Metro') %>%
+    group_by(Line_Name, Station_Name) %>%
+    summarise(n = n())
+  
   patronage_data = patronage_data %>%
+    filter(Mode == 'Metro') %>%
+    left_join(busted_stations, by = c('Line_Name', 'Station_Name')) %>%
+    filter(n > 450) %>%
+    select(-n) %>%
     mutate( capacity_factor = Passenger_Departure_Load / 600 ) %>%
     mutate(hour_of_day = sub("\\:.*", "", Arrival_Time_Scheduled)) %>%
     mutate(isCityLoop =  Station_Name %in% city_loop_stations  ) %>%
@@ -116,6 +125,10 @@ generate_station_stop_number <- function() {
   #   ungroup() %>%
   #   select(Line_Name, rn)
   
+  city_loop_stations = c('Flagstaff', 'Parliament', 'Melbourne Central', 'Flinders Street', 'Southern Cross')
+  
+  #this is broken because of trips on the wrong line, like Footscray on upfield...
+  
   station_location_on_line_cardinal <- patronage_data %>%
     filter(Mode == 'Metro') %>%
     select(Line_Name, Station_Chainage, Station_Name) %>%
@@ -124,7 +137,7 @@ generate_station_stop_number <- function() {
     group_by(Line_Name) %>%
     mutate(rn = row_number()) %>%
     ungroup() %>%
-    select(Station_Name, Line_Name, rn)
+    select(Station_Name, Station_Chainage, Line_Name, rn)
   
   saveRDS(station_location_on_line_cardinal, 'r_objects/station_chainages.Rdata')
   

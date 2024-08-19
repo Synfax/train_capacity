@@ -271,10 +271,30 @@ get_distance_to_flinders <- function(station) {
   #  
   # return(distance)
   
-  patronage_data %>%
+  chainage_info = readRDS('r_objects/station_chainages.Rdata') 
+  
+  city_loop_stations = c('Flagstaff', 'Parliament', 'Melbourne Central', 'Flinders Street', 'Southern Cross')
+  
+  lines = patronage_data %>%
     filter(Station_Name == station) %>%
-    pull(Station_Chainage) %>% first() %>%
-    return()
+    select(Line_Name) %>%
+    distinct() %>%
+    pull()
+    
+  city_start_chainage = chainage_info %>%
+    filter(Line_Name %in% lines) %>%
+    filter(Station_Name %in% city_loop_stations) %>%
+    group_by(Line_Name) %>%
+    summarise(city_start_chainage = max(Station_Chainage))
+    
+  avg_distance = chainage_info %>% filter(Line_Name %in% lines) %>%
+    filter(Station_Name == station) %>%
+    left_join(city_start_chainage, by = 'Line_Name') %>%
+    mutate(distance = Station_Chainage - city_start_chainage) %>%
+    pull(distance) %>%
+    mean()
+  
+  return(avg_distance)
   
 }
 
