@@ -94,3 +94,38 @@ generate_line_information <- function() {
   saveRDS(by_line_data, '../r_objects/by_line_data.Rdata')
   
 }
+
+generate_station_stop_number <- function() {
+  
+  # lines <- patronage_data %>% 
+  #   filter(Mode == 'Metro') %>%
+  #   filter(Station_Name == station) %>%
+  #   select(Line_Name) %>%
+  #   distinct() %>%
+  #   unlist() %>%
+  #   as.vector()
+  # 
+  # n_stations <- patronage_data %>%
+  #   filter(Line_Name %in% lines) %>%
+  #   select(Line_Name, Station_Chainage, Station_Name) %>%
+  #   distinct() %>%
+  #   arrange(Line_Name, Station_Chainage) %>%
+  #   group_by(Line_Name) %>%
+  #   mutate(rn = row_number()) %>%
+  #   filter(Station_Name == station) %>%
+  #   ungroup() %>%
+  #   select(Line_Name, rn)
+  
+  station_location_on_line_cardinal <- patronage_data %>%
+    filter(Mode == 'Metro') %>%
+    select(Line_Name, Station_Chainage, Station_Name) %>%
+    distinct() %>%
+    arrange(Line_Name, Station_Chainage) %>%
+    group_by(Line_Name) %>%
+    mutate(rn = row_number()) %>%
+    ungroup() %>%
+    select(Station_Name, Line_Name, rn)
+  
+  saveRDS(station_location_on_line_cardinal, 'r_objects/station_chainages.Rdata')
+  
+}

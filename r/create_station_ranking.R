@@ -35,13 +35,13 @@ dwelling_data = readRDS(paste0(prefix_dir, 'data/final_dwelling_data.Rdata')) %>
 
 station_rankings <- stations %>%
   map(~ as_tibble(as.list(return_information(.x))), .progress = T) %>%
-  list_rbind()
+  list_rbind() %>%
+  mutate(across(-station, as.numeric)) %>%
+  filter(!is.nan(walkability_score))
 
 #saveRDS(station_rankings, 'r_objects/station_rankings.Rdata')
 
-station_rankings = readRDS('r_objects/station_rankings.Rdata') %>%
-  mutate(across(-station, as.numeric)) %>%
-  filter(!is.nan(walkability_score))
+station_rankings = readRDS('r_objects/station_rankings.Rdata') 
 
 transformed_scores = transform_scores(station_rankings)
 

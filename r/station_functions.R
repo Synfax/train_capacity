@@ -3,9 +3,9 @@ return_information <- function(station) {
   
   return(c(
     "station" = station,
-    "grz_nrz_percentage" = find_zoning_suitability(station),
+    "grz_nrz_pc" = find_zoning_suitability(station),
     "capacity_delta" = find_zoned_capacity(station),
-    "heritage_pc" = find_heritage_pc(station),
+    #"heritage_pc" = find_heritage_pc(station),
     "average_peak_service_freq" = get_peak_service_frequency(station),
     "average_peak_service_cap" = get_peak_service_capacity(station),
     "walkability_score" = get_walkability_score(station),
@@ -22,18 +22,32 @@ peak_evening = 14:19
 
 find_zoning_suitability <- function(station) {
  
-  near_properties = get_near_properties(station)
+  near_properties = get_near_properties(station) %>%
+    mutate(area = st_area(geom))
   
-  split_by_type = split_by_zone_type(near_properties)
+  # split_by_type = split_by_zone_type(near_properties)
+  # 
+  # nrz_grz_area_no_heritage = split_by_type %>%
+  #   filter(type_short %in% c('Neighbourhood residential', 'General residential')) %>%
+  #   filter(heritage == F) %>%
+  #   select(ttl_area) %>%
+  #   sum()
   
-  nrz_grz_area = split_by_type %>%
+  nrz_grz_area_no_heritage = near_properties %>%
     filter(type_short %in% c('Neighbourhood residential', 'General residential')) %>%
-    select(ttl_area) %>%
+    filter(heritage == F) %>%
+    st_drop_geometry() %>%
+    select(area) %>%
+    unlist() %>%
+    sum()
+
+  total_area = near_properties %>%
+    st_drop_geometry() %>%
+    select(area) %>%
+    unlist() %>%
     sum()
   
-  total_area = split_by_type %>% select(ttl_area) %>% sum()
-  
-  return(nrz_grz_area/total_area) 
+  return(nrz_grz_area_no_heritage/total_area) 
 
 }
 
@@ -239,20 +253,27 @@ get_near_osm <- function(station, fromQuarto = F) {
 
 get_distance_to_flinders <- function(station) {
   
-  locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
+  #use station chainage
   
-  distance = locations %>%
+  # locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
+  # 
+  # distance = locations %>%
+  #   filter(Station_Name == station) %>%
+  #   mutate(cbd_lon = 144.9671,
+  #          cbd_lat = -37.8183) %>%
+  #   rowwise() %>% 
+  #   mutate(flinders_dist = distHaversine(c(lng, lat), 
+  #                                   c(cbd_lon, cbd_lat))) %>%
+  #   select(flinders_dist) %>%
+  #   unlist() %>%
+  #   as.vector()
+  #  
+  # return(distance)
+  
+  patronage_data %>%
     filter(Station_Name == station) %>%
-    mutate(cbd_lon = 144.9671,
-           cbd_lat = -37.8183) %>%
-    rowwise() %>% 
-    mutate(flinders_dist = distHaversine(c(lng, lat), 
-                                    c(cbd_lon, cbd_lat))) %>%
-    select(flinders_dist) %>%
-    unlist() %>%
-    as.vector()
-   
-  return(distance)
+    pull(Station_Chainage) %>% first() %>%
+    return()
   
 }
 
@@ -260,23 +281,14 @@ get_bus_and_tram_stops <- function(station) {
   
 }
 
-transform_scores <- function(station_rankings) {
+get_number_of_stops_to_flinders <- function(station) {
   
-  bad_columns = c('heritage_pc', 'average_peak_service_cap', 'distance')
+  # doesn't work for Ltd express.
   
-  transformed_station_rankings = station_rankings %>%
-    mutate( across(-station, ~ as.numeric(.) )) %>%
-    mutate( across(-station, .fns = function(x) { x / max(x) } )) %>%
-    mutate(across(all_of(bad_columns), .fns = function(x) {-x} )) %>%
-    rowwise() %>%
-    mutate(score =sum(across(-station)),
-           n_metrics = ncol( station_rankings %>% select(-station )),
-           percent_score = score/n_metrics) 
+  avg_number_of_stops = readRDS('r_objects/station_chainages.Rdata') %>%
+    filter(Station_Name == station) %>%
+    pull(rn) %>% mean()
   
-  # print(transformed_station_rankings %>%
-  #         select(station, score) %>%
-  #         tibble())
-  
-  return(transformed_station_rankings)
+  return(avg_number_of_stops)
+      
 }
-
