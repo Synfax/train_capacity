@@ -17,7 +17,7 @@ return_information <- function(station) {
 
 radius = 1000
 peak_morning = 7:10
-peak_evening = 14:19
+peak_evening = 16:19
 
 
 
@@ -271,44 +271,46 @@ get_distance_to_flinders <- function(station) {
   
   #use station chainage
   
-  # locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
+  locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
+
+  distance = locations %>%
+    filter(Station_Name == station) %>%
+    mutate(cbd_lon = 144.9671,
+           cbd_lat = -37.8183) %>%
+    rowwise() %>%
+    mutate(flinders_dist = distHaversine(c(lng, lat),
+                                    c(cbd_lon, cbd_lat))) %>%
+    select(flinders_dist) %>%
+    unlist() %>%
+    as.vector()
+
+  return(distance)
+  
+  # chainage_info = readRDS('r_objects/station_chainages.Rdata') 
   # 
-  # distance = locations %>%
+  # city_loop_stations = c('Flagstaff', 'Parliament', 'Melbourne Central', 'Flinders Street', 'Southern Cross')
+  # 
+  # lines = patronage_data %>%
   #   filter(Station_Name == station) %>%
-  #   mutate(cbd_lon = 144.9671,
-  #          cbd_lat = -37.8183) %>%
-  #   rowwise() %>% 
-  #   mutate(flinders_dist = distHaversine(c(lng, lat), 
-  #                                   c(cbd_lon, cbd_lat))) %>%
-  #   select(flinders_dist) %>%
-  #   unlist() %>%
-  #   as.vector()
-  #  
-  # return(distance)
-  
-  chainage_info = readRDS('r_objects/station_chainages.Rdata') 
-  
-  city_loop_stations = c('Flagstaff', 'Parliament', 'Melbourne Central', 'Flinders Street', 'Southern Cross')
-  
-  lines = patronage_data %>%
-    filter(Station_Name == station) %>%
-    select(Line_Name) %>%
-    distinct() %>%
-    pull()
-    
-  city_start_chainage = chainage_info %>%
-    filter(Line_Name %in% lines) %>%
-    filter(Station_Name %in% city_loop_stations) %>%
-    group_by(Line_Name) %>%
-    summarise(city_start_chainage = max(Station_Chainage))
-    
-  avg_distance = chainage_info %>%
-    filter(Line_Name %in% lines) %>%
-    filter(Station_Name == station) %>%
-    left_join(city_start_chainage, by = 'Line_Name') %>%
-    mutate(distance = Station_Chainage - city_start_chainage) %>%
-    pull(distance) %>%
-    mean()
+  #   select(Line_Name) %>%
+  #   distinct() %>%
+  #   pull()
+  # 
+  # #what?
+  #   
+  # city_start_chainage = chainage_info %>%
+  #   filter(Line_Name %in% lines) %>%
+  #   filter(Station_Name %in% city_loop_stations) %>%
+  #   group_by(Line_Name) %>%
+  #   summarise(city_start_chainage = max(Station_Chainage))
+  #   
+  # avg_distance = chainage_info %>%
+  #   filter(Line_Name %in% lines) %>%
+  #   filter(Station_Name == station) %>%
+  #   left_join(city_start_chainage, by = 'Line_Name') %>%
+  #   mutate(distance = Station_Chainage - city_start_chainage) %>%
+  #   pull(distance) %>%
+  #   mean()
   
   return(avg_distance)
   
@@ -388,6 +390,7 @@ get_line_peak_capacity_at_closest_station <- function(station) {
   
   hourly_factors %>%
     ungroup() %>%
+    as.data.frame() %>%
     filter(Station_Name == target_station, Day_Type == 'Normal Weekday') %>%
     filter(Line_Name %in% lines) %>%
     mutate(peak_type = ifelse(hour_of_day %in% peak_morning, 'm', NA),

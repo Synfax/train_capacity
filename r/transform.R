@@ -39,12 +39,12 @@ transform_scores_normal <- function(station_rankings) {
 
 weights = c(
   "grz_nrz_pc" = 1,
-  "capacity_delta" = 2,
+  "capacity_delta" = 1,
   'average_peak_service_freq' = 1,
-  'average_peak_service_cap' = 2,
+  'average_peak_service_cap' = 1,
   'walkability_score' = 1,
   'distance' = 1, 
-  'n_bus_tram' = 2
+  'n_bus_tram' = 1
 )
 
 transform_scores_xminxmax <- function(station_rankings) {
@@ -93,6 +93,7 @@ ranked_by_lga = function() {
     mutate(pc_of_total = (n / slice_n)*100)
   
   xminmaxtransform %>%
+    as.data.frame() %>%
     slice_head(n = 25) %>%
     rename(Station_Name = 'station') %>%
     dplyr::left_join(locations, by = 'Station_Name') %>%
