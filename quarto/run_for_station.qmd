@@ -8,7 +8,7 @@ format:
   html: 
     theme: zephyr
     fig-width: 8
-    fig-height: 8
+    fig-height: 6
     code-fold: false
     toc: true
     toc-depth: 4
@@ -16,11 +16,25 @@ format:
     page-layout: full
 ---
 
+```{css}
+<!-- .plot { -->
+<!--   height: 600px; /* Adjust this to your desired height */ -->
+<!--   overflow: hidden; /* Prevent scrollbars */ -->
+<!-- } -->
+
+<!-- .plot .plotly { -->
+<!--   height: 100%; -->
+<!-- } -->
+```
+
 This file needs to have one section for each of the metrics. e.g. heritage by zone, zoned capacity, etc. In addition to other cool patronage stuff.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 station = params$station
+
+peak_morning = 7:10
+peak_evening = 16:19
 
 library(knitr)
 library(tidyverse)
@@ -31,9 +45,11 @@ library(mapgl)
 library(htmltools)
 library(htmlwidgets)
 library(reactablefmtr)
-
+library(plotly)
 
 source('../r/station_functions.R')
+
+near_properties = get_near_properties(station, fromQuarto = T)
 
 
 yimby_colours <- list(
@@ -67,9 +83,7 @@ hourly_factors = readRDS('../r_objects/hourly_factors.Rdata') %>%
 
 ```
 
-output `r params$station `
-
-
+output `r params$station`
 
 ```{r  warning=FALSE,message=FALSE}
 #| echo: false 
@@ -121,137 +135,239 @@ output `r params$station `
 
 ```
 
-
-
 ## Service Frequency
+
+Service frequency is calculated as the mean number of services per hour in two time periods. The chart below shows:
+
+-   Number of services between 7 and 10am towards Flinders Street, denoted as blue in the charts.
+
+-   Number of services between 4 and 7pm away from Flinders street, shown as green in the charts.
+
+The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
+
 service_frequencies = readRDS('../r_objects/service_frequencies.Rdata')
 
-for_select_station = service_frequencies %>% filter(Station_Name == station)
+for_select_station = service_frequencies %>%
+  filter(Station_Name == station) %>%
+  filter(Day_Type == 'Normal Weekday') %>%
+  mutate(hour_of_day = as.numeric(hour_of_day)) %>%
+  arrange(desc(Direction))
 
+morning_to_flinders = for_select_station %>%
+    filter(Direction == 'Towards Flinders',
+           as.numeric(hour_of_day) %in% peak_morning) %>%
+    pull(sph) %>% mean() %>% round(., 2)
+
+evening_away_from_flinders = for_select_station %>%
+    filter(Direction == 'Away from Flinders',
+           as.numeric(hour_of_day) %in% peak_evening) %>%
+    pull(sph) %>% mean() %>% round(., 2)
+
+final_frequency_score = mean(c(morning_to_flinders, evening_away_from_flinders)) %>% round(., 2)
+
+vlines <- data.frame(
+  Direction = c("Towards Flinders", "Away from Flinders"),  # Your actual directions
+  xintercept = c( c(7, 16), c(10,19) ),
+  fill = c("morning", "evening")
+)
+
+rect_data <- data.frame(
+  Direction = c("Towards Flinders", "Away from Flinders"),  # Your actual directions
+  xmin = c(7, 16),
+  xmax = c(10, 19),
+  ymin = -1000,
+  ymax = 1000,
+  fill = c("morning", "evening")
+)
+
+mean_data <- data.frame(
+  Direction = c("Towards Flinders", "Away from Flinders"),
+  y = c(morning_to_flinders, evening_away_from_flinders),
+  xmin = c(7, 16),
+  xmax = c(10, 19),
+  fill = c("morning", "evening")
+)
+  
+sph_plot <- ggplot() +
+  geom_rect(data = rect_data, 
+            mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill),  
+            alpha = 0.1) + 
+  facet_grid(rows = vars(Direction)) +
+  geom_segment(data  = mean_data, mapping = aes(x = xmin, xend = xmax, y = y, yend = y, fill = fill), size = 1, linetype = 'dashed', color = 'darkgrey') +
+  geom_vline(data = vlines, mapping = aes(xintercept = xintercept), linetype = 'dashed',  color = 'red') +
+  geom_point(data = for_select_station, mapping = aes(x = hour_of_day, y = sph, group = 1)) +
+  scale_fill_manual(values = c('morning' = 'blue', 'evening' = 'green')) +
+  scale_x_continuous(breaks = 0:23, limits = c(0, 23)) +
+  labs(title = "Service Frequency by time of day", fill = " Peak Period") +
+  theme_bw(base_size = 13) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(legend.position = "bottom") + 
+  xlab('Hour of day') + 
+  ylab('Services per hour') + 
+  coord_cartesian(ylim = c(0, max(for_select_station$sph) + 1 ))
+
+interactive_sph = ggplotly(sph_plot, height = 550)
+interactive_sph = layout(interactive_sph, height = "550", autosize = T, legend = list(orientation = "v",   # horizontal legend
+                                         yanchor = "middle",
+                                         x = 0.05,
+                                         y = 0.85,
+                                          bordercolor = "black",    # Border color of the legend
+    borderwidth = 1
+                                         ))
+
+div(class = "plot", interactive_sph)
+#interactive_sph
 ```
+
+The morning average freqency is `r morning_to_flinders`, the average evening frequency is `r evening_away_from_flinders`, which forms a mean score of `r final_frequency_score`.
 
 ## Service Capacity
 
-:::{.panel-tabset}
+Service frequency is calculated as the mean patronage of trains in two time periods. The chart below shows:
 
-## weekday
+-   Patronage between 7 and 10am towards Flinders Street, denoted as blue in the charts.
+
+-   Patronage between 4 and 7pm away from Flinders street, shown as green in the charts.
+
+The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
+
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
 to_plot <- hourly_factors %>%
   filter(Station_Name == station) %>%
-  filter(Day_Type == 'Normal Weekday')
+  filter(Day_Type == 'Normal Weekday') %>%
+  mutate(hour_of_day = as.numeric(hour_of_day))
+
+morning_to_flinders = to_plot %>%
+    filter(Direction == 'Towards Flinders',
+           as.numeric(hour_of_day) %in% peak_morning) %>%
+    pull(avg_patronage) %>% mean() %>% round(., 2)
+
+evening_away_from_flinders = to_plot %>%
+    filter(Direction == 'Away from Flinders',
+           as.numeric(hour_of_day) %in% peak_evening) %>%
+    pull(avg_patronage) %>% mean() %>% round(., 2)
+
+final_patronage_score = mean(c(morning_to_flinders, evening_away_from_flinders)) %>% round(., 2)
 
 rect_data <- data.frame(
-  Direction = c("Towards Flinders", "Towards Flinders", "Away from Flinders", "Away from Flinders"),  # Your actual directions
-  xmin = c(7, 16, 7, 16),
-  xmax = c(10, 19, 10, 19),
-  ymin = 0,
-  ymax = Inf,
-  fill = c("morning", "evening", "morning", "evening")
+  Direction = c("Towards Flinders", "Away from Flinders"),  # Your actual directions
+  xmin = c(7, 16),
+  xmax = c(10, 19),
+  ymin = -100,
+  ymax = 1000,
+  fill = c("morning", "evening")
 )
-  
-ggplot() +
+
+mean_data <- data.frame(
+  Direction = c("Towards Flinders", "Away from Flinders"),
+  y = c(morning_to_flinders, evening_away_from_flinders),
+  xmin = c(7, 16),
+  xmax = c(10, 19),
+  fill = c("morning", "evening")
+)
+
+patronage_plot <- ggplot() +
   geom_rect(data = rect_data, 
             mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill),  
             alpha = 0.1) + 
-  geom_point(data = to_plot, mapping = aes(x = hour_of_day, y = avg_patronage, group = 1)) +
   facet_grid(rows = vars(Direction)) +
-  geom_vline(xintercept = c(7,10, 16,19), linetype = 'dashed', color = 'red') +
+  geom_segment(data  = mean_data, mapping = aes(x = xmin, xend = xmax, y = y, yend = y, fill = fill), size = 1, linetype = 'dashed', color = 'darkgrey') +
+  geom_vline(data = vlines, mapping = aes(xintercept = xintercept), linetype = 'dashed',  color = 'red') +
+  geom_point(data = to_plot, mapping = aes(x = hour_of_day, y = avg_patronage, group = 1)) +
   scale_fill_manual(values = c('morning' = 'blue', 'evening' = 'green')) +
-  theme_bw(base_size = 15)
+  scale_x_continuous(breaks = 0:23, limits = c(0, 23)) +
+  labs(title = "Average patronage by time of day", fill = " Peak Period") +
+  theme_bw(base_size = 13) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  xlab('Hour of day') + 
+  ylab('Patronage') +
+  coord_cartesian(ylim = c(0, max(to_plot$avg_patronage) + 50))
+
+interactive_patronage = ggplotly(patronage_plot, height = 550)
+interactive_patronage = layout(interactive_patronage, autosize = T, height = '550', legend = list(orientation = "v",   # horizontal legend
+                                         yanchor = "middle",
+                                         x = 0.05,
+                                         y = 0.85,
+                                         bordercolor = "black",    # Border color of the legend
+    borderwidth = 1
+                                         ))
+
+div(class = 'plot', interactive_patronage)
 
 ```
 
-## weekend
+The morning average patronage is `r morning_to_flinders`, the average evening patronage is `r evening_away_from_flinders`, which forms a mean score of `r final_patronage_score`.
 
-```{r warning=FALSE,message=FALSE}
-# #| echo: false 
-# 
-# to_plot <- hourly_factors %>%
-#   filter(Station_Name == station) %>%
-#   filter(Day_Type == 'Normal Weekend')
-#   
-# p <- ggplot(to_plot, mapping = aes(x = hour_of_day, y = avg_patronage)) + geom_point()
-# p + facet_grid(rows = vars(Direction)) + theme_bw(base_size = 15)
-
-```
-
-:::
 
 ## Grz Nrz
+
+The number of lots within 1km of statios zoned as either Neighbourhood Residential or General Residential, and NOT under heritage protection is an approximation of 'ease of upzoning' for a given station.
+
+The map below shows the properties within 1km of `r station` that meet the conditions above, shaded in orange.
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+
+# grz_nrz = near_properties %>%
+#     filter(type_short %in% c('Neighbourhood residential', 'General residential')) %>%
+#     filter(heritage == F)
+
+grz_nrz = near_properties %>%
+  mutate(isNRZGRZ = case_when((type_short %in% c('Neighbourhood residential', 'General residential') & !heritage) ~ T, .default = F ) ) %>%
+  mutate(colour = ifelse(isNRZGRZ, 'orange' ,'black'))
+
+bounds <- c(min(grz_nrz$lon, na.rm = T), min(grz_nrz$lat, na.rm = T),
+            max(grz_nrz$lon, na.rm = T), max(grz_nrz$lat, na.rm = T))
+
+#fix panes
+
+leaflet(grz_nrz) %>%
+  fitBounds(bounds[1], bounds[2], bounds[3], bounds[4]) %>%
+  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = 14.5) %>%
+  addMapPane("background_map", zIndex = 410) %>%  # Level 1: bottom
+  addMapPane("polygons", zIndex = 420) %>%        # Level 2: middle
+  addMapPane("labels", zIndex = 430) %>%  
+  addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.7, pane = "background_map")) %>%
+  addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(pane = "labels")) %>%
+  addPolygons(fillColor = ~colour, color = NA, weight = 0, fillOpacity = 0.7, options = pathOptions(pane = "polygons")) %>%
+  addLegend(position = 'bottomleft', colors = c('orange','black'), labels = c('Suitable lot for upzoning','Unsuitable lot'), title = "Lot Suitability")
+  
+n_suitable = grz_nrz %>%
+  st_drop_geometry() %>%
+  count(isNRZGRZ) %>%
+  filter(isNRZGRZ) %>%
+  pull(n)
+
+n_unsuitable = grz_nrz %>%
+  st_drop_geometry() %>%
+  count(isNRZGRZ) %>%
+  filter(!isNRZGRZ) %>%
+  pull(n)
+
+by_validity <- grz_nrz %>%
+  group_by(isNRZGRZ) %>%
+  summarise(total_area = sum(st_area(geom))) %>%
+  st_drop_geometry()
+
+area_ratio = ( by_validity %>% filter(isNRZGRZ) %>% pull(total_area) ) / sum(by_validity$total_area) %>% unname() %>% as.vector() %>% round(.,2)
+
+```
+
+Out of `r n_suitable + n_unsuitable` lots within 1km radius of `r station`, `r n_suitable` are easiest to upzone. In terms of area,
+the easiest properties cover `r area_ratio` of the total area of `r sum(by_validity$total_area) %>% round(.,2)`.
 
 ## N bus tram
 
 ## Distance
 
 ## Capacity Delta
-
-
-
-
-## map
-
-```{r warning=FALSE,message=FALSE}
-#| echo: false 
-
-near_station = get_near_properties(station, fromQuarto = T)
-
-# %>% mutate( old_color = specified_colors[category], new_color = specified_colors[category_new] )
-
-# m1 <- mapgl::maplibre(style = mapgl::carto_style('positron')) %>%
-#   mapgl::add_fill_extrusion_layer(id = 'brunswick', source = near_station,
-#                            fill_extrusion_opacity = 0.85,
-#                            fill_extrusion_color = c('get', 'old_color'),
-#                            fill_extrusion_height = c("get", "old_height") ) %>%
-#     mapgl::fly_to(
-#       center = c(145.063115,-37.814175),
-#       zoom = 9,
-#       pitch = 40
-#     )
-# 
-# m1
-
-#palTest = colorFactor(palette = 'Dark2', domain = near_station$category)
-leaflet(near_station) %>%
-  addProviderTiles('CartoDB.Positron') %>%
-  addPolygons(fillColor = , color = NA, weight = 0, fillOpacity = 0.7) 
-
-```
-
-### Land Use Distribution
-
-```{r warning=FALSE,message=FALSE}
-#| echo: false 
-
-# split_by_zone = split_by_zone_type(near_station)
-# 
-# bar_chart <- function(label, width = "100%", height = "1rem", fill = "#00bfc4", background = NULL) {
-#   bar <- div(style = list(background = fill, width = width, height = height))
-#   chart <- div(style = list(flexGrow = 1, marginLeft = "0.5rem", background = background), bar)
-#   div(style = list(display = "flex", alignItems = "center"), label, chart)
-# }
-# 
-# near_station %>%
-#   reactable(
-#     defaultSorted = list('ttl_area' = "desc"),
-#     theme = sandstone(),
-#     columns = list(
-#       type_short = colDef(name = "Type Short"),
-#       ttl_area = colDef(name = "Total Area", cell = function(value) {
-#           width <- paste0(value / max(.$ttl_area) * 100, "%")
-#           bar_chart(value, width = width)
-#         })
-#       
-#     ))
-
-
-
-```
 
 

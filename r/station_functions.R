@@ -168,7 +168,7 @@ get_peak_service_frequency <- function(station, fromQuarto = F) {
     unlist() %>%
     unname() %>% mean()
   
-  return(mean(morning_to_flinders, evening_away_from_flinders))
+  return(mean( c(morning_to_flinders, evening_away_from_flinders) ))
 }
 
 get_peak_service_capacity <- function(station, fromQuarto = F) {
@@ -207,7 +207,7 @@ get_peak_service_capacity <- function(station, fromQuarto = F) {
   #   mean() %>%
   #   return()
   
-  return(mean(avg_peak_evening_load, avg_peak_morning_load))
+  return(mean( c(avg_peak_evening_load, avg_peak_morning_load)))
   
 }
 
