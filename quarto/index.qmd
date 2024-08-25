@@ -1,40 +1,232 @@
 ---
-title: "Train Capacity"
-author: "Paul S"
-date: "6/6/24"
-format: 
-  html:
-    theme: zephyr
-    fig-width: 8
-    fig-height: 8
-    code-fold: false
-    toc: true
-    toc-depth: 4
-    toc-location: left
-    self_contained: true
-    page-layout: full
+format:
+  closeread-html:
+    remove-header-space: false
+    css: index.css
+    image: "index_images/main.png"
+    cr-section:
+      layout: "overlay-left"
+      
 ---
 
-## Top Ranked Stations
+```{r, message=FALSE, warning=FALSE}
 
-```{r, results='hide', warning=FALSE,message=FALSE}
-
+library(tidyverse)
+library(leaflet)
 library(reactablefmtr)
 
-scores <- readRDS('../r_objects/transformed_scores.Rdata')
+transformed_scores <- readRDS('../r_objects/transformed_scores.Rdata') %>%
+  as.data.frame() %>%
+  slice_head(n = 10) %>%
+  mutate(across(where(is.numeric), .fns = function(x) round(x, 2) )) %>%
+  mutate(rank = row_number())
 
-scores %>%
-  reactable( pagination = T,
-    theme = sandstone(),
-             columns = list(
-               station = colDef(name = "Station"),
-               grz_nrz_percentage = colDef(name = "GRZ/NRZ %"),
-               capacity_delta = colDef(name = "Delta"),
-               heritage_pc = colDef(name = "Heritage"),
-               average_peak_service_freq = colDef(name = 'Service Frequency'),
-               average_peak_service_cap = colDef(name = 'Average load'),
-               walkability_score = colDef(name = 'Walkability')
-             ) )
+translations = c(
+  'grz_nrz_pc' = 'Zoning suitability',
+  'capacity_delta' = 'Potential new homes',
+  'average_peak_service_freq' = 'Train frequency',
+  'average_peak_service_cap' = 'Available train capacity',
+  'walkability_score' = 'Local services',
+  'distance' = 'Distance to CBD',
+  'n_bus_tram' = 'Other transport infrastructure'
+)
+
+printScores <- function(r) {
+  transformed_scores %>% 
+  filter(rank == r) %>%
+  pivot_longer(-station) %>%
+  select(-station) %>%
+  filter(!(name %in% c('score','rank'))) %>%
+  mutate(name = translations[name]) %>%
+  reactable(theme = cyborg(),
+            columns = list(
+              'name' = colDef(name = 'Metric'),
+              'value' = colDef(name = "Score",
+                             cell = data_bars(.,
+                                              fill_color = 'white',
+                                              background = 'opaque',
+                                              fill_opacity = 1,
+                                              bar_height = 24,
+                                              bold_text = T))
+            )
+            
+            ) %>%
+  return()
+}
+
+```
+:::{.cr-section}
+
+:::{focus-on="cr-main"}
+
+# Train Ranking Project
+
+:::
+
+
+:::{focus-on="cr-main"}
+
+This project ranks train stations by 7 key metrics. For more info see "here"
+
+\
+
+```{r}
+
+transformed_scores %>%
+  select(station, score) %>%
+  reactable(theme = cyborg(),
+            columns = list(
+              'station' = colDef(name = 'station'),
+              'score' = colDef(name = "Score",
+                             cell = data_bars(.,
+                                              fill_color = 'white',
+                                              background = 'opaque'))
+            )
+            
+            )
 
 
 ```
+
+:::
+
+
+:::{focus-on="cr-map1"}
+
+## [`r transformed_scores$station[1]`](`r paste0('../stations/',transformed_scores$station[1],'.html') `)
+
+
+###### Rank: 1
+
+###### Total Score: `r transformed_scores$score[1]`
+
+\
+
+Distribution of scores:
+
+```{r}
+
+printScores(1)
+
+```
+
+:::
+
+:::{focus-on="cr-map2"}
+This paragraph and the one that follows will appear as one narrative block.
+
+This is about south yarra
+
+When these paragraphs scroll into view, they will reveal a histogram.
+:::
+
+:::{focus-on="cr-map3"}
+This paragraph and the one that follows will appear as one narrative block.
+
+This is about south yarra
+
+When these paragraphs scroll into view, they will reveal a histogram.
+:::
+
+:::{focus-on="cr-map4"}
+This paragraph and the one that follows will appear as one narrative block.
+
+This is about south yarra
+
+When these paragraphs scroll into view, they will reveal a histogram.
+:::
+
+:::{focus-on="cr-map5"}
+This paragraph and the one that follows will appear as one narrative block.
+
+This is about south yarra
+
+When these paragraphs scroll into view, they will reveal a histogram.
+:::
+
+:::{focus-on="cr-map6"}
+This paragraph and the one that follows will appear as one narrative block.
+
+This is about south yarra
+
+When these paragraphs scroll into view, they will reveal a histogram.
+:::
+
+:::{focus-on="cr-map7"}
+This paragraph and the one that follows will appear as one narrative block.
+
+This is about south yarra
+
+When these paragraphs scroll into view, they will reveal a histogram.
+:::
+
+:::{focus-on="cr-map8"}
+This paragraph and the one that follows will appear as one narrative block.
+
+This is about south yarra
+
+When these paragraphs scroll into view, they will reveal a histogram.
+:::
+
+:::{focus-on="cr-map9"}
+This paragraph and the one that follows will appear as one narrative block.
+
+This is about south yarra
+
+When these paragraphs scroll into view, they will reveal a histogram.
+:::
+
+
+:::{focus-on="cr-map10"}
+This paragraph and the one that follows will appear as one narrative block.
+
+This is about south yarra
+
+When these paragraphs scroll into view, they will reveal a histogram.
+:::
+
+
+
+:::{#cr-main}
+
+:::
+:::{#cr-map1}
+
+:::
+
+:::{#cr-map2}
+
+:::
+
+:::{#cr-map3}
+
+:::
+
+:::{#cr-map4}
+
+:::
+
+:::{#cr-map5}
+
+:::
+
+:::{#cr-map6}
+
+:::
+
+:::{#cr-map7}
+
+:::
+
+:::{#cr-map8}
+
+:::
+
+:::{#cr-map9}
+
+:::
+
+:::{#cr-map10}
+
+:::
+:::

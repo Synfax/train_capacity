@@ -1,0 +1,78 @@
+.narrative {
+  background-color: rgba(0, 0, 0, 0.75);
+  padding: 20px !important;
+  border: 6px solid white;
+   font-family: 'Helvetica' !important;
+
+    color: rgba(255, 255, 255, 1) !important;
+}
+
+.narrative a, h1, h2, h3 , h4 {
+  color: rgba(255, 255, 255, 1) !important;
+  font-family: 'Helvetica' !important;
+  font-weight: 800 !important;
+  text-decoration: ;
+}
+
+.Reactable {
+  font-weight: 800 !important;
+  opacity: 1 !important;
+  color: rgba(255, 255, 255, 1);
+}
+
+#quarto-document-content {
+  margin: 0 !important;
+}
+
+.sticky {
+  height: 100vh !important;
+  width: 100vw !important;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#cr-main{
+  background-image: url(index_images/main.png);
+}
+
+#cr-map1{
+  background-image: url(index_images/1.png);
+}
+
+#cr-map2{
+  background-image: url(index_images/2.png);
+}
+
+#cr-map3{
+  background-image: url(index_images/3.png);
+}
+
+#cr-map4{
+  background-image: url(index_images/4.png);
+}
+
+#cr-map5{
+  background-image: url(index_images/5.png);
+}
+
+#cr-map6{
+  background-image: url(index_images/6.png);
+}
+
+#cr-map7{
+  background-image: url(index_images/7.png);
+}
+
+#cr-map8{
+  background-image: url(index_images/8.png);
+}
+
+#cr-map9{
+  background-image: url(index_images/9.png);
+}
+
+#cr-map10{
+  background-image: url(index_images/10.png);
+}
+

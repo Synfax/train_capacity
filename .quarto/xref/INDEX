@@ -18,5 +18,14 @@
   },
   "quarto/rankings.qmd": {
     "rankings.html": "8b542a18"
+  },
+  "tests/test.qmd": {
+    "test.html": "6db6ee0e"
+  },
+  "tests/closerad.qmd": {
+    "closerad.html": "29149329"
+  },
+  "quarto/index.qmd": {
+    "index.html": "5c9829c2"
   }
 }

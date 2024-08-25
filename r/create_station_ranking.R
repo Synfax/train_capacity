@@ -18,10 +18,6 @@ stations = patronage_data %>%
 
 #or
 
-stations = list.files('station_zoning_info/') %>%
-  str_replace(., ".Rdata", "")
-
-##
 
 #set globals
 
@@ -30,7 +26,7 @@ walkability = read_parquet('data/walkability_by_node.parquet')%>%
   st_set_geometry('geometry') %>%
   st_set_crs('wgs84')
 
-dwelling_data = readRDS(paste0(prefix_dir, 'data/final_dwelling_data.Rdata')) %>%
+dwelling_data = readRDS(paste0('data/final_dwelling_data.Rdata')) %>%
   st_transform( 'wgs84')
 
 station_rankings <- stations %>%

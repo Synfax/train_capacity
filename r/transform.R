@@ -61,7 +61,7 @@ transform_scores_xminxmax <- function(station_rankings) {
     mutate(score = sum(across(-station))) %>%
     arrange(desc(score))
   
-  print(transformed_station_rankings %>%
+  print(xminmaxtransform %>%
           select(station, score) %>%
           tibble())
   
@@ -98,15 +98,6 @@ ranked_by_lga = function() {
 
 make_map <- function() {
   
-  data_to_map <- xminmaxtransform %>%
-    as.data.frame() %>%
-    slice_head(n = 10) %>%
-    arrange(desc(score)) %>%
-    mutate(rank = row_number(), label = paste0(station, ": ", rank )) %>%
-    select(station, score, rank, label) %>%
-    rename(Station_Name = 'station') %>%
-    dplyr::left_join(locations, by = 'Station_Name') %>%
-    st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
   
   # data_to_map_bbox = data_to_map %>%
   #   st_bbox() %>%
@@ -117,10 +108,12 @@ make_map <- function() {
   # 
   # center = c(data_to_map_bbox$X,data_to_map_bbox$Y)
   
-  data_to_map_bbox = data_to_map %>% st_bbox() %>%
-    st_as_sfc(., crs = st_crs(7844)) %>%
-    st_as_sf(.) %>%
-    st_buffer(., dist = 500)
+  #write_sf(data_to_map, 'shapefiles/qgis/data_to_map.shp')
+  # 
+  # data_to_map_bbox = data_to_map %>% st_bbox() %>%
+  #   st_as_sfc(., crs = st_crs(7844)) %>%
+  #   st_as_sf(.) %>%
+  #   st_buffer(., dist = 500)
   
   # mapgl::maplibre(style = carto_style('positron'), bounds = data_to_map_bbox) %>%
   #   mapgl::add_circle_layer(id = "stations", source = data_to_map, min_zoom = 9, circle_color = "#000") %>%
@@ -135,33 +128,38 @@ make_map <- function() {
   #     
   #   ) )
   
-  mapgl::maplibre(style = carto_style('positron'), bounds = data_to_map_bbox) %>%
-    mapgl::add_circle_layer(
-      id = "stations", 
-      source = data_to_map, 
-      min_zoom = 9, 
-      circle_color = "#000"
-    ) %>%
-    mapgl::add_layer(
-      id = "station_labels", 
-      source = data_to_map, 
-      type = 'symbol', 
-      min_zoom = 11,
-      layout = list(
-        "text-field" = list(
-          "format",
-          c("get", "Station_Name"),
-          list("font-scale" = 1),
-          "\n",
-          c('get', 'rank'),
-          list("font-scale" = 0.7)
-        ),
-        'text-offset' = c(-1,0),
-        'text-size' = 16,
-        'text-justify' = 'auto',
-        'text-anchor' = c('right')
-      )
-    )
+  # mapgl::maplibre(style = carto_style('positron'), bounds = data_to_map_bbox) %>%
+  #   mapgl::add_circle_layer(
+  #     id = "stations", 
+  #     source = data_to_map, 
+  #     min_zoom = 9, 
+  #     circle_color = "#000"
+  #   ) %>%
+  #   mapgl::add_layer(
+  #     id = "station_labels", 
+  #     source = data_to_map, 
+  #     
+  #     type = 'symbol', 
+  #     min_zoom = 11,
+  #     layout = list(
+  #       "text-field" = list(
+  #         "format",
+  #         c("get", "Station_Name"),
+  #         list("font-scale" = 1),
+  #         "\n",
+  #         c('get', 'rank'),
+  #         list("font-scale" = 0.7)
+  #       ),
+  #       'text-offset' = c(-1,0),
+  #       'text-size' = 16,
+  #      'text-justify' = 'center',
+  #      'text-variable-anchor' = c('right','left'),
+  #       'symbol-sort-key' = c('get', 'rank')
+  #     ),
+  #     paint = list( 'text-color' = "#000" ))
+    
   
 }
+
+
 

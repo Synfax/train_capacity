@@ -18,8 +18,9 @@ format:
 
 This file needs to have one section for each of the metrics. e.g. heritage by zone, zoned capacity, etc. In addition to other cool patronage stuff.
 
-```{r}
-
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+station = params$station
 
 library(knitr)
 library(tidyverse)
@@ -60,70 +61,41 @@ specified_colors <- c("Already developed"                       = "#989898",
                       "6 storeys (Missing middle)"              = yimby_colours$green_palette[3]
 )
 
-```
-
-output `r params$station `
-
-todo: what line does the station serve (could be multiple?)
-
-where does this station rank within its line? where does it rank in the overall network?
-
-when is this station busiest? 
-
-## Info
-
-
-::: {.panel-tabset}
-
-## Average Patronage
-
-```{r warning=FALSE,message=FALSE}
-#| echo: false 
-
-
-station = params$station
-
-station = 'Brunswick'
 
 hourly_factors = readRDS('../r_objects/hourly_factors.Rdata') %>%
   as.data.frame()
 
-to_plot <- hourly_factors %>% filter(Station_Name == station)
-  
-p <- ggplot(to_plot, mapping = aes(x = hour_of_day, y = avg_patronage)) + geom_point()
-  
-p + facet_grid(rows = vars(Direction)) + theme_bw(base_size = 15)
-
 ```
 
-## Frequency and Load Factors
+output `r params$station `
+
 
 
 ```{r  warning=FALSE,message=FALSE}
 #| echo: false 
 
-service_frequencies = readRDS('../r_objects/service_frequencies.Rdata')
-
-  for_select_station = service_frequencies %>% filter(Station_Name == station)
-  
-  coeff = ( max(for_select_station %>%
-                   filter(Day_Type == 'Normal Weekday') %>%
-                   select(sph) ) /
-              max( hourly_factors %>% filter(Station_Name == station) %>% select(capacity_factor)  ))
-
-  ggplot( ) +
-    geom_line(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph, group = 1)) +
-    geom_point(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph, group = 1)) +
-    geom_line(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor * coeff, group = 1), col = 'red') +
-    geom_point(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor * coeff, group = 1), col = 'red') +
-    scale_y_continuous(
-
-      # Features of the first axis
-      name = "Services Per Hour",
-
-      # Add a second axis and specify its features
-      sec.axis = sec_axis(~.*(1/coeff), name="Capacity Factor")
-    ) + facet_grid(rows = vars(Direction))
+# service_frequencies = readRDS('../r_objects/service_frequencies.Rdata')
+# 
+#   for_select_station = service_frequencies %>% filter(Station_Name == station)
+#   
+#   coeff = ( max(for_select_station %>%
+#                    filter(Day_Type == 'Normal Weekday') %>%
+#                    select(sph) ) /
+#               max( hourly_factors %>% filter(Station_Name == station) %>% select(capacity_factor)  ))
+# 
+#   ggplot( ) +
+#     geom_line(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph, group = 1)) +
+#     geom_point(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph, group = 1)) +
+#     geom_line(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor * coeff, group = 1), col = 'red') +
+#     geom_point(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor * coeff, group = 1), col = 'red') +
+#     scale_y_continuous(
+# 
+#       # Features of the first axis
+#       name = "Services Per Hour",
+# 
+#       # Add a second axis and specify its features
+#       sec.axis = sec_axis(~.*(1/coeff), name="Capacity Factor")
+#     ) + facet_grid(rows = vars(Direction))
   
   # max_capacity = for_select_station %>%
   #   filter(Day_Type == 'Normal Weekday') %>%
@@ -149,7 +121,77 @@ service_frequencies = readRDS('../r_objects/service_frequencies.Rdata')
 
 ```
 
+
+
+## Service Frequency
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+service_frequencies = readRDS('../r_objects/service_frequencies.Rdata')
+
+for_select_station = service_frequencies %>% filter(Station_Name == station)
+
+```
+
+## Service Capacity
+
+:::{.panel-tabset}
+
+## weekday
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+to_plot <- hourly_factors %>%
+  filter(Station_Name == station) %>%
+  filter(Day_Type == 'Normal Weekday')
+
+rect_data <- data.frame(
+  Direction = c("Towards Flinders", "Towards Flinders", "Away from Flinders", "Away from Flinders"),  # Your actual directions
+  xmin = c(7, 16, 7, 16),
+  xmax = c(10, 19, 10, 19),
+  ymin = 0,
+  ymax = Inf,
+  fill = c("morning", "evening", "morning", "evening")
+)
+  
+ggplot() +
+  geom_rect(data = rect_data, 
+            mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill),  
+            alpha = 0.1) + 
+  geom_point(data = to_plot, mapping = aes(x = hour_of_day, y = avg_patronage, group = 1)) +
+  facet_grid(rows = vars(Direction)) +
+  geom_vline(xintercept = c(7,10, 16,19), linetype = 'dashed', color = 'red') +
+  scale_fill_manual(values = c('morning' = 'blue', 'evening' = 'green')) +
+  theme_bw(base_size = 15)
+
+```
+
+## weekend
+
+```{r warning=FALSE,message=FALSE}
+# #| echo: false 
+# 
+# to_plot <- hourly_factors %>%
+#   filter(Station_Name == station) %>%
+#   filter(Day_Type == 'Normal Weekend')
+#   
+# p <- ggplot(to_plot, mapping = aes(x = hour_of_day, y = avg_patronage)) + geom_point()
+# p + facet_grid(rows = vars(Direction)) + theme_bw(base_size = 15)
+
+```
+
 :::
+
+## Grz Nrz
+
+## N bus tram
+
+## Distance
+
+## Capacity Delta
+
 
 
 
@@ -187,26 +229,26 @@ leaflet(near_station) %>%
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
-split_by_zone = split_by_zone_type(near_station)
-
-bar_chart <- function(label, width = "100%", height = "1rem", fill = "#00bfc4", background = NULL) {
-  bar <- div(style = list(background = fill, width = width, height = height))
-  chart <- div(style = list(flexGrow = 1, marginLeft = "0.5rem", background = background), bar)
-  div(style = list(display = "flex", alignItems = "center"), label, chart)
-}
-
-near_station %>%
-  reactable(
-    defaultSorted = list('ttl_area' = "desc"),
-    theme = sandstone(),
-    columns = list(
-      type_short = colDef(name = "Type Short"),
-      ttl_area = colDef(name = "Total Area", cell = function(value) {
-          width <- paste0(value / max(.$ttl_area) * 100, "%")
-          bar_chart(value, width = width)
-        })
-      
-    ))
+# split_by_zone = split_by_zone_type(near_station)
+# 
+# bar_chart <- function(label, width = "100%", height = "1rem", fill = "#00bfc4", background = NULL) {
+#   bar <- div(style = list(background = fill, width = width, height = height))
+#   chart <- div(style = list(flexGrow = 1, marginLeft = "0.5rem", background = background), bar)
+#   div(style = list(display = "flex", alignItems = "center"), label, chart)
+# }
+# 
+# near_station %>%
+#   reactable(
+#     defaultSorted = list('ttl_area' = "desc"),
+#     theme = sandstone(),
+#     columns = list(
+#       type_short = colDef(name = "Type Short"),
+#       ttl_area = colDef(name = "Total Area", cell = function(value) {
+#           width <- paste0(value / max(.$ttl_area) * 100, "%")
+#           bar_chart(value, width = width)
+#         })
+#       
+#     ))
 
 
 

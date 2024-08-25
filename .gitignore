@@ -4,3 +4,4 @@ r/data.Rdata
 /.quarto/
 .Rproj.user
 com_fixed.Rdata
+tests/

@@ -267,7 +267,9 @@ get_near_osm <- function(station, fromQuarto = F) {
   
 }
 
-get_distance_to_flinders <- function(station) {
+get_distance_to_flinders <- function(station, fromQuarto = F) {
+  
+  prefix_dir = ifelse(fromQuarto, '../', '')
   
   #use station chainage
   
@@ -316,7 +318,10 @@ get_distance_to_flinders <- function(station) {
   
 }
 
-get_bus_and_tram_stops <- function(station) {
+get_bus_and_tram_stops <- function(station, fromQuarto = F) {
+  
+  
+  prefix_dir = ifelse(fromQuarto, '../', '')
  
   bus_stops = read_sf('shapefiles/ptv/PTV_METRO_BUS_STOP.shp')
   tram_stops = read_sf('shapefiles/ptv/PTV_METRO_TRAM_STOP.shp')
@@ -362,7 +367,10 @@ get_number_of_stops_to_flinders <- function(station) {
       
 }
 
-get_line_peak_capacity_at_closest_station <- function(station) {
+get_line_peak_capacity_at_closest_station <- function(station, fromQuarto = F) {
+  
+  
+  prefix_dir = ifelse(fromQuarto, '../', '')
   
   city_loop_stations = c('Flagstaff', 'Parliament', 'Melbourne Central', 'Flinders Street', 'Southern Cross')
   
