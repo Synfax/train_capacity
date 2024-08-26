@@ -1,33 +1,30 @@
 library(quarto)
-library(tidyverse)
 
-stations = c('Brunswick', 'South Yarra')
+# List of stations
+stations <- c("South Yarra")  # Replace with your actual list
 
-reports <-
-  tibble(
-    input = "run_for_station.qmd",
-    output_file = str_glue("{stations}.html"),
-    execute_params = map(stations, ~ list(station = .))
+
+# Render a report for each station
+for (station in stations) {
+  # Create a safe filename
+  safe_name <- gsub("[^a-zA-Z0-9]", "_", station)
+  
+  # Set the output directory for this station
+  output_dir <- file.path("stations", safe_name)
+  dir.create(output_dir, recursive = T, showWarnings = FALSE)
+  
+  # Render the report
+  quarto_render(
+    input = "quarto/run_for_station.qmd",
+    output_file = paste0(safe_name, ".html"),
+    execute_params = list(station = station),
+    output_format = "html",
+    quarto_args = c("--output-dir", output_dir)
   )
-
-pwalk(reports, quarto_render)
-
-
-# 
-# run_a_station <- function(stn) {
-#   
-#   quarto::quarto_render('stations/run_for_station.qmd',
-#                         output_file = paste0(stn, '.html'),
-#                         output_format = 'html',
-#                         execute_params = list('station' = stn))
-#   
-#   my.file.rename(from = paste0(stn,".html"), to = paste0("stations/",stn,'.html'))
-#   
-# }
-# 
-# 
-# my.file.rename <- function(from, to) {
-#   todir <- dirname(to)
-#   if (!isTRUE(file.info(todir)$isdir)) dir.create(todir, recursive=TRUE)
-#   file.rename(from = from,  to = to)
-# }
+  
+  fs::file_move(
+    path = file.path(output_dir, paste0(safe_name, ".html")),
+    new_path = file.path(output_dir, "quarto/", paste0(safe_name, ".html"))
+  )
+  
+}

@@ -16,19 +16,6 @@ format:
     page-layout: full
 ---
 
-```{css}
-<!-- .plot { -->
-<!--   height: 600px; /* Adjust this to your desired height */ -->
-<!--   overflow: hidden; /* Prevent scrollbars */ -->
-<!-- } -->
-
-<!-- .plot .plotly { -->
-<!--   height: 100%; -->
-<!-- } -->
-```
-
-This file needs to have one section for each of the metrics. e.g. heritage by zone, zoned capacity, etc. In addition to other cool patronage stuff.
-
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 station = params$station
@@ -83,55 +70,50 @@ hourly_factors = readRDS('../r_objects/hourly_factors.Rdata') %>%
 
 ```
 
-output `r params$station`
+## Overall Scores
 
-```{r  warning=FALSE,message=FALSE}
+```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
-# service_frequencies = readRDS('../r_objects/service_frequencies.Rdata')
-# 
-#   for_select_station = service_frequencies %>% filter(Station_Name == station)
-#   
-#   coeff = ( max(for_select_station %>%
-#                    filter(Day_Type == 'Normal Weekday') %>%
-#                    select(sph) ) /
-#               max( hourly_factors %>% filter(Station_Name == station) %>% select(capacity_factor)  ))
-# 
-#   ggplot( ) +
-#     geom_line(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph, group = 1)) +
-#     geom_point(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph, group = 1)) +
-#     geom_line(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor * coeff, group = 1), col = 'red') +
-#     geom_point(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor * coeff, group = 1), col = 'red') +
-#     scale_y_continuous(
-# 
-#       # Features of the first axis
-#       name = "Services Per Hour",
-# 
-#       # Add a second axis and specify its features
-#       sec.axis = sec_axis(~.*(1/coeff), name="Capacity Factor")
-#     ) + facet_grid(rows = vars(Direction))
-  
-  # max_capacity = for_select_station %>%
-  #   filter(Day_Type == 'Normal Weekday') %>%
-  #   select(sph) %>%
-  #   max()
-  # 
-  # ggplot( ) +
-  #   geom_line(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph/max_capacity, group = 1)) +
-  #   geom_point(for_select_station %>% filter(Day_Type == 'Normal Weekday') , mapping = aes(x = hour_of_day, y = sph/max_capacity, group = 1)) +
-  #   geom_line(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor, group = 1), col = 'red') +
-  #   geom_point(hourly_factors %>% filter(Station_Name == station), mapping = aes(x = hour_of_day, y = capacity_factor, group = 1), col = 'red') +
-  #   facet_grid(rows = vars(Direction)) + theme_bw()
-  # 
-  # ratio = for_select_station %>%
-  #   filter(Day_Type == 'Normal Weekday') %>% left_join(
-  #           (hourly_factors %>%
-  #              filter(Station_Name == station)), by = c('hour_of_day', 'Direction') )
-  # 
-  # ratio = ratio %>% mutate(rt = capacity_factor /  (sph/max_capacity) )
-  # 
-  # ggplot() + geom_line(ratio, mapping = aes(x = hour_of_day, y = rt, group = 1 )) + facet_grid(rows = vars(Direction))
+translations = c(
+  'grz_nrz_pc' = 'Zoning suitability (% residential and not heritage)',
+  'capacity_delta' = 'Potential new homes in broad 1000m upzoning',
+  'average_peak_service_freq' = 'Train frequency in peak (services per hour)',
+  'average_peak_service_cap' = 'Average train patronage in peak',
+  'walkability_score' = 'Number of local services within 500m walk',
+  'distance' = 'Distance to CBD (km)',
+  'n_bus_tram' = 'Number of bus and tram stops'
+)
 
+rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+  rename(Station_Name = "station") %>%
+  filter(Station_Name == station) %>%
+  pivot_longer(-Station_Name) %>%
+  select(-Station_Name) %>%
+  mutate(value = round(value, 2)) 
+
+
+transformed_rankings = readRDS('../r_objects/transformed_scores.Rdata') %>%
+  rename(Station_Name = "station") %>%
+  filter(Station_Name == station) %>%
+  pivot_longer(-Station_Name) %>%
+  select(-Station_Name) %>%
+  mutate(value = round(value, 2)) %>%
+  filter(name != 'score') 
+
+
+
+rankings %>%
+  left_join(transformed_rankings, by = 'name') %>%
+  mutate(name = translations[name]) %>%
+reactable(theme = sandstone(),
+            columns = list(
+              'name' = colDef(name = 'Metric'),
+              'value.x' = colDef(name = "Score"),
+              'value.y' = colDef(name = "Transformed Score")
+            )
+            
+            )
 
 ```
 
@@ -235,7 +217,6 @@ Service frequency is calculated as the mean patronage of trains in two time peri
 
 The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
 
-
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -305,12 +286,11 @@ div(class = 'plot', interactive_patronage)
 
 The morning average patronage is `r morning_to_flinders`, the average evening patronage is `r evening_away_from_flinders`, which forms a mean score of `r final_patronage_score`.
 
+## Zoning Suitability
 
-## Grz Nrz
+The number of lots within 1km of stations zoned as either Neighbourhood Residential or General Residential, and NOT under heritage protection is an approximation of 'ease of upzoning' for a given station.
 
-The number of lots within 1km of statios zoned as either Neighbourhood Residential or General Residential, and NOT under heritage protection is an approximation of 'ease of upzoning' for a given station.
-
-The map below shows the properties within 1km of `r station` that meet the conditions above, shaded in orange.
+The map below shows the properties within 1km of `r station` that meet the conditions above, shaded in orange. Properties that do not meet the conditions described above are black.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -357,17 +337,97 @@ by_validity <- grz_nrz %>%
   summarise(total_area = sum(st_area(geom))) %>%
   st_drop_geometry()
 
-area_ratio = ( by_validity %>% filter(isNRZGRZ) %>% pull(total_area) ) / sum(by_validity$total_area) %>% unname() %>% as.vector() %>% round(.,2)
+area_ratio = ( ( by_validity %>% filter(isNRZGRZ) %>% pull(total_area) ) / sum(by_validity$total_area) %>% unname() %>% as.vector() ) %>% round(.,2)
 
 ```
 
-Out of `r n_suitable + n_unsuitable` lots within 1km radius of `r station`, `r n_suitable` are easiest to upzone. In terms of area,
-the easiest properties cover `r area_ratio` of the total area of `r sum(by_validity$total_area) %>% round(.,2)`.
+Out of `r n_suitable + n_unsuitable` lots within 1km radius of `r station`, `r n_suitable` are easiest to upzone. In terms of area, the easiest properties cover `r area_ratio` of the total area of `r sum(by_validity$total_area) %>% round(.,2)` m^2.
 
-## N bus tram
+## Existing Transport Infrastructure
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+ 
+bus_stops = read_sf('../shapefiles/ptv/PTV_METRO_BUS_STOP.shp')
+tram_stops = read_sf('../shapefiles/ptv/PTV_METRO_TRAM_STOP.shp')
+tram_routes = read_sf('../shapefiles/Order_JRGGG7/ll_gda2020/esrishape/whole_of_dataset/victoria/PTV/PTV_METRO_TRAM_ROUTE.shp')
+bus_routes = read_sf('../shapefiles/Order_JRGGG7/ll_gda2020/esrishape/whole_of_dataset/victoria/PTV/PTV_METRO_BUS_ROUTE.SHP')
+
+locations = readRDS(paste0('../r_objects/locations.Rdata'))
+  
+station_location = locations %>%
+    filter(Station_Name == station) %>%
+    st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
+  
+buffer = st_buffer(station_location, dist = radius) %>%
+    st_transform(crs = 7844)
+  
+near_bus_vector <- st_within(bus_stops, buffer, sparse = F)
+  
+bus_stops_near_station = bus_stops %>%
+    filter(near_bus_vector) 
+
+bus_routes_near_station = bus_routes %>%
+  filter(ROUTESHTNM %in% bus_stops_near_station$ROUTEUSSP) %>%
+  st_intersection(buffer)
+  
+near_tram_vector <- st_within(tram_stops, buffer, sparse = F)
+  
+tram_stops_near_station = tram_stops %>%
+    filter(near_tram_vector) 
+
+tram_routes_near_station = tram_routes %>%
+  filter(ROUTESHTNM %in% tram_stops_near_station$ROUTEUSSP) %>%
+  st_intersection(buffer)
+
+tram_route_list <- tram_routes_near_station %>% st_drop_geometry() %>%
+  pull(ROUTESHTNM) %>% unique()
+
+bus_route_list <- bus_routes_near_station %>% st_drop_geometry() %>%
+  pull(ROUTESHTNM) %>% unique()
+
+leaflet() %>%
+  fitBounds(bounds[1], bounds[2], bounds[3], bounds[4]) %>%
+  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = 14.5) %>%
+  addMapPane("background_map", zIndex = 410) %>%  # Level 1: bottom
+  addMapPane("polygons", zIndex = 420) %>%        # Level 2: middle
+  addMapPane("labels", zIndex = 430) %>%  
+  addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.7, pane = "background_map")) %>%
+    addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(pane = "labels")) %>%
+  addCircleMarkers(data = tram_stops_near_station, color = "black", radius = 3, fillColor = "#78BE20", fillOpacity = 1, options = pathOptions(pane = 'polygons'), stroke = 0.5, weight = 1, opacity = 1) %>%
+  addCircleMarkers(data = bus_stops_near_station, fillOpacity = 1, radius = 3, fillColor = "#FF8200", color = "black", stroke = 0.5, options = pathOptions(pane = 'polygons'), weight = 1, opacity = 1) %>%
+  addPolylines(data = bus_routes_near_station, color = "#FF8200", options = pathOptions(pane = 'polygons'), fillOpacity = 0.7) %>%
+  addPolylines(data = tram_routes_near_station, color = "#78BE20", options = pathOptions(pane = 'polygons'), fillOpacity = 0.7) %>%
+  addPolygons(data = buffer, color = 'black', fillColor = 'grey', fillOpacity = 0.3, options = pathOptions(pane = 'polygons'))
+
+```
+
+There are `r tram_stops_near_station %>% nrow()` tram stops in a 1km radius, and `r bus_stops_near_station %>% nrow()` bus stops. In the model, tram stops are weighted to be worth twice as much as bus stops, as trams carry more passengers and are often more frequent.
+
+This yields a total score of `r 2*(tram_stops_near_station %>% nrow()) + (bus_stops_near_station %>% nrow())`.
+
+While not includes in the model directly, bus route(s) `r bus_route_list` and tram route(s) `r tram_route_list` serve this area.
 
 ## Distance
 
 ## Capacity Delta
 
+Zoned capacity is a measure of how many dwellings could fit in an area, given the current zoning. It is a theoretic maximum. This section looks at the current zoned capacity, and compares it to a theoretic zoned capacity under 'Missing Middle' zoning. To reiterate, the potential future zoned capacity is **a theoretic maximum**, and extremely unlikely to be realised if upzoning occured.
 
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+delta = near_properties %>%
+  st_drop_geometry() %>%
+  group_by(zone_short) %>%
+  summarise(old_yield = sum(buxton_yeilds_corrected_net, na.rm = T), new_yield = sum(mm_yield_net, na.rm = T))
+
+delta %>% reactable(theme = sandstone(),
+                    columns = list(
+                      zone_short = colDef(name = "Current Zone"),
+                      old_yield = colDef(name = "Existing Zoned Capacity"),
+                      new_yield = colDef(name = "Potential Future Zoned Capacity")
+                    )) 
+
+```

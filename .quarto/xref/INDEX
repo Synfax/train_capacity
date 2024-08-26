@@ -1,7 +1,8 @@
 {
   "quarto/run_for_station.qmd": {
     "run_for_station.html": "715803f7",
-    "Brunswick.html": "fe6352ea"
+    "Brunswick.html": "fe6352ea",
+    "South_Yarra.html": "d5573a5e"
   },
   "stations/run_for_station.qmd": {
     "Brunswick.html": "0b741dcf",

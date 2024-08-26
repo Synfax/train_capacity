@@ -91,6 +91,6 @@ writeStationMaps <- function(rank, zm = 17) {
     setView(data_to_map$lng[rank], data_to_map$lat[rank], zoom = zm)
   
   mapshot(station_map, file = paste0('quarto/index_images/',as.numeric(rank),'.png'))
-}
+}   
 
 
