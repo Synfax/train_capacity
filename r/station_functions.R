@@ -131,7 +131,7 @@ find_heritage_pc <- function(station) {
   
   percent_heritage <- near_properties %>%
     st_drop_geometry() %>%
-    filter(zoning_permits_housing == 'Housing permitted', !feature_preventing_development) %>%
+    filter(zone_short %in% c('Neighbourhood residential', 'General residential', 'Residential growth'), !feature_preventing_development, dwellings_est <= 1) %>%
     count(heritage) %>%
     filter(heritage == TRUE) %>% select(n) /
     ( near_properties %>%
@@ -181,7 +181,7 @@ get_peak_service_capacity <- function(station, fromQuarto = F) {
   avg_peak_morning_load = hourly_factors %>%
     filter(Station_Name == station, Direction == 'Towards Flinders') %>%
     filter(as.numeric(hour_of_day) %in% peak_morning) %>%
-    select(capacity_factor) %>%
+    select(avg_patronage) %>%
     unlist() %>%
     unname() %>%
     mean()
@@ -189,7 +189,7 @@ get_peak_service_capacity <- function(station, fromQuarto = F) {
   avg_peak_evening_load = hourly_factors %>%
     filter(Station_Name == station, Direction == 'Away from Flinders') %>%
     filter(as.numeric(hour_of_day) %in% peak_evening) %>%
-    select(capacity_factor) %>%
+    select(avg_patronage) %>%
     unlist() %>%
     unname() %>%
     mean()
@@ -404,11 +404,39 @@ get_line_peak_capacity_at_closest_station <- function(station, fromQuarto = F) {
     mutate(peak_type = ifelse(hour_of_day %in% peak_morning, 'm', NA),
            peak_type = ifelse(hour_of_day %in% peak_evening, 'e', peak_type)) %>%
     group_by(Line_Name, Direction, peak_type) %>%
-    summarise(avg_capacity = mean(capacity_factor)) %>%
+    summarise(avg_patronage = mean(avg_patronage)) %>%
     filter(!is.na(peak_type)) %>%
     filter( !(peak_type == "e" & Direction == 'Towards Flinders') ) %>%
     filter( !(peak_type == "m" & Direction == 'Away from Flinders') ) %>%
-    pull(avg_capacity) %>%
+    pull(avg_patronage) %>%
     mean() %>%
     return()
+}
+
+prepare_data_for_the_age = function(station) {
+  near_properties = get_near_properties(station) 
+  
+  heritage_pc = (near_properties %>%
+    st_drop_geometry() %>%
+    count(heritage) %>%
+    filter(heritage) %>%
+    pull(n)) / nrow(near_properties)
+  
+  heritage_pc = ifelse(is_empty(heritage_pc), 0, heritage_pc)
+  
+  resi = near_properties %>%
+    st_drop_geometry() %>%
+    filter(zone_short %in% c('General residential', 'Residential growth ', 'Neighbourhood residential'))  
+  
+  residential_pc = (resi %>% count(heritage) %>% filter(heritage) %>% pull(n)) / nrow(resi)
+  residential_pc = ifelse(is_empty(residential_pc), 0, residential_pc)
+  
+  suitable = resi %>%
+    filter(dwellings_est <= 1) %>%
+    filter(!feature_preventing_development)
+  
+  suitable_pc = (suitable %>% count(heritage) %>% filter(heritage) %>% pull(n)) / nrow(suitable)
+  suitable_pc = ifelse(is_empty(suitable_pc), 0, suitable_pc)
+  
+  return(c( station = station, total_heritage = heritage_pc, residential = residential_pc, suitable = suitable_pc ))
 }

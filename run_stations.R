@@ -1,11 +1,19 @@
 library(quarto)
+library(fs)
+library(tidyverse)
+
 
 # List of stations
-stations <- c("South Yarra")  # Replace with your actual list
+stations = patronage_data %>%
+  filter(Mode == 'Metro') %>%
+  select(Station_Name) %>%
+  pull() %>%
+  unique()
 
 
 # Render a report for each station
 for (station in stations) {
+  print(station)
   # Create a safe filename
   safe_name <- gsub("[^a-zA-Z0-9]", "_", station)
   
@@ -22,9 +30,10 @@ for (station in stations) {
     quarto_args = c("--output-dir", output_dir)
   )
   
-  fs::file_move(
+   fs::file_move(
     path = file.path(output_dir, paste0(safe_name, ".html")),
     new_path = file.path(output_dir, "quarto/", paste0(safe_name, ".html"))
   )
+
   
 }

@@ -12,14 +12,23 @@ format:
 ```{r, message=FALSE, warning=FALSE}
 
 library(tidyverse)
+library(sf)
 library(leaflet)
+library(shiny)
+library(htmlwidgets)
 library(reactablefmtr)
+
+locations <- readRDS('../r_objects/locations.Rdata')
 
 transformed_scores <- readRDS('../r_objects/transformed_scores.Rdata') %>%
   as.data.frame() %>%
   slice_head(n = 10) %>%
   mutate(across(where(is.numeric), .fns = function(x) round(x, 2) )) %>%
   mutate(rank = row_number())
+
+san_station <- function(x) {
+  return( str_replace(x, ' ', '_') )
+}
 
 translations = c(
   'grz_nrz_pc' = 'Zoning suitability',
@@ -59,14 +68,23 @@ printScores <- function(r) {
 
 :::{focus-on="cr-main"}
 
-# Train Ranking Project
+# Train Station Upzoning Rankings
 
 :::
 
 
 :::{focus-on="cr-main"}
 
-This project ranks train stations by 7 key metrics. For more info see "here"
+This project ranks train stations by 7 key metrics.
+\
+For more info see "here". A map of all stations at the bottom of the page has clickable icons to all train stations.
+\
+You can also click on the station names on the individual pages to view them.
+
+:::
+:::{focus-on="cr-main"}
+
+## Total Scores
 
 \
 
@@ -93,7 +111,7 @@ transformed_scores %>%
 
 :::{focus-on="cr-map1"}
 
-## [`r transformed_scores$station[1]`](`r paste0('../stations/',transformed_scores$station[1],'.html') `)
+## [`r transformed_scores$station[1]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[1]),'/quarto/',san_station(transformed_scores$station[1]),'.html') `)
 
 
 ###### Rank: 1
@@ -113,76 +131,193 @@ printScores(1)
 :::
 
 :::{focus-on="cr-map2"}
-This paragraph and the one that follows will appear as one narrative block.
 
-This is about south yarra
+## [`r transformed_scores$station[2]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[2]),'/quarto/',san_station(transformed_scores$station[2]),'.html') `)
 
-When these paragraphs scroll into view, they will reveal a histogram.
+
+###### Rank: 2
+
+###### Total Score: `r transformed_scores$score[2]`
+
+\
+
+Distribution of scores:
+
+```{r}
+
+printScores(2)
+
+```
+
 :::
 
 :::{focus-on="cr-map3"}
-This paragraph and the one that follows will appear as one narrative block.
 
-This is about south yarra
+## [`r transformed_scores$station[3]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[3]),'/quarto/',san_station(transformed_scores$station[3]),'.html') `)
 
-When these paragraphs scroll into view, they will reveal a histogram.
+
+###### Rank: 3
+
+###### Total Score: `r transformed_scores$score[3]`
+
+\
+
+Distribution of scores:
+
+```{r}
+
+printScores(3)
+
+```
+
 :::
 
 :::{focus-on="cr-map4"}
-This paragraph and the one that follows will appear as one narrative block.
 
-This is about south yarra
+## [`r transformed_scores$station[4]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[4]),'/quarto/',san_station(transformed_scores$station[4]),'.html') `)
 
-When these paragraphs scroll into view, they will reveal a histogram.
+
+###### Rank: 4
+
+###### Total Score: `r transformed_scores$score[4]`
+
+\
+
+Distribution of scores:
+
+```{r}
+
+printScores(4)
+
+```
+
 :::
 
 :::{focus-on="cr-map5"}
-This paragraph and the one that follows will appear as one narrative block.
 
-This is about south yarra
+## [`r transformed_scores$station[5]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[5]),'/quarto/',san_station(transformed_scores$station[5]),'.html') `)
 
-When these paragraphs scroll into view, they will reveal a histogram.
+
+###### Rank: 5
+
+###### Total Score: `r transformed_scores$score[5]`
+
+\
+
+Distribution of scores:
+
+```{r}
+
+printScores(5)
+
+```
+
 :::
 
 :::{focus-on="cr-map6"}
-This paragraph and the one that follows will appear as one narrative block.
 
-This is about south yarra
+## [`r transformed_scores$station[6]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[6]),'/quarto/',san_station(transformed_scores$station[6]),'.html') `)
 
-When these paragraphs scroll into view, they will reveal a histogram.
+
+###### Rank: 6
+
+###### Total Score: `r transformed_scores$score[6]`
+
+\
+
+Distribution of scores:
+
+```{r}
+
+printScores(6)
+
+```
+
 :::
 
 :::{focus-on="cr-map7"}
-This paragraph and the one that follows will appear as one narrative block.
 
-This is about south yarra
+## [`r transformed_scores$station[7]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[7]),'/quarto/',san_station(transformed_scores$station[7]),'.html') `)
 
-When these paragraphs scroll into view, they will reveal a histogram.
+
+###### Rank: 7
+
+###### Total Score: `r transformed_scores$score[7]`
+
+\
+
+Distribution of scores:
+
+```{r}
+
+printScores(7)
+
+```
+
 :::
 
 :::{focus-on="cr-map8"}
-This paragraph and the one that follows will appear as one narrative block.
 
-This is about south yarra
+## [`r transformed_scores$station[8]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[8]),'/quarto/',san_station(transformed_scores$station[8]),'.html') `)
 
-When these paragraphs scroll into view, they will reveal a histogram.
+
+###### Rank: 8
+
+###### Total Score: `r transformed_scores$score[8]`
+
+\
+
+Distribution of scores:
+
+```{r}
+
+printScores(8)
+
+```
+
 :::
 
 :::{focus-on="cr-map9"}
-This paragraph and the one that follows will appear as one narrative block.
 
-This is about south yarra
+## [`r transformed_scores$station[9]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[9]),'/quarto/',san_station(transformed_scores$station[9]),'.html') `)
 
-When these paragraphs scroll into view, they will reveal a histogram.
+
+###### Rank: 9
+
+###### Total Score: `r transformed_scores$score[9]`
+
+\
+
+Distribution of scores:
+
+```{r}
+
+printScores(9)
+
+```
+
 :::
 
 
 :::{focus-on="cr-map10"}
-This paragraph and the one that follows will appear as one narrative block.
 
-This is about south yarra
+## [`r transformed_scores$station[10]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[10]),'/quarto/',san_station(transformed_scores$station[10]),'.html') `)
 
-When these paragraphs scroll into view, they will reveal a histogram.
+
+###### Rank: 10
+
+###### Total Score: `r transformed_scores$score[10]`
+
+\
+
+Distribution of scores:
+
+```{r}
+
+printScores(10)
+
+```
+
 :::
 
 
@@ -230,3 +365,102 @@ When these paragraphs scroll into view, they will reveal a histogram.
 
 :::
 :::
+
+## Clickable Map
+
+Clickable Map
+
+```{r}
+
+colours = tribble(
+  ~group, ~ colour,
+  'Sandringham' , "#F178AF",
+  'CrossCity' , "#028430",
+  'Cran/Pak' , "#279FD5",
+  "Burnley" , "#152C6B",
+  "Northern" , "#FFBE00",
+  "Eastern" , "#BE1014",
+  'event' , "#95979A"
+)
+
+lines_dissolved <- read_sf('../shapefiles/qgis/final_map.shp') %>%
+  left_join(colours, by = 'group') 
+
+locations = locations %>%
+  mutate(message = 
+           paste0(
+             '<div style = \" background-color: black; \">',
+             "<p style = \" color: white; text-align:center ; padding: 5px; \" >", Station_Name, '</p>',
+             '</div>'
+             
+           )
+  ) %>%
+  mutate(win_url = paste0('stations/', 'South_Yarra', '/quarto/', 'South_Yarra', '.html'))
+
+
+
+js_code <- "
+function(el, x, data) {
+
+  var marker = document.getElementsByClassName('leaflet-interactive');
+  for(var i=0; i < marker.length; i++){
+    (function(){
+      var v = data.win_url[i];
+      marker[i].addEventListener('click', function() { window.open(v);}, false);
+  }()); 
+  }
+
+  var map = this;
+  
+
+  function updateLabelVisibility() {
+   
+    var currentZoom = map.getZoom();
+   
+    var showLabelsZoomLevel = 13;
+
+    var labels = document.getElementsByClassName('leaflet-tooltip');
+   
+    for (var i = 0; i < labels.length; i++) {
+      if (currentZoom >= showLabelsZoomLevel) {
+        labels[i].style.display = 'block';
+      } else {
+        labels[i].style.display = 'none';
+      }
+    }
+  }
+
+  // Ensure the map is fully loaded before adding the event listener
+  map.whenReady(function() {
+ 
+    map.on('zoomend', function() {
+  
+      updateLabelVisibility();
+    });
+    
+    // Initial call to set correct visibility
+    updateLabelVisibility();
+  });
+}
+"
+
+m <- leaflet() %>%
+  addPolylines(data = lines_dissolved, color = ~colour, opacity = 1) %>%
+  addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.5)) %>%
+  addCircleMarkers(lng = locations$lng, lat=locations$lat, radius = 5, color = 'black', fillColor = 'black', fillOpacity = 1, opacity = 0.7) %>%
+  addLabelOnlyMarkers(lng = locations$lng,
+                      lat = locations$lat,
+                      label = lapply(locations$message, htmltools::HTML),
+                      labelOptions = labelOptions(noHide = T, className = 'my-labels', direction = 'auto', textOnly = T, textsize = '10pt',
+                                                  style = list(
+                                                    'font-weight' = '800',
+                                                    'text-decoration' = 'underline',
+                                                    'text-decoration-color' = 'white',
+                                                    'margin' = '5px',
+                                                    'letter-spacing' = '0.5px'
+                                                  ))) %>%
+  htmlwidgets::onRender(js_code, data = locations) 
+
+m
+
+```

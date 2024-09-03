@@ -5,3 +5,5 @@ r/data.Rdata
 .Rproj.user
 com_fixed.Rdata
 tests/
+stations/
+theage.csv

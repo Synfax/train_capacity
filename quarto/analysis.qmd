@@ -1,0 +1,70 @@
+---
+title: "Station Capacity"
+author: "Paul S"
+date: "6/6/24"
+params: 
+  station: "South Yarra"
+format: 
+  html: 
+    theme: zephyr
+    fig-width: 8
+    fig-height: 6
+    code-fold: false
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    page-layout: full
+---
+
+```{r}
+
+station_rankings = readRDS('../r_objects/station_rankings.Rdata')
+
+station_rankings = station_rankings %>%
+  pivot_longer(cols = -c('station'))
+
+ggplot(station_rankings) + geom_density(aes( x = value)) + facet_grid(rows = vars(name), scales = 'free_y')
+
+ggplot(station_rankings %>% filter(name == 'distance'), aes(x = value)) + geom_density()
+
+```
+
+
+```{r}
+
+station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+  as.data.frame()
+
+
+station_rankings[, 2:ncol(station_rankings) ] = scale(station_rankings[, 2:ncol(station_rankings) ])
+
+
+getSS <- function(n) {
+  km <- kmeans(station_rankings[, 2:ncol(station_rankings) ], n, iter.max = 10, nstart =  25)
+  return(sum(km$withinss))
+}
+
+res.df = data.frame(n = 1:10, ss = map(1:10, getSS) %>% unlist() %>% as.vector() )
+
+#plot(x = res.df$n, y= res.df$ss)
+
+## elbow is around 4
+
+km.res <- kmeans(station_rankings[, 2:ncol(station_rankings) ], 4, iter.max = 10, nstart =  25)
+
+station_rankings = station_rankings %>%
+  mutate(cluster = km.res$cluster) %>%
+  rename(Station_Name = 'station') %>%
+  select(Station_Name, cluster)
+
+locations = readRDS('../r_objects/locations.Rdata') %>% left_join(station_rankings, by = 'Station_Name') %>%
+  st_as_sf(coords = c('lng', 'lat'))
+
+fillPal = colorFactor('viridis', domain = locations$cluster)
+
+leaflet(locations) %>%
+  addProviderTiles('CartoDB.Positron') %>%
+  addCircleMarkers(fillColor = ~fillPal(cluster), stroke = NA, fillOpacity = 0.5 ) %>%
+  addLegend(position = 'bottomleft', pal = fillPal, values = ~cluster )
+
+```

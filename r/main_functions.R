@@ -3,7 +3,7 @@
 
 load_and_clean_patronage_data <- function() {
   
-  patronage_data <- fread('data/Train_Service_Passenger_Counts_Financial_Year_2022-2023.csv') %>%
+  patronage_data <- fread('data/train_service_passenger_counts_fy_2023-2024.csv') %>%
     as.data.frame()
   
   city_loop_stations = c('Flagstaff', 'Parliament', 'Melbourne Central', 'Flinders Street', 'Southern Cross')

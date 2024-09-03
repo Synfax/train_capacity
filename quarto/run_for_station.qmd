@@ -3,7 +3,7 @@ title: "Station Capacity"
 author: "Paul S"
 date: "6/6/24"
 params: 
-  station: "Brunswick"
+  station: "South Yarra"
 format: 
   html: 
     theme: zephyr
@@ -223,7 +223,9 @@ The mean values of these two periods are shown as dashed lines, and the mean of 
 to_plot <- hourly_factors %>%
   filter(Station_Name == station) %>%
   filter(Day_Type == 'Normal Weekday') %>%
-  mutate(hour_of_day = as.numeric(hour_of_day))
+  mutate(hour_of_day = as.numeric(hour_of_day)) %>%
+  group_by(hour_of_day, Direction) %>%
+  summarise(avg_patronage = mean(avg_patronage))
 
 morning_to_flinders = to_plot %>%
     filter(Direction == 'Towards Flinders',
@@ -292,6 +294,8 @@ The number of lots within 1km of stations zoned as either Neighbourhood Resident
 
 The map below shows the properties within 1km of `r station` that meet the conditions above, shaded in orange. Properties that do not meet the conditions described above are black.
 
+Additional information on land use and heritage is provided in tables below the map.
+
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -301,7 +305,7 @@ The map below shows the properties within 1km of `r station` that meet the condi
 #     filter(heritage == F)
 
 grz_nrz = near_properties %>%
-  mutate(isNRZGRZ = case_when((type_short %in% c('Neighbourhood residential', 'General residential') & !heritage) ~ T, .default = F ) ) %>%
+  mutate(isNRZGRZ = case_when((zone_short %in% c('Neighbourhood residential', 'General residential', 'Residential growth') & !heritage) ~ T, .default =  F ) ) %>%
   mutate(colour = ifelse(isNRZGRZ, 'orange' ,'black'))
 
 bounds <- c(min(grz_nrz$lon, na.rm = T), min(grz_nrz$lat, na.rm = T),
@@ -341,9 +345,65 @@ area_ratio = ( ( by_validity %>% filter(isNRZGRZ) %>% pull(total_area) ) / sum(b
 
 ```
 
+:::{.panel-tabset}
+
+## Key information
+
 Out of `r n_suitable + n_unsuitable` lots within 1km radius of `r station`, `r n_suitable` are easiest to upzone. In terms of area, the easiest properties cover `r area_ratio` of the total area of `r sum(by_validity$total_area) %>% round(.,2)` m^2.
 
+## Tabular data
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+by_zone_heritage <- near_properties %>%
+  st_drop_geometry() %>%
+  count(heritage, zone_short) %>%
+  dplyr::relocate(zone_short, .before = heritage) %>%
+  arrange(zone_short)
+
+# by_zone_heritage %>%
+#   mutate(heritage = ifelse(heritage, 'Yes','No')) %>%
+#   reactable(
+#     theme = sandstone(),
+#     pagination = F,
+#     columns = list(
+#       zone_short = colDef(name = "Zone"),
+#       heritage = colDef(name = "Heritage protected"),
+#       n = colDef(name = "Number of lots")
+#     )
+#   )
+
+by_zone_heritage %>%
+  group_by(zone_short) %>%
+  summarise(n_total = sum(n), percent = n[heritage] / n_total, n_heritage = n[heritage], n_not_heritage = n[!heritage]) %>%
+  mutate(percent = round(percent, 2)) %>%
+  relocate(n_total, .after = n_not_heritage) %>%
+  reactable(
+    theme = sandstone(),
+    pagination = F,
+    columns = list(
+      zone_short = colDef(name = "Zone"),
+      percent = colDef(name = "% Heritage"),
+      n_heritage = colDef(name = "# Heritage Lots"),
+      n_not_heritage = colDef(name = "# Non Heritage Lots"),
+      n_total = colDef(name = "Total")
+    )
+  )
+
+
+
+```
+
+
+
+:::
+
+
+
 ## Existing Transport Infrastructure
+
+The map below shows tram routes and tram stops in green, as well as bus routes and bus stops in orange.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
