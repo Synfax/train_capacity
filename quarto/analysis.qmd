@@ -27,6 +27,7 @@ library(leaflet)
 library(stringr)
 library(RColorBrewer)
 library(plotly)
+library(ggridges)
 
 translations = c(
   'grz_nrz_pc' = 'Zoning suitability',
@@ -50,40 +51,22 @@ transformed_scores = transformed_scores %>%
 
 # <- ggplot(transformed_scores) + geom_density(aes( x = value)) + facet_grid(rows = vars(name), scales = 'free') + theme_bw()
 
+ggplot(transformed_scores, aes(x = value, y  = name, fill = name)) +
+  geom_density_ridges(alpha = 0.5, bins = 30, stat = 'binline') +
+  theme_ridges()  + 
+  theme(legend.position = "none")
 
-makeDensityPlot <- function(var = 'Zoning suitability') {
-  
-  plot <- ggplot(transformed_scores %>% filter(name == var)) +
-    geom_density(aes(x = value)) +
-    theme_bw() 
- 
-  print(plot)
-}
+
+ggplot(transformed_scores, aes(x = value, y  = name, fill = name)) +
+  geom_density_ridges(alpha = 0.5, bins = 30) +
+  theme_ridges()  + 
+  theme(legend.position = "none")
+
+
+
 
 ```
 
-:::{.panel-tabset}
-
-##   Zoning suitability
-
-```{r}
-makeDensityPlot('Zoning suitability')
-```
-
-##  Potential number of new homes
-
-##   Train service frequency in peak
-
-##  Train service passenger numbers in peak
-
-##  Number of local services within a 500m walk
-
-##  Distance to CBD
-
-##  Existing transport infrastructure.
-
-
-:::
 
 
 
