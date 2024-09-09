@@ -109,6 +109,8 @@ For each train stations, seven key metrics are calculated:
 -   Existing transport infrastructure.
 
 With these 'raw' metrics, a transformed score is calculated by factoring in how each station scores relative to others on the network. This allows for stations to be compared easily with a single number, or rank.
+\
+The transformation process is described [here](rankings.html "Rankings Page").
 :::
 :::{focus-on="cr-main"}
 
@@ -116,7 +118,11 @@ This page is only a summary of the ten most well suited stations.
 
 \
 
-Supporting web pages have been created for each individual train station which details how the scores are calculated. A clickable map of all stations and searchable table are at the foot of the document (here).
+Supporting web pages have been created for each individual train station which details why each metric is important for upzoning considerations, and how each are calculated.
+
+\
+
+A clickable map of all stations and searchable table are at the foot of the document (here).
 
 \
 

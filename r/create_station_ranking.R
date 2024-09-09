@@ -33,9 +33,9 @@ station_rankings <- stations %>%
   map(~ as_tibble(as.list(return_information(.x))), .progress = T) %>%
   list_rbind() %>%
   mutate(across(-station, as.numeric)) %>%
-  filter(!is.nan(walkability_score))
+  filter(!is.nan(walkability_score)) 
 
-write_csv(station_rankings %>% filter(distance > 3000, distance < 25000), 'data/csv_output.csv')
+#write_csv(station_rankings, 'data/csv_output.csv')
 
 saveRDS(station_rankings, 'r_objects/station_rankings.Rdata')
 
@@ -47,21 +47,21 @@ saveRDS(transformed_scores, 'r_objects/transformed_scores.Rdata')
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~
-
-
-for_the_age <- stations %>%
-  map(~ as_tibble(as.list(prepare_data_for_the_age(.x))), .progress = T) %>%
-  list_rbind() %>%
-  mutate(across(-station, as.numeric)) %>%
-  rename(Station_Name = station) %>%
-  left_join(locations, by = 'Station_Name') %>%
-  st_as_sf(coords = c('lng', 'lat')) %>%
-  st_set_crs('wgs84')
-
-for_the_age = st_transform(for_the_age, 7844)
-
-lgas = read_sf('shapefiles/lga_boundaries/LGA_2023_AUST_GDA2020.shp')
-
-for_the_age = st_join(for_the_age, lgas)
-
-for_the_age = for_the_age %>% select(c(Station_Name, total_heritage, residential, suitable, LGA_NAME23)) 
+# 
+# 
+# for_the_age <- stations %>%
+#   map(~ as_tibble(as.list(prepare_data_for_the_age(.x))), .progress = T) %>%
+#   list_rbind() %>%
+#   mutate(across(-station, as.numeric)) %>%
+#   rename(Station_Name = station) %>%
+#   left_join(locations, by = 'Station_Name') %>%
+#   st_as_sf(coords = c('lng', 'lat')) %>%
+#   st_set_crs('wgs84')
+# 
+# for_the_age = st_transform(for_the_age, 7844)
+# 
+# lgas = read_sf('shapefiles/lga_boundaries/LGA_2023_AUST_GDA2020.shp')
+# 
+# for_the_age = st_join(for_the_age, lgas)
+# 
+# for_the_age = for_the_age %>% select(c(Station_Name, total_heritage, residential, suitable, LGA_NAME23)) 

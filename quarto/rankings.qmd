@@ -15,10 +15,11 @@ format:
     toc-location: left
     page-layout: full
 ---
+This page aims to describe how scores are transformed from their raw calculations into a rank which allows comparison across stations.
 
-This page contains information about the ranking of stations for priority upzoning.
+The first table contains the raw scores in a searchable table. 
 
-The page contains first the raw scores for each train station. Then, a section explaining how scores are transformed, and then the transformed scores are show in full.
+The next section details the transformation process, and the final section contains a searchable table of the final scores.
 
 ## Raw Scores
 
@@ -29,6 +30,9 @@ library(tidyverse)
 library(reactablefmtr)
 
 source('../r/station_functions.R')
+source('../r/constants.R')
+source('../r/transform.R')
+
 
 station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
   mutate(across(-station, as.numeric)) %>%
@@ -36,42 +40,71 @@ station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
 
 station_rankings %>%
   reactable( pagination = T,
-    theme = sandstone(),
-             columns = list(
-               station = colDef(name = "Station"),
-               grz_nrz_percentage = colDef(name = "GRZ/NRZ %"),
-               capacity_delta = colDef(name = "Delta"),
-               heritage_pc = colDef(name = "Heritage"),
-               average_peak_service_freq = colDef(name = 'Service Frequency'),
-               average_peak_service_cap = colDef(name = 'Average load'),
-               walkability_score = colDef(name = 'Walkability')
-             ) )
+    theme = sandstone(), searchable = T)
 
 ```
 
 ## How does the transformation work?
 
-Each raw score is in different units, so the first task is to transform all the metrics into something that can be summed into one total score. 
+Each raw score is in different units, so the first task is to transform all the metrics into something that can be summed into one total score.
 
-This is achieved by scaling each column (of all the scores) so that each value is its percent of the largest number, e.g., the highest score gets a value of one. 
+This is achieved by scaling each column (of all the scores) so that each value is relative to the maximum and minimum values from other stations, also known as xmin-xmax scaling. The end result is a value between zero and 1 across all metrics, allowing an easy summation.
 
-The second problem is that some metrics are beneficial, e.g. NRZ/GRZ Percentage. However, some metrics are detrimental, e.g. heritage percentage. 
+$$
+x = \frac{x - \min{x} }{ \max{x} - \min{x} }
+$$
 
-So, we need to denote which columns are 'bad'. When we sum the scores up together, these columns are subtracted instead of added.
+The problem is that some metrics are beneficial, e.g. NRZ/GRZ Percentage. However, some metrics are detrimental, e.g. distance.
 
+To deal with this problem, weights are applied to each metric, with negative weights representing unwanted metrics.
+
+By default, weights are set as:
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+weights_df <- weights %>%
+  as.data.frame() 
+
+weights_df = weights_df %>%
+  mutate(var = rownames(weights_df))
+  
+colnames(weights_df) = c('weight' , 'variable')
+
+weights_df = weights_df %>%
+  pivot_wider(names_from = variable, values_from = weight)
+
+rownames(weights_df) = "Weight"
+
+weights_df %>%
+  reactable(rownames = T, theme = sandstone())
+
+```
+
+These transformed scores are then summed to produce a final score.
+
+:::{.callout-note}
+There are some restrictions placed on final rankings:
+
+- Stations within 3km of Flinders Street are excluded to prevent the city loop dominating
+
+- Stations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.
+
+This restriction is arbitrary and will be improved.
+:::
 <!-- ## Example Transformation -->
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
-example_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
-  filter(station %in% c('Brunswick', 'Merri', 'Carnegie')) %>%
-  mutate(across(-station, as.numeric)) %>%
-  mutate(across(where(is.numeric), .fns = function(x) {round(x,2)}))
+# example_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+#   filter(station %in% c('Brunswick', 'Merri', 'Carnegie')) %>%
+#   mutate(across(-station, as.numeric)) %>%
+#   mutate(across(where(is.numeric), .fns = function(x) {round(x,2)}))
 
 #example_rankings %>% reactable()
 
-example_transformed = transform_scores(example_rankings)
+#example_transformed = transform_scores_xminxmax(example_rankings)
 
 #example_transformed %>% reactable()
 
@@ -89,19 +122,10 @@ transformed_scores = readRDS('../r_objects/transformed_scores.Rdata') %>%
 
 transformed_scores %>%
   reactable( theme = sandstone(),
+             searchable = T,
              defaultSorted = 'score',
              defaultSortOrder = 'desc',
              columns = list(
-               station = colDef(name = "Station"),
-               grz_nrz_percentage = colDef(name = "GRZ/NRZ %"),
-               capacity_delta = colDef(name = "Delta"),
-               heritage_pc = colDef(name = "Heritage"),
-               average_peak_service_freq = colDef(name = 'Service Frequency'),
-               average_peak_service_cap = colDef(name = 'Average load'),
-               walkability_score = colDef(name = 'Walkability'),
-               score = colDef(name = "Total Score"),
-               n_metrics = colDef(show = F),
-               percent_score = colDef(show = F)
              ) )
 
 ```

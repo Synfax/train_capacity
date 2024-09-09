@@ -1,4 +1,5 @@
 
+
 return_information <- function(station) {
   
   return(c(
@@ -14,11 +15,6 @@ return_information <- function(station) {
   ))
   
 }
-
-radius = 1000
-peak_morning = 7:10
-peak_evening = 16:19
-
 
 
 find_zoning_suitability <- function(station) {

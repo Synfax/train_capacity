@@ -1,5 +1,5 @@
 ---
-title: "Extra Statistics & Analytics"
+title: "Extra Information & Analytics"
 author: "Paul S"
 date: "6/6/24"
 params: 
@@ -16,11 +16,8 @@ format:
     page-layout: full
 ---
 
-## Distribution of scores
-
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-
 library(tidyverse)
 library(sf)
 library(leaflet)
@@ -28,6 +25,24 @@ library(stringr)
 library(RColorBrewer)
 library(plotly)
 library(ggridges)
+```
+
+## Transformation of Scores
+
+To see how scores are transformed, see [here](rankings.html "Rankings Page").
+
+## Distributions of Scores
+
+
+Shown below are density plots of the scores, both raw and after transformation. The density plots seek to show how the underlying data is distributed, as well as how many extreme values there are.
+
+
+::: panel-tabset
+## Transformed scores
+
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
 
 translations = c(
   'grz_nrz_pc' = 'Zoning suitability',
@@ -54,24 +69,57 @@ transformed_scores = transformed_scores %>%
 ggplot(transformed_scores, aes(x = value, y  = name, fill = name)) +
   geom_density_ridges(alpha = 0.5, bins = 30, stat = 'binline') +
   theme_ridges()  + 
-  theme(legend.position = "none")
+  theme(legend.position = "none") + xlab("Transformed Score") +
+  ylab("")
 
 
-ggplot(transformed_scores, aes(x = value, y  = name, fill = name)) +
-  geom_density_ridges(alpha = 0.5, bins = 30) +
-  theme_ridges()  + 
-  theme(legend.position = "none")
+# ggplot(transformed_scores, aes(x = value, y  = name, fill = name)) +
+#   geom_density_ridges(alpha = 0.5, bins = 30) +
+#   theme_ridges()  + 
+#   theme(legend.position = "none")
 
 
 
 
 ```
 
+## Raw scores
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+translations = c(
+  'grz_nrz_pc' = 'Zoning suitability (%)',
+  'capacity_delta' = 'Potential new homes (#)',
+  'average_peak_service_freq' = 'Train frequency (#/h)',
+  'average_peak_service_cap' = 'Current train patronage (#)',
+  'walkability_score' = 'Local services (#)',
+  'distance' = 'Distance to CBD (m)',
+  'n_bus_tram' = 'Other transport infrastructure (#)'
+)
+
+raw_scores = readRDS('../r_objects/station_rankings.Rdata') %>%
+  filter(distance > 3000 & distance < 25000)
+
+raw_scores = raw_scores %>%
+  pivot_longer(cols = -c('station')) %>%
+  mutate(name = translations[name])
 
 
+ggplot(raw_scores) + geom_density(aes( x = value)) +
+  facet_wrap(~ name, scales = 'free') +
+  theme_bw() +
+  theme(axis.text.y = element_blank()) + xlab("Raw score") + ylab("Density")
+
+```
+
+:::{.callout-note}
+The same exclusion restrictions outlined [here](rankings.html "Rankings Page") are applied to the raw score plots.
+:::
+
+:::
 
 ## Top scores by LGA
-
 
 ## K-clustering
 

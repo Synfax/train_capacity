@@ -16,7 +16,9 @@ library(mapview)
 library(geosphere)
 
 source('r/helpers.r')
+source('r/constants.r')
 source('r/main_functions.r')
+
 
 
 # check directories

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.55">
+<meta name="generator" content="quarto-1.3.353">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -35,6 +35,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="rankings_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="rankings_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="rankings_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
 <script src="rankings_files/libs/core-js-2.5.3/shim.min.js"></script>
 <script src="rankings_files/libs/react-18.2.0/react.min.js"></script>
 <script src="rankings_files/libs/react-18.2.0/react-dom.min.js"></script>
@@ -44,6 +45,8 @@ ul.task-list li input[type="checkbox"] {
 <link href="rankings_files/libs/reactable-0.4.4/reactable.css" rel="stylesheet">
 <script src="rankings_files/libs/reactable-binding-0.4.4/reactable.js"></script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
@@ -72,7 +75,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<div class="quarto-title-meta column-page-right">
+<div class="quarto-title-meta">
 
     <div>
     <div class="quarto-title-meta-heading">Author</div>
@@ -92,35 +95,66 @@ ul.task-list li input[type="checkbox"] {
   </div>
   
 
-
 </header>
 
-
-<p>This page contains information about the ranking of stations for priority upzoning.</p>
-<p>The page contains first the raw scores for each train station. Then, a section explaining how scores are transformed, and then the transformed scores are show in full.</p>
+<p>This page aims to describe how scores are transformed from their raw calculations into a rank which allows comparison across stations.</p>
+<p>The first table contains the raw scores in a searchable table.</p>
+<p>The next section details the transformation process, and the final section contains a searchable table of the final scores.</p>
 <section id="raw-scores" class="level2">
 <h2 class="anchored" data-anchor-id="raw-scores">Raw Scores</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div class="reactable html-widget html-fill-item" id="htmlwidget-fb413b820c56abad19d3" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-fb413b820c56abad19d3">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"station":["Brunswick","Carnegie","Merri"],"grz_nrz_percentage":[0.43,0.69,0.65],"capacity_delta":[33996,59366,48134],"heritage_pc":[0.42,0.22,0.82],"average_peak_service_freq":[3.72,10.24,5.86],"average_peak_service_cap":[0.21,0.41,0.39],"walkability_score":[2.24,1.59,1.41]},"columns":[{"id":"station","name":"Station","type":"character"},{"id":"grz_nrz_percentage","name":"GRZ/NRZ %","type":"numeric"},{"id":"capacity_delta","name":"Delta","type":"numeric"},{"id":"heritage_pc","name":"Heritage","type":"numeric"},{"id":"average_peak_service_freq","name":"Service Frequency","type":"numeric"},{"id":"average_peak_service_cap","name":"Average load","type":"numeric"},{"id":"walkability_score","name":"Walkability","type":"numeric"}],"theme":{"color":"#3e3f3a","backgroundColor":"#ffffff","borderColor":"#f8f5f0","borderWidth":"1px","stripedColor":"#ededed","highlightColor":"#f8f5f0","cellPadding":6,"tableStyle":{"fontSize":15},"headerStyle":{"borderWidth":"2px","backgroundColor":"#f8f5f0","color":"#7c7a78","transitionDuration":"0.5s","&:hover[aria-sort]":{"color":"#000000"},"&[aria-sort='ascending'], &[aria-sort='descending']":{"color":"#000000"},"fontSize":16},"groupHeaderStyle":{"&:not(:empty)":{"color":"#3e3f3a","fontSize":16},"&:hover":{"fontWeight":"bold","transitionDuration":"1s","transitionTimingFunction":"ease-out","color":"#000000"}},"rowSelectedStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"inputStyle":{"backgroundColor":"#ffffff","borderColor":"#bcbfc1","color":"#3e3f3a"},"searchInputStyle":{"backgroundColor":"#ffffff","color":"#3e3f3a","borderColor":"#bcbfc1","&:focus":{"color":"#3e3f3a"}},"selectStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84","borderColor":"#ffffff","outlineColor":"#ffffff"},"pageButtonStyle":{"backgroundColor":"#f8f5f0","color":"#8e8c84","&:hover":{"backgroundColor":"#f3969a","color":"#8e8c84"}},"pageButtonHoverStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"pageButtonActiveStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"pageButtonCurrentStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"}},"dataKey":"5e9ff3d6b122212fb079d86dbb7d2e9c"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+
+<div class="reactable html-widget html-fill-item" id="htmlwidget-cd215a3e259a7b9b9120" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-cd215a3e259a7b9b9120">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"station":["Fawkner","Southland","Clifton Hill","Jordanville","Eaglemont","Werribee","Ringwood","Westall","Eltham","Hawksburn","Batman","Rosanna","Cheltenham","Seaholme","Parliament","Williams Landing","Mitcham","Heatherdale","South Yarra","Ascot Vale","Darling","Keilor Plains","Burwood","Coburg","Carnegie","Noble Park","Aspendale","Balaclava","Moreland","Heathmont","Patterson","Middle Gorge","Camberwell","Sandringham","Newmarket","Southern Cross","Riversdale","Croydon","Ormond","Syndal","North Williamstown","Flagstaff","Rushall","Footscray","Hampton","Dandenong","Watsonia","Sandown Park","Williamstown","Gardenvale","Gardiner","Aircraft","Glen Waverley","Macleod","Westgarth","Preston","Jewell","Ripponlea","West Footscray","Lalor","Murrumbeena","Carrum","Glenbervie","Roxburgh Park","Bentleigh","Coolaroo","St Albans","Essendon","Prahran","Croxton","Yarraville","Ruthven","Strathmore","Melbourne Central","Westona","Northcote","Mernda","Boronia","Royal Park","Mount Waverley","Middle Footscray","Flemington Bridge","Seddon","Canterbury","Blackburn","Lynbrook","Chatham","Jolimont","Holmesglen","Ashburton","Oakleigh","Nunawading","Glenferrie","Newport","Chelsea","Hurstbridge","North Brighton","Springvale","East Malvern","Glenhuntly","Moorabbin","Regent","Middle Brighton","Montmorency","Union","Bayswater","North Richmond","Watergardens","Ivanhoe","Auburn","Mooroolbark","Moonee Ponds","Laburnum","Richmond","Pascoe Vale","Collingwood","Huntingdale","Heyington","Broadmeadows","Merlynston","Sunbury","Caulfield","Hawkstowe","Alamein","Jacana","Hawthorn","Merri","Kensington","West Richmond","Alphington","Mordialloc","East Camberwell","Wattle Glen","Tooronga","Ferntree Gully","Burnley","Mckinnon","Oak Park","Anstey","Brighton Beach","Flinders Street","Keon Park","Diamond Creek","South Kensington","Windsor","Victoria Park","Williamstown Beach","East Richmond","Upper Ferntree Gully","Diggers Rest","Macaulay","Thomastown","Box Hill","Brunswick","Glen Iris","Toorak","Highett","Armadale","South Morang","Heidelberg","Epping","Darebin","Greensborough","Bonbeach","Edithvale","Kooyong","Dennis","Willison","Reservoir","Yarraman","Fairfield","Glenroy","Altona","Mentone","Craigieburn","Spotswood","Laverton","Malvern","Showgrounds","Flemington Racecourse","Ringwood East","Upfield","Parkdale","Ginifer","Hughesdale","Clayton","Hartwell","Sunshine","North Melbourne","Tottenham","Hoppers Crossing","Gowrie","Elsternwick","Thornbury","Bell","Albion"],"grz_nrz_pc":[0.67,0.52,0.03,0.64,0.7,0.55,0.43,0.35,0.54,0.27,0.45,0.85,0.59,0.56,0,0.2,0.59,0.5,0.18,0.42,0.62,0.65,0.68,0.61,0.5,0.71,0.75,0.29,0.5,0.84,0.61,0.48,0.16,0.77,0.2,0,0.26,0.55,0.54,0.71,0.2,0,0.05,0.09,0.7,0.23,0.74,0.69,0,0.67,0.46,0.53,0.64,0.72,0.22,0.54,0.17,0.3,0.42,0.59,0.61,0.74,0.5,0.24,0.6,0.75,0.47,0.46,0.27,0.53,0.36,0.85,0.57,0,0.69,0.31,0.21,0.73,0.08,0.74,0.33,0.07,0.22,0.38,0.58,0.67,0.35,0,0.61,0.68,0.49,0.51,0.12,0.33,0.7,0,0.64,0.51,0.53,0.63,0.61,0.74,0.65,0.81,0.54,0.4,0.08,0.45,0.71,0.17,0.7,0.44,0.6,0.03,0.7,0.09,0.49,0.32,0.46,0.49,0.44,0.38,0.53,0.68,0.72,0.12,0.11,0.16,0.08,0.47,0.64,0.32,0.19,0.44,0.67,0.29,0.58,0.8,0.37,0.71,0,0.33,0.59,0.11,0.23,0.07,0.06,0.12,0.43,0.33,0.06,0.48,0.33,0.24,0.5,0.36,0.7,0.35,0.34,0.61,0.23,0.51,0.58,0.68,0.83,0.37,0.57,0.43,0.71,0.62,0.67,0.71,0.58,0.61,0.41,0.25,0.64,0.26,0.36,0.29,0.78,0.48,0.77,0.65,0.71,0.48,0.68,0.41,0,0.37,0.56,0.59,0.39,0.5,0.33,0.21],"capacity_delta":[36179,34743,34422,51584,62156,38772,31227,26733,46698,42041,34997,63987,38568,22359,3500,11461,45535,34252,33250,54438,56735,43996,65006,49634,59366,54900,28120,49813,57666,64403,52556,30715,53799,34583,34845,0,61079,47619,64320,56527,47744,881,41181,11168,40942,19534,48081,38493,15513,60986,47954,19491,47119,52232,47858,46716,24585,53046,41248,46187,59528,29506,48350,13993,60004,49061,36113,51710,27575,50451,44197,61569,49386,72,45170,45747,14926,58935,12723,48651,36130,16796,32021,67160,47526,36698,65764,15433,43100,66908,52170,40679,47590,38406,38340,0,55269,36201,51408,56698,36564,57916,60231,64343,68284,33472,22074,35092,55286,50023,54583,49984,49345,20308,50664,17850,30393,35642,35313,34411,31636,42260,23660,54838,49265,37887,48134,22044,25664,45805,30015,64311,13651,45652,52581,29697,60217,58654,45060,31252,293,23853,43158,14283,33808,19918,38194,25589,26542,15483,18983,35694,37361,34006,51955,57621,54078,52552,19092,49955,14942,43852,45460,35612,34168,44417,51992,65733,55704,43065,52871,57044,33074,40413,21451,20088,33738,51237,29891,14068,55653,25388,46678,46056,59569,44433,67040,37319,3950,25458,24824,34254,43592,48567,35975,24026],"average_peak_service_freq":[3.29,5.7,12.5,5.67,4.31,5.21,9.42,8.01,3.88,5.94,3.33,6.14,8.57,2.89,42.13,5.09,9.35,9.14,25.2,6.71,5.57,6.34,3.71,3.33,10.37,9.73,7.82,6.22,3.33,4.21,6.02,5.94,13.75,6.09,6.71,50.38,3.46,4.04,6.13,5.56,2.94,42.01,6.25,17.31,6.21,9.64,5.52,9.62,2.95,6.21,5.33,5.09,5.67,6.14,4.43,6.25,3.45,6.21,5.49,6.26,10.36,7.72,6.7,6.43,6.02,6.19,6.46,6.71,6.21,6.24,5.87,6.14,6.7,42.13,2.88,6.36,5.94,4.06,3.45,5.55,5.49,3.33,5.75,4.38,12.09,4.29,4.38,12.36,5.67,3.71,10.37,9.13,11.29,11,7.71,2.57,6.22,9.85,5.66,6.01,5.9,6.11,6.22,3.89,6.81,4.15,9.92,6.46,6,6.65,4.32,6.7,9.6,45.68,6.7,9.92,10.24,5.32,6.7,3.17,3.91,18.98,6.06,3.7,6.69,6.78,6.25,6.71,9.92,4.43,8.24,4.62,2.57,5.33,4.05,12.06,6.13,6.82,3.45,6.22,98.92,6.04,2.58,5.87,6.21,12.61,2.95,6.92,4.05,3.91,3.33,6.14,12.32,3.45,5.33,5.94,5.82,6.07,6.06,6.13,6.2,4.31,5.3,7.94,7.82,5.45,4.43,3.71,6.13,7.39,4.43,6.69,2.89,8.13,6.43,5.87,7.89,8.1,1.12,0.04,4.32,3.29,7.61,6.46,10.36,10.48,3.71,6.47,27.39,5.49,5.09,3.17,6.33,6.35,6.35,6.59],"average_peak_service_cap":[187.36,168.64,266.55,212.04,240.77,244.96,260.95,362.79,240.77,168.64,187.36,240.77,168.64,244.96,276.14,244.96,260.95,260.95,272.99,349.44,212.04,399.22,118.55,187.36,362.79,362.79,168.64,197.75,187.36,301.58,168.64,292.32,232.47,197.75,349.44,276.14,118.55,220.32,168.64,212.04,154.74,276.14,292.32,266.3,197.75,362.79,240.77,362.79,154.74,197.75,212.04,244.96,212.04,240.77,240.77,292.32,187.36,197.75,399.22,292.32,362.79,168.64,349.44,349.44,168.64,349.44,399.22,349.44,197.75,292.32,199.85,292.32,349.44,276.14,244.96,292.32,292.32,301.58,187.36,212.04,399.22,187.36,199.85,260.95,260.95,362.09,260.95,266.55,212.04,118.55,362.79,260.95,232.47,199.85,168.64,240.77,197.75,362.79,212.04,168.64,168.64,292.32,197.75,240.77,260.95,301.58,266.55,399.22,240.77,232.47,220.32,349.44,260.95,251.36,349.44,266.55,362.79,212.04,349.44,187.36,399.22,298.07,292.32,118.55,349.44,232.47,292.32,349.44,266.55,240.77,168.64,260.95,240.77,212.04,301.58,226.63,168.64,349.44,187.36,197.75,251.36,292.32,240.77,199.85,197.75,266.55,154.74,226.63,301.58,399.22,187.36,292.32,260.95,187.36,212.04,168.64,168.64,168.64,292.32,240.77,292.32,240.77,240.77,168.64,168.64,212.04,240.77,118.55,292.32,362.79,240.77,349.44,244.96,168.64,349.44,199.85,244.96,298.07,156.14,156.14,220.32,187.36,168.64,399.22,362.79,362.79,118.55,399.22,248.64,399.22,244.96,187.36,197.75,292.32,292.32,399.22],"walkability_score":[0.32,2.98,2.67,0.31,1.19,3.54,4.09,0.47,2.57,7.37,1.77,0.9,2.67,1.31,11.06,0.43,1.85,1.11,7.29,3.32,0.76,0.18,0.71,2.86,3.6,2.12,0.5,4.3,3.31,0.77,1.86,0.27,5.84,1.81,2.94,12.73,1.99,2.53,1.41,1.14,1.17,13.56,3.26,5.5,2.12,3.61,1.31,1.45,3.14,1.66,0.66,0.99,6.07,0.38,2.29,3.12,3.72,3.96,1.79,1.17,2.67,0.83,1.68,1.1,2.29,0.23,2.74,2.2,8.82,3.7,2.49,1.42,0.37,14.31,0.59,3.16,0.37,3,1.19,1.42,4.66,2.68,4.11,1.32,1.42,0,1.62,4.17,1.09,1.56,3.57,1.5,5.96,1.7,1.45,1.41,2.2,4.37,0.58,1.16,1.21,0.98,2.28,0.66,1.13,1.86,5.54,0.98,2.12,5.33,0.51,4.86,0.97,4.25,0.54,5.43,1.29,0.21,1.26,0.44,2.38,2.73,0.24,1.56,0.44,1.32,2.98,3.16,5.73,0.58,2.42,2.88,0.22,0.93,1.32,2.36,2.45,0.39,4.43,0.32,12.1,0.44,1.11,1.77,7.42,2.75,2.78,4.79,0.76,0.17,2.98,1.38,5.17,4.65,0.74,1.78,1.01,2.44,1.34,1.28,1.39,2.03,4.95,0.75,0.55,0.42,1.79,0.88,2.05,0.44,1.53,1.51,1.57,1.26,0.81,0.6,1.07,2.67,1.09,0.46,0.9,0.56,0.82,0.29,4.05,2.63,0.72,3.52,5.45,0.74,1.06,0.44,2.69,3.11,3.83,2.25],"distance":[11555.87,17216.39,4134.22,14154.31,9770.42,28366.75,23030.09,20166.97,19720.46,4249.46,9444.79,12100.48,18214.01,12384.69,954.87,20144.42,19774.95,21605.21,3155.48,6226.56,10138.89,18190.52,10636.24,8461.75,11038.59,24792.56,26105.97,6153.07,7119.02,24422.66,13325.62,22302.46,8106.82,15061.55,4809.39,1380.24,9135.91,27689.79,11400.07,17304.69,8120.38,1228.01,4495.24,5937.78,13660.38,28624.37,15755.69,23073.4,7732.93,9315.22,8391.87,18915.28,18441.73,13644.3,5057.88,9338.96,4877.64,6873.15,7422.54,17534.11,11905.44,31651.09,8895,20238.49,12628.85,17879.17,16817.94,8254.26,4010.15,6583.81,6791.43,12844.32,9023.13,1011.63,14476.2,5934.17,26751.44,28285.31,4330.98,15504.27,6879.76,4152.23,6366.3,10059.01,16086.03,36356.83,10709.07,1507.79,12529.12,11157.92,14034.01,18274.27,6107.56,7828.63,29112.6,28084.9,10131.35,21940.97,11110.84,10334.77,14294.85,10488.04,11080.76,17779.84,11703.96,26596.48,2400.71,21410.2,8815.77,6939.37,30600.82,7215.38,15268.49,2127.58,10329.1,2800.75,15742.87,5212.16,15625.44,10850.7,33987.27,9344.92,24583.09,11353.74,14433.99,4922.38,5045.64,4218.87,2171.23,7181.91,23482.18,8929.31,25529.39,7417.25,29695.33,3703.66,12002.46,11869.22,6376.69,12197.95,11.95,14294.3,23332.78,4215.61,4740.04,3213.62,8161.64,2784.98,31045.84,30448.39,3815.72,15909.38,13571.65,5669.14,9220.48,5477.59,15905.54,6254.51,20782.76,10688.26,19284.68,7917.86,17785.58,30349.8,27434.93,6319.41,5661.58,9278.7,11822.76,26569.9,6177.82,13403.32,13250.66,20142.87,24189.61,7267.98,17828.32,7641.23,6000.65,6275.6,24905.44,17039.82,21693.03,15422.18,12925.17,17945.3,9955.46,12261.69,2616.53,9402.6,24486.59,13113.62,7971.76,7565.59,8603.57,13317.72],"n_bus_tram":[48,51,63,32,33,43,50,26,18,124,75,43,48,26,176,15,56,21,104,103,48,23,26,83,68,24,13,94,72,21,34,24,92,24,74,178,82,53,41,35,44,231,102,81,41,65,35,19,17,49,59,15,37,35,73,77,92,90,61,40,59,27,73,21,29,59,35,88,137,81,50,44,33,235,31,75,17,49,72,26,101,67,59,30,44,13,33,86,26,14,49,46,72,33,29,1,39,30,52,54,31,47,40,26,39,33,80,32,45,46,23,91,49,86,32,66,38,46,58,42,42,50,25,22,36,57,86,45,92,36,30,64,4,53,28,60,37,30,93,20,185,31,25,26,125,46,43,99,15,6,63,38,92,87,54,97,64,140,41,32,48,35,46,20,32,53,58,83,58,30,61,33,34,43,16,12,26,111,66,36,26,19,31,26,48,28,40,70,60,29,22,43,87,77,79,35]},"columns":[{"id":"station","name":"station","type":"character"},{"id":"grz_nrz_pc","name":"grz_nrz_pc","type":"numeric"},{"id":"capacity_delta","name":"capacity_delta","type":"numeric"},{"id":"average_peak_service_freq","name":"average_peak_service_freq","type":"numeric"},{"id":"average_peak_service_cap","name":"average_peak_service_cap","type":"numeric"},{"id":"walkability_score","name":"walkability_score","type":"numeric"},{"id":"distance","name":"distance","type":"numeric"},{"id":"n_bus_tram","name":"n_bus_tram","type":"numeric"}],"searchable":true,"theme":{"color":"#3e3f3a","backgroundColor":"#ffffff","borderColor":"#f8f5f0","borderWidth":"1px","stripedColor":"#ededed","highlightColor":"#f8f5f0","cellPadding":6,"tableStyle":{"fontSize":15},"headerStyle":{"borderWidth":"2px","backgroundColor":"#f8f5f0","color":"#7c7a78","transitionDuration":"0.5s","&:hover[aria-sort]":{"color":"#000000"},"&[aria-sort='ascending'], &[aria-sort='descending']":{"color":"#000000"},"fontSize":16},"groupHeaderStyle":{"&:not(:empty)":{"color":"#3e3f3a","fontSize":16},"&:hover":{"fontWeight":"bold","transitionDuration":"1s","transitionTimingFunction":"ease-out","color":"#000000"}},"rowSelectedStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"inputStyle":{"backgroundColor":"#ffffff","borderColor":"#bcbfc1","color":"#3e3f3a"},"searchInputStyle":{"backgroundColor":"#ffffff","color":"#3e3f3a","borderColor":"#bcbfc1","&:focus":{"color":"#3e3f3a"}},"selectStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84","borderColor":"#ffffff","outlineColor":"#ffffff"},"pageButtonStyle":{"backgroundColor":"#f8f5f0","color":"#8e8c84","&:hover":{"backgroundColor":"#f3969a","color":"#8e8c84"}},"pageButtonHoverStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"pageButtonActiveStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"pageButtonCurrentStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"}},"dataKey":"74c88966585b7640dcfda02157d00325"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
 <section id="how-does-the-transformation-work" class="level2">
 <h2 class="anchored" data-anchor-id="how-does-the-transformation-work">How does the transformation work?</h2>
 <p>Each raw score is in different units, so the first task is to transform all the metrics into something that can be summed into one total score.</p>
-<p>This is achieved by scaling each column (of all the scores) so that each value is its percent of the largest number, e.g., the highest score gets a value of one.</p>
-<p>The second problem is that some metrics are beneficial, e.g.&nbsp;NRZ/GRZ Percentage. However, some metrics are detrimental, e.g.&nbsp;heritage percentage.</p>
-<p>So, we need to denote which columns are ‘bad’. When we sum the scores up together, these columns are subtracted instead of added.</p>
+<p>This is achieved by scaling each column (of all the scores) so that each value is relative to the maximum and minimum values from other stations, also known as xmin-xmax scaling. The end result is a value between zero and 1 across all metrics, allowing an easy summation.</p>
+<p><span class="math display">\[
+x = \frac{x - \min{x} }{ \max{x} - \min{x} }
+\]</span></p>
+<p>The problem is that some metrics are beneficial, e.g.&nbsp;NRZ/GRZ Percentage. However, some metrics are detrimental, e.g.&nbsp;distance.</p>
+<p>To deal with this problem, weights are applied to each metric, with negative weights representing unwanted metrics.</p>
+<p>By default, weights are set as:</p>
+<div class="cell">
+<div class="cell-output-display">
+
+<div class="reactable html-widget html-fill-item" id="htmlwidget-c42012ed2bc1b04379b9" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-c42012ed2bc1b04379b9">{"x":{"tag":{"name":"Reactable","attribs":{"data":{".rownames":["Weight"],"grz_nrz_pc":[1],"capacity_delta":[1],"average_peak_service_freq":[1],"average_peak_service_cap":[-1],"walkability_score":[1],"distance":[-1],"n_bus_tram":[1]},"columns":[{"id":".rownames","name":"","type":"character","sortable":false,"filterable":false,"rowHeader":true},{"id":"grz_nrz_pc","name":"grz_nrz_pc","type":"numeric"},{"id":"capacity_delta","name":"capacity_delta","type":"numeric"},{"id":"average_peak_service_freq","name":"average_peak_service_freq","type":"numeric"},{"id":"average_peak_service_cap","name":"average_peak_service_cap","type":"numeric"},{"id":"walkability_score","name":"walkability_score","type":"numeric"},{"id":"distance","name":"distance","type":"numeric"},{"id":"n_bus_tram","name":"n_bus_tram","type":"numeric"}],"theme":{"color":"#3e3f3a","backgroundColor":"#ffffff","borderColor":"#f8f5f0","borderWidth":"1px","stripedColor":"#ededed","highlightColor":"#f8f5f0","cellPadding":6,"tableStyle":{"fontSize":15},"headerStyle":{"borderWidth":"2px","backgroundColor":"#f8f5f0","color":"#7c7a78","transitionDuration":"0.5s","&:hover[aria-sort]":{"color":"#000000"},"&[aria-sort='ascending'], &[aria-sort='descending']":{"color":"#000000"},"fontSize":16},"groupHeaderStyle":{"&:not(:empty)":{"color":"#3e3f3a","fontSize":16},"&:hover":{"fontWeight":"bold","transitionDuration":"1s","transitionTimingFunction":"ease-out","color":"#000000"}},"rowSelectedStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"inputStyle":{"backgroundColor":"#ffffff","borderColor":"#bcbfc1","color":"#3e3f3a"},"searchInputStyle":{"backgroundColor":"#ffffff","color":"#3e3f3a","borderColor":"#bcbfc1","&:focus":{"color":"#3e3f3a"}},"selectStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84","borderColor":"#ffffff","outlineColor":"#ffffff"},"pageButtonStyle":{"backgroundColor":"#f8f5f0","color":"#8e8c84","&:hover":{"backgroundColor":"#f3969a","color":"#8e8c84"}},"pageButtonHoverStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"pageButtonActiveStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"pageButtonCurrentStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"}},"dataKey":"1c38bd5af43db3f5eea04afc2510ba2a"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>These transformed scores are then summed to produce a final score.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>There are some restrictions placed on final rankings:</p>
+<ul>
+<li><p>Stations within 3km of Flinders Street are excluded to prevent the city loop dominating</p></li>
+<li><p>Stations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.</p></li>
+</ul>
+<p>This restriction is arbitrary and will be improved.</p>
+</div>
+</div>
 <!-- ## Example Transformation -->
 </section>
 <section id="transformed-scores" class="level2">
 <h2 class="anchored" data-anchor-id="transformed-scores">Transformed Scores</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div class="reactable html-widget html-fill-item" id="htmlwidget-6603261596fdb1806938" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-6603261596fdb1806938">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"station":["Carnegie","Brunswick","Merri"],"grz_nrz_percentage":[1,0.63,0.95],"capacity_delta":[1,0.57,0.81],"heritage_pc":[-0.27,-0.51,-1],"average_peak_service_freq":[1,0.36,0.57],"average_peak_service_cap":[-1,-0.5,-0.95],"walkability_score":[0.71,1,0.63],"score":[2.44,1.55,1.01],"n_metrics":[6,6,6],"percent_score":[0.41,0.26,0.17]},"columns":[{"id":"station","name":"Station","type":"character"},{"id":"grz_nrz_percentage","name":"GRZ/NRZ %","type":"numeric"},{"id":"capacity_delta","name":"Delta","type":"numeric"},{"id":"heritage_pc","name":"Heritage","type":"numeric"},{"id":"average_peak_service_freq","name":"Service Frequency","type":"numeric"},{"id":"average_peak_service_cap","name":"Average load","type":"numeric"},{"id":"walkability_score","name":"Walkability","type":"numeric"},{"id":"score","name":"Total Score","type":"numeric"},{"id":"n_metrics","name":"n_metrics","type":"numeric","show":false},{"id":"percent_score","name":"percent_score","type":"numeric","show":false}],"defaultSortDesc":true,"defaultSorted":[{"id":"score","desc":true}],"theme":{"color":"#3e3f3a","backgroundColor":"#ffffff","borderColor":"#f8f5f0","borderWidth":"1px","stripedColor":"#ededed","highlightColor":"#f8f5f0","cellPadding":6,"tableStyle":{"fontSize":15},"headerStyle":{"borderWidth":"2px","backgroundColor":"#f8f5f0","color":"#7c7a78","transitionDuration":"0.5s","&:hover[aria-sort]":{"color":"#000000"},"&[aria-sort='ascending'], &[aria-sort='descending']":{"color":"#000000"},"fontSize":16},"groupHeaderStyle":{"&:not(:empty)":{"color":"#3e3f3a","fontSize":16},"&:hover":{"fontWeight":"bold","transitionDuration":"1s","transitionTimingFunction":"ease-out","color":"#000000"}},"rowSelectedStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"inputStyle":{"backgroundColor":"#ffffff","borderColor":"#bcbfc1","color":"#3e3f3a"},"searchInputStyle":{"backgroundColor":"#ffffff","color":"#3e3f3a","borderColor":"#bcbfc1","&:focus":{"color":"#3e3f3a"}},"selectStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84","borderColor":"#ffffff","outlineColor":"#ffffff"},"pageButtonStyle":{"backgroundColor":"#f8f5f0","color":"#8e8c84","&:hover":{"backgroundColor":"#f3969a","color":"#8e8c84"}},"pageButtonHoverStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"pageButtonActiveStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"pageButtonCurrentStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"}},"dataKey":"9e9767375fac856c32168501f8685d12"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+
+<div class="reactable html-widget html-fill-item" id="htmlwidget-794d1bb0dec13f2450aa" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-794d1bb0dec13f2450aa">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"station":["South Yarra","Hawksburn","Prahran","Armadale","Windsor","Camberwell","Toorak","Willison","Balaclava","Moreland","Ripponlea","Coburg","Anstey","Hartwell","Glenferrie","Riversdale","Gardenvale","Ashburton","Croxton","Burwood","Glenhuntly","Middle Brighton","Fairfield","Mckinnon","Elsternwick","Rosanna","Ivanhoe","Ascot Vale","Ormond","Moonee Ponds","North Brighton","Alamein","Brunswick","Bentleigh","Dennis","Box Hill","Malvern","Highett","Thornbury","Hughesdale","Ruthven","Preston","Glen Waverley","Darling","Carnegie","East Camberwell","Eaglemont","Auburn","Reservoir","Caulfield","Patterson","Murrumbeena","Burnley","Regent","Yarraville","Union","Northcote","Glen Iris","Footscray","Essendon","Jewell","Hampton","Westgarth","Seddon","Gardiner","Merri","Cheltenham","Batman","Tooronga","Rushall","East Malvern","Greensborough","Syndal","Bell","Heidelberg","Newport","Kooyong","Mount Waverley","Macleod","Blackburn","Montmorency","Middle Footscray","Darebin","Laburnum","Glenbervie","Southland","Showgrounds","Canterbury","Clifton Hill","Watsonia","Jordanville","Fawkner","Parkdale","Oakleigh","Chatham","Sandringham","North Williamstown","Oak Park","Moorabbin","Mentone","Holmesglen","Alphington","Glenroy","Mitcham","Hawthorn","Heyington","Williamstown Beach","Pascoe Vale","Newmarket","Brighton Beach","Gowrie","Macaulay","Merlynston","Victoria Park","Flemington Bridge","Westona","Mordialloc","Strathmore","Ringwood East","Nunawading","Jacana","Coolaroo","West Footscray","Sunshine","Lalor","Heathmont","Altona","Ringwood","Laverton","Eltham","Royal Park","Noble Park","Clayton","Thomastown","Kensington","South Kensington","Flemington Racecourse","Seaholme","Broadmeadows","Springvale","Spotswood","Williamstown","Huntingdale","Diamond Creek","Ginifer","Heatherdale","Upfield","St Albans","Sandown Park","Keilor Plains","Aircraft","Keon Park","Hoppers Crossing","Tottenham","Middle Gorge","South Morang","Albion","Epping","Watergardens","Hawkstowe","Westall","Williams Landing","Craigieburn","Roxburgh Park"],"grz_nrz_pc":[0.22,0.32,0.32,0.41,0.27,0.19,0.43,0.51,0.34,0.59,0.35,0.72,0.44,0.8,0.15,0.31,0.78,0.8,0.62,0.8,0.74,0.76,0.79,0.68,0.46,1,0.84,0.5,0.64,0.52,0.75,0.8,0.28,0.7,0.67,0.39,0.31,0.82,0.59,0.84,1,0.64,0.76,0.73,0.59,0.37,0.83,0.2,0.84,0.45,0.72,0.72,0.34,0.87,0.42,0.64,0.37,0.59,0.11,0.55,0.21,0.82,0.26,0.26,0.54,0.13,0.7,0.52,0.52,0.06,0.62,0.68,0.84,0.39,0.72,0.39,0.44,0.87,0.85,0.69,0.95,0.39,0.6,0.71,0.59,0.62,0.42,0.45,0.03,0.87,0.75,0.78,0.9,0.58,0.41,0.9,0.23,0.94,0.72,0.72,0.72,0.56,0.84,0.69,0.14,0.37,0.07,0.83,0.24,0.83,0.7,0.07,0.58,0.08,0.09,0.81,0.76,0.67,0.92,0.6,0.85,0.88,0.5,0.48,0.7,0.99,0.68,0.51,0.75,0.64,0.09,0.84,0.57,0.57,0.18,0.13,0.35,0.65,0.54,0.6,0.29,0,0.58,0.69,0.76,0.59,0.56,0.55,0.81,0.76,0.63,0.38,0.66,0.43,0.57,0.41,0.25,0.27,0.53,0.63,0.41,0.23,0.48,0.28],"capacity_delta":[0.39,0.54,0.29,0.72,0.4,0.75,0.81,0.96,0.68,0.81,0.73,0.67,0.59,0.98,0.64,0.87,0.87,0.98,0.69,0.94,0.8,0.86,0.73,0.86,0.57,0.92,0.77,0.76,0.93,0.68,0.77,0.76,0.4,0.86,0.71,0.46,0.7,0.75,0.65,0.85,0.88,0.62,0.63,0.8,0.84,0.93,0.89,0.68,0.78,0.54,0.72,0.85,0.32,0.82,0.58,1,0.61,0.71,0,0.71,0.23,0.52,0.64,0.37,0.64,0.65,0.48,0.42,0.6,0.53,0.7,0.6,0.79,0.43,0.68,0.48,0.58,0.66,0.72,0.64,0.93,0.44,0.57,0.67,0.65,0.41,0.33,0.98,0.41,0.65,0.71,0.44,0.62,0.72,0.96,0.41,0.64,0.83,0.44,0.51,0.56,0.61,0.8,0.6,0.47,0.43,0.47,0.69,0.41,0.35,0.4,0.14,0.41,0.15,0.1,0.6,0.33,0.67,0.78,0.52,0.67,0.66,0.53,0.46,0.61,0.93,0.38,0.35,0.4,0.62,0.03,0.77,0.58,0.43,0.19,0.05,0.05,0.2,0.42,0.44,0.16,0.08,0.34,0.56,0.61,0.4,0.25,0.44,0.48,0.57,0.15,0.22,0.24,0.25,0.34,0.14,0.23,0.07,0.42,0.22,0.27,0.01,0.18,0.05],"average_peak_service_freq":[1,0.23,0.25,0.24,0.25,0.55,0.23,0.15,0.25,0.13,0.25,0.13,0.14,0.15,0.45,0.14,0.25,0.15,0.25,0.15,0.24,0.25,0.17,0.24,0.25,0.24,0.24,0.27,0.24,0.26,0.25,0.15,0.14,0.24,0.17,0.49,0.32,0.23,0.25,0.41,0.24,0.25,0.22,0.22,0.41,0.18,0.17,0.26,0.24,0.75,0.24,0.41,0.48,0.24,0.23,0.27,0.25,0.21,0.69,0.27,0.14,0.25,0.17,0.23,0.21,0.25,0.34,0.13,0.21,0.25,0.22,0.21,0.22,0.25,0.24,0.44,0.21,0.22,0.24,0.48,0.15,0.22,0.17,0.38,0.26,0.22,0.04,0.17,0.5,0.22,0.22,0.13,0.3,0.41,0.17,0.24,0.12,0.27,0.23,0.32,0.22,0.17,0.26,0.37,0.27,0.21,0.12,0.26,0.27,0.25,0.12,0.13,0.12,0.5,0.13,0.11,0.33,0.26,0.17,0.36,0.26,0.24,0.22,0.26,0.25,0.17,0.11,0.37,0.31,0.15,0.14,0.39,0.42,0.24,0.27,0.23,0,0.11,0.26,0.39,0.23,0.12,0.41,0.1,0.26,0.36,0.13,0.26,0.38,0.25,0.2,0.24,0.2,0.22,0.23,0.24,0.26,0.25,0.26,0.24,0.32,0.2,0.25,0.25],"average_peak_service_cap":[-0.55,-0.18,-0.28,-0.18,-0.28,-0.41,-0.18,-0,-0.28,-0.25,-0.28,-0.25,-0.25,-0,-0.41,-0,-0.28,-0,-0.62,-0,-0.18,-0.28,-0.44,-0.18,-0.28,-0.44,-0.44,-0.82,-0.18,-0.82,-0.28,-0,-0.25,-0.18,-0.44,-0.51,-0.64,-0.18,-0.62,-0.87,-0.62,-0.62,-0.33,-0.33,-0.87,-0.51,-0.44,-0.41,-0.62,-0.64,-0.18,-0.87,-0.39,-0.62,-0.29,-0.51,-0.62,-0.33,-0.53,-0.82,-0.25,-0.28,-0.44,-0.29,-0.33,-0.62,-0.18,-0.25,-0.33,-0.62,-0.33,-0.44,-0.33,-0.62,-0.44,-0.29,-0.33,-0.33,-0.44,-0.51,-0.44,-1,-0.44,-0.51,-0.82,-0.18,-0.13,-0.51,-0.53,-0.44,-0.33,-0.25,-0.18,-0.87,-0.51,-0.28,-0.13,-0.82,-0.18,-0.18,-0.33,-0.44,-0.82,-0.51,-0.41,-0.33,-0.13,-0.82,-0.82,-0.28,-0.25,-0.25,-0.25,-0.53,-0.25,-0.45,-0.18,-0.82,-0.36,-0.51,-0.82,-0.82,-1,-1,-0.62,-0.65,-0.45,-0.51,-0.45,-0.44,-0.25,-0.87,-0.87,-0.62,-0.82,-0.29,-0.13,-0.45,-0.82,-0.87,-0.29,-0.13,-0.87,-0.44,-1,-0.51,-0.25,-1,-0.87,-1,-0.45,-0.62,-0.45,-1,-0.62,-0.62,-1,-0.62,-1,-0.62,-0.87,-0.45,-0.82,-0.82],"walkability_score":[0.82,0.83,1,0.26,0.84,0.65,0.18,0.08,0.48,0.36,0.44,0.31,0.49,0.06,0.67,0.21,0.17,0.16,0.41,0.06,0.11,0.24,0.16,0.26,0.29,0.08,0.22,0.36,0.14,0.54,0.23,0.16,0.52,0.24,0.19,0.58,0.29,0.1,0.34,0.45,0.14,0.34,0.68,0.07,0.4,0.31,0.12,0.6,0.22,0.29,0.19,0.29,0.25,0.09,0.27,0.11,0.34,0.06,0.62,0.23,0.41,0.22,0.24,0.45,0.05,0.32,0.29,0.18,0.09,0.36,0.05,0.55,0.11,0.42,0.13,0.18,0.03,0.14,0.02,0.14,0.06,0.52,0.21,0.09,0.17,0.32,0.1,0.13,0.29,0.13,0.01,0.02,0.07,0.39,0.17,0.19,0.11,0.02,0.12,0.13,0.11,0.05,0.15,0.19,0.13,0,0.3,0.04,0.32,0.02,0.03,0.32,0.03,0.3,0.29,0.05,0.26,0.02,0.08,0.15,0.03,0.01,0.19,0.39,0.11,0.07,0.16,0.45,0.1,0.28,0.12,0.22,0.28,0.14,0.35,0.18,0.03,0.13,0.13,0.48,0.05,0.34,0.13,0.11,0.01,0.11,0.04,0.3,0.15,0,0.09,0.03,0.1,0.06,0.01,0.13,0.24,0.14,0.09,0.01,0.03,0.03,0.07,0.11],"distance":[-0,-0.05,-0.04,-0.14,-0.07,-0.23,-0.11,-0.28,-0.14,-0.18,-0.17,-0.24,-0.15,-0.31,-0.14,-0.27,-0.28,-0.37,-0.16,-0.34,-0.33,-0.36,-0.14,-0.41,-0.22,-0.41,-0.26,-0.14,-0.38,-0.19,-0.32,-0.38,-0.12,-0.44,-0.12,-0.48,-0.21,-0.59,-0.2,-0.45,-0.45,-0.28,-0.7,-0.32,-0.36,-0.27,-0.3,-0.17,-0.4,-0.28,-0.47,-0.4,-0.03,-0.34,-0.17,-0.39,-0.13,-0.28,-0.13,-0.23,-0.08,-0.48,-0.09,-0.15,-0.24,-0.09,-0.69,-0.29,-0.2,-0.06,-0.37,-0.67,-0.65,-0.25,-0.35,-0.21,-0.15,-0.57,-0.48,-0.59,-0.67,-0.17,-0.22,-0.56,-0.26,-0.65,-0.13,-0.32,-0.04,-0.58,-0.51,-0.39,-0.85,-0.5,-0.35,-0.55,-0.23,-0.4,-0.51,-0.78,-0.43,-0.19,-0.47,-0.76,-0.08,-0.09,-0.23,-0.33,-0.08,-0.42,-0.46,-0.03,-0.35,-0,-0.05,-0.52,-0.93,-0.27,-1,-0.7,-0.52,-0.68,-0.2,-0.42,-0.66,-0.98,-0.46,-0.91,-0.67,-0.76,-0.05,-0.99,-0.68,-0.59,-0.05,-0.05,-0.14,-0.42,-0.57,-0.86,-0.19,-0.21,-0.58,-0.93,-0.56,-0.85,-0.64,-0.63,-0.92,-0.69,-0.72,-0.51,-0.98,-0.29,-0.88,-0.81,-0.47,-0.74,-0.84,-0.99,-0.78,-0.78,-0.97,-0.79],"n_bus_tram":[0.72,0.88,0.98,1,0.88,0.62,0.66,0.55,0.64,0.47,0.61,0.55,0.63,0.22,0.47,0.55,0.29,0.02,0.54,0.11,0.33,0.22,0.38,0.2,0.59,0.24,0.26,0.71,0.23,0.62,0.21,0.08,0.59,0.13,0.36,0.62,0.77,0.41,0.51,0.28,0.25,0.51,0.2,0.28,0.44,0.41,0.16,0.27,0.36,0.3,0.17,0.37,0.38,0.27,0.3,0.21,0.49,0.33,0.54,0.59,0.62,0.23,0.48,0.37,0.37,0.58,0.28,0.49,0.32,0.7,0.31,0.27,0.18,0.52,0.16,0.16,0.32,0.11,0.18,0.25,0.11,0.7,0.18,0.29,0.48,0.3,0.42,0.14,0.4,0.18,0.16,0.28,0.15,0.29,0.16,0.09,0.25,0.14,0.15,0.24,0.11,0.19,0.16,0.34,0.35,0.27,0.24,0.16,0.48,0.06,0.24,0.4,0.23,0.27,0.43,0.15,0.14,0.16,0.11,0.27,0.19,0.37,0.38,0.45,0.22,0.07,0.17,0.3,0.11,0.05,0.47,0.09,0.12,0.2,0.26,0.11,0.19,0.11,0.36,0.14,0,0.04,0.2,0.1,0.11,0.07,0.05,0.18,0.05,0.09,0.02,0.15,0.08,0.13,0.09,0.23,0.18,0.28,0.16,0.1,0.11,0.02,0.03,0.07],"score":[2.59,2.57,2.5,2.32,2.27,2.13,2.04,1.96,1.96,1.94,1.93,1.9,1.9,1.89,1.83,1.8,1.8,1.73,1.72,1.71,1.71,1.68,1.66,1.66,1.65,1.64,1.64,1.63,1.62,1.62,1.61,1.57,1.56,1.56,1.56,1.55,1.55,1.54,1.52,1.51,1.45,1.45,1.45,1.45,1.44,1.43,1.43,1.42,1.42,1.41,1.4,1.36,1.36,1.34,1.34,1.33,1.31,1.29,1.29,1.29,1.29,1.28,1.27,1.24,1.24,1.22,1.22,1.21,1.21,1.21,1.21,1.2,1.16,1.15,1.15,1.13,1.1,1.1,1.1,1.09,1.09,1.09,1.08,1.07,1.06,1.06,1.05,1.05,1.05,1.03,1.02,1.02,1.02,1.02,1.01,1.01,1,0.98,0.97,0.96,0.95,0.95,0.93,0.93,0.87,0.85,0.84,0.83,0.82,0.81,0.79,0.78,0.78,0.76,0.74,0.74,0.7,0.7,0.7,0.69,0.66,0.66,0.62,0.62,0.61,0.6,0.6,0.56,0.55,0.54,0.54,0.45,0.42,0.38,0.37,0.37,0.34,0.33,0.32,0.32,0.25,0.23,0.2,0.2,0.18,0.18,0.16,0.09,0.09,-0.02,-0.08,-0.11,-0.15,-0.19,-0.25,-0.28,-0.31,-0.36,-0.38,-0.41,-0.51,-0.74,-0.77,-0.84]},"columns":[{"id":"station","name":"station","type":"character"},{"id":"grz_nrz_pc","name":"grz_nrz_pc","type":"numeric"},{"id":"capacity_delta","name":"capacity_delta","type":"numeric"},{"id":"average_peak_service_freq","name":"average_peak_service_freq","type":"numeric"},{"id":"average_peak_service_cap","name":"average_peak_service_cap","type":"numeric"},{"id":"walkability_score","name":"walkability_score","type":"numeric"},{"id":"distance","name":"distance","type":"numeric"},{"id":"n_bus_tram","name":"n_bus_tram","type":"numeric"},{"id":"score","name":"score","type":"numeric"}],"searchable":true,"defaultSortDesc":true,"defaultSorted":[{"id":"score","desc":true}],"theme":{"color":"#3e3f3a","backgroundColor":"#ffffff","borderColor":"#f8f5f0","borderWidth":"1px","stripedColor":"#ededed","highlightColor":"#f8f5f0","cellPadding":6,"tableStyle":{"fontSize":15},"headerStyle":{"borderWidth":"2px","backgroundColor":"#f8f5f0","color":"#7c7a78","transitionDuration":"0.5s","&:hover[aria-sort]":{"color":"#000000"},"&[aria-sort='ascending'], &[aria-sort='descending']":{"color":"#000000"},"fontSize":16},"groupHeaderStyle":{"&:not(:empty)":{"color":"#3e3f3a","fontSize":16},"&:hover":{"fontWeight":"bold","transitionDuration":"1s","transitionTimingFunction":"ease-out","color":"#000000"}},"rowSelectedStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"inputStyle":{"backgroundColor":"#ffffff","borderColor":"#bcbfc1","color":"#3e3f3a"},"searchInputStyle":{"backgroundColor":"#ffffff","color":"#3e3f3a","borderColor":"#bcbfc1","&:focus":{"color":"#3e3f3a"}},"selectStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84","borderColor":"#ffffff","outlineColor":"#ffffff"},"pageButtonStyle":{"backgroundColor":"#f8f5f0","color":"#8e8c84","&:hover":{"backgroundColor":"#f3969a","color":"#8e8c84"}},"pageButtonHoverStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"pageButtonActiveStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"},"pageButtonCurrentStyle":{"backgroundColor":"#dfd7ca","color":"#8e8c84"}},"dataKey":"538f2e4ba96a5e5367f2ebb970cf85a0"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
@@ -162,7 +196,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const onCopySuccess = function(e) {
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -194,50 +239,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
   });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
-    });
-    clipboardModal.on('success', onCopySuccess);
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-    }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
-      }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+  function tippyHover(el, contentFn) {
     const config = {
       allowHTML: true,
+      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -247,17 +253,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start',
+      placement: 'bottom-start'
     };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -269,130 +266,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
-        }
-      }
-    }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
-          }
-        }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
-        }
-        return container.innerHTML
-      } else {
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(note);
-        }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      // TODO in 1.5, we should make sure this works without a callout special case
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
-      }
-    }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
-          }
-        } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
-          .then(res => res.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
-            if (note !== null) {
-              const html = processXRef(id, note);
-              instance.setContent(html);
-            } 
-          }).finally(() => {
-            instance.enable();
-            instance.show();
-          });
-        }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
+      return note.innerHTML;
     });
   }
       let selectedAnnoteEl;
@@ -436,7 +310,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
-            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -462,32 +335,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -548,7 +395,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
-
 
 
 
