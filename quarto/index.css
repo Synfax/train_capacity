@@ -7,14 +7,14 @@
     color: rgba(255, 255, 255, 1) !important;
 }
 
-.narrative a, h1, h2, h3 , h4 {
+.narrative a, .narrative h2 {
   color: rgba(255, 255, 255, 1) !important;
   font-family: 'Helvetica' !important;
   font-weight: 800 !important;
   text-decoration: ;
 }
 
-.Reactable {
+.pageinforeactable {
   font-weight: 800 !important;
   opacity: 1 !important;
   color: rgba(255, 255, 255, 1);

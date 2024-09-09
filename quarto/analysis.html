@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Paul S">
+<meta name="dcterms.date" content="2024-06-06">
+
+<title>Extra Statistics &amp; Analytics</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="analysis_files/libs/quarto-html/quarto.js"></script>
+<script src="analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="analysis_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="analysis_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="analysis_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="analysis_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="analysis_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="analysis_files/libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+<script src="analysis_files/libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="analysis_files/libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
+<script src="analysis_files/libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="analysis_files/libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="analysis_files/libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
+<script src="analysis_files/libs/leaflet-binding-2.2.2/leaflet.js"></script>
+<script src="analysis_files/libs/leaflet-providers-2.0.0/leaflet-providers_2.0.0.js"></script>
+<script src="analysis_files/libs/leaflet-providers-plugin-2.2.2/leaflet-providers-plugin.js"></script>
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-full toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#distribution-of-scores" id="toc-distribution-of-scores" class="nav-link active" data-scroll-target="#distribution-of-scores">Distribution of scores</a></li>
+  <li><a href="#top-scores-by-lga" id="toc-top-scores-by-lga" class="nav-link" data-scroll-target="#top-scores-by-lga">Top scores by LGA</a></li>
+  <li><a href="#k-clustering" id="toc-k-clustering" class="nav-link" data-scroll-target="#k-clustering">K-clustering</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content column-page-right" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Extra Statistics &amp; Analytics</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Paul S </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 6, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="distribution-of-scores" class="level2">
+<h2 class="anchored" data-anchor-id="distribution-of-scores">Distribution of scores</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">Zoning suitability</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">Potential number of new homes</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false" href="">Train service frequency in peak</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false" href="">Train service passenger numbers in peak</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-5" role="tab" aria-controls="tabset-1-5" aria-selected="false" href="">Number of local services within a 500m walk</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-6" role="tab" aria-controls="tabset-1-6" aria-selected="false" href="">Distance to CBD</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-7" role="tab" aria-controls="tabset-1-7" aria-selected="false" href="">Existing transport infrastructure.</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">makeDensityPlot</span>(<span class="st">'Zoning suitability'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="analysis_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+
+</div>
+<div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-4-tab">
+
+</div>
+<div id="tabset-1-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-5-tab">
+
+</div>
+<div id="tabset-1-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-6-tab">
+
+</div>
+<div id="tabset-1-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-7-tab">
+
+</div>
+</div>
+</div>
+</section>
+<section id="top-scores-by-lga" class="level2">
+<h2 class="anchored" data-anchor-id="top-scores-by-lga">Top scores by LGA</h2>
+</section>
+<section id="k-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="k-clustering">K-clustering</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-5457d5038a2ecf8a76b0" style="width:100%;height:487px;"></div>
+<script type="application/json" data-for="htmlwidget-5457d5038a2ecf8a76b0">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["CartoDB.Positron",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addCircleMarkers","args":[[-37.86660595,-37.86832039,-37.77765281,-37.77839363,-37.8671476,-37.76124203,-37.85645238,-37.77530609,-37.86196753,-38.02722019,-37.82239831,-37.86948773,-37.73352285,-38.19404306,-37.84173004,-38.05083135,-37.9091021,-37.74556212,-37.91742457,-38.04040829,-38.33739032,-37.82007075,-38.06294478,-37.8604518,-37.81922165,-37.92648432,-37.68304926,-37.76772055,-37.82756022,-37.85156328,-37.82656714,-37.82448518,-38.07129047,-37.88624148,-38.07489292,-37.87745946,-37.82429952,-38.05195538,-37.96664989,-37.92468255,-37.78865745,-37.74234502,-37.80452593,-37.66100253,-37.6018169,-38.09953731,-38.36612338,-37.764101,-37.79543697,-37.98996792,-37.77496341,-37.86895684,-37.77918729,-37.67329744,-37.62701651,-37.76358553,-37.82589419,-37.87693002,-38.084284,-37.82639995,-38.03805602,-37.88475311,-37.71354967,-37.65238715,-37.7560117,-37.77917126,-37.71462129,-37.88169799,-37.81198131,-37.78813995,-37.78720192,-37.81830513,-37.80108298,-38.14299007,-37.89669508,-37.85327908,-37.75751083,-37.85930842,-37.87950407,-37.74720985,-37.82146682,-37.88971946,-37.70453633,-37.700678,-37.70395408,-38.01774038,-37.93797681,-37.84398457,-38.30565853,-37.84459087,-37.622992,-37.82182601,-37.81889537,-37.82832227,-37.75707293,-37.83467244,-37.948425,-37.87440222,-37.88327618,-37.89488129,-37.91101734,-37.63939817,-37.76889674,-37.69513079,-37.77498702,-37.81652702,-37.87360339,-38.12174203,-37.72927934,-37.79378022,-37.69487012,-37.83992894,-37.82078023,-37.66585075,-37.86369404,-38.152034,-37.75551777,-38.05734118,-37.79426673,-37.7260123,-37.8662533,-37.91030903,-37.80993877,-37.9818654,-38.07900048,-37.72093389,-37.602549,-37.77784668,-37.91513441,-37.8025047,-37.644062,-37.81800987,-37.71529624,-37.76570666,-37.93435329,-37.78474883,-38.00658295,-37.75448484,-38.35403334,-37.87525526,-37.89019832,-38.02780932,-37.78732767,-37.84271757,-37.96723193,-37.90488721,-37.80630984,-37.81039836,-37.85733348,-37.76986537,-37.82060317,-37.71794973,-37.90037214,-38.06614572,-37.90321167,-38.08061397,-37.99307882,-37.81105406,-37.73075596,-37.92514919,-37.84951848,-37.73867424,-37.72840277,-37.71688492,-37.82407446,-37.81588648,-37.81196804,-37.87590643,-37.83150543,-37.7428786,-37.63823121,-37.78119293,-37.78321711,-37.70789754,-37.95650457,-37.95033018,-38.10402104,-37.86784231,-37.80900514,-37.7835,-38.22534196,-37.79953087,-37.6491588,-37.83844935,-37.81793643,-37.958758,-37.83063888,-37.94950878,-37.74486131,-38.37423454,-37.74359132,-37.57909097,-37.78853633,-37.87622963,-37.90811849,-37.68033809,-37.75505179,-37.85077381,-37.84936553,-37.7992509,-38.259815,-37.823477,-37.66607779,-37.8926717,-37.90369097,-37.79915782,-37.70112872,-37.71095798,-37.66396792,-37.89937805,-37.8018087,-37.81494896,-37.93849121,-37.7806207,-37.86516348,-37.86986533,-37.86775292,-37.86398189,-37.83571565,-37.85605308,-37.97825454,-37.81585044],[144.7608094,145.0796557,144.8247036,145.0312549,144.8296447,144.960684,145.0193255,144.9218207,145.0813438,145.1021496,145.0458437,144.9935121,144.9628406,145.1605261,145.2681364,145.3660737,145.3552913,145.000155,145.0369951,145.3457261,145.1780265,145.1500135,145.1196804,145.2843851,145.1214289,144.9891536,144.9196132,144.9595865,145.0075551,145.0805111,145.0586972,145.0812242,145.437791,145.0585751,145.1224183,145.0425248,145.0886479,145.1160413,145.0545579,145.1205344,144.9954167,144.9633363,144.9937497,144.9260556,144.9433203,145.280599,145.2040433,144.9970562,145.2805978,145.2097254,145.038476,145.0629508,145.0082416,145.1585062,144.7199224,145.0539427,145.0681902,145.069393,145.506311,144.9970657,145.1085355,145.0008979,145.147822,145.0301217,144.9161975,145.0169053,144.960545,145.2952513,144.9556538,144.9393233,144.9075887,144.9669643,144.9031992,145.1261623,145.0041684,145.0516547,144.8095734,145.0582249,145.1620575,144.9209387,145.0364388,145.0422229,144.9172204,144.9588743,145.1082474,145.2697768,145.0014706,145.0755596,145.1859799,145.0021421,145.097396,145.0228987,145.2127872,145.2445554,145.0606855,145.0226353,145.0418718,145.090662,144.7009549,145.0776351,145.1023643,145.1920169,145.0454252,144.9158505,144.9587169,144.9840983,145.1120902,145.1352953,144.7937381,144.9305244,145.0118838,145.0335516,145.1407027,145.0171932,144.7726167,145.139534,145.3477102,145.2492751,144.9361663,145.0691433,145.0292939,145.038299,144.9625935,145.0651659,145.2635114,144.9613135,145.100883,144.9929725,144.9962991,144.8914721,145.09214,145.1919735,145.1215157,144.9191607,145.0367383,145.3124024,145.0876594,144.961823,145.1896025,145.1280557,145.0673749,145.3039694,144.9289785,144.8835999,145.1769357,145.002605,144.9415102,144.9925003,144.8890695,144.9952772,145.1748917,144.9215188,145.0883079,145.4109872,145.0396134,145.4863791,145.0763268,144.9729109,144.9281956,145.03547,144.9898599,145.000522,145.0027726,145.0069958,144.9901643,145.2289685,145.2501909,144.9952366,145.069646,145.0661403,144.9354037,144.9523013,144.9924071,145.0095166,145.1628259,145.0045614,145.1282304,144.8409577,144.8956716,144.915,145.1762449,144.925469,145.0670324,144.9923422,144.9514112,145.049124,144.8859335,145.1534518,144.8000505,145.2218375,144.9273157,144.7273188,144.8328782,145.1497805,145.3429946,145.0142789,144.9985715,145.0139086,145.0417337,144.8629449,145.1864007,145.1000368,144.9467399,145.3075302,145.3313334,144.9944514,144.7741805,145.0837934,145.1816145,144.661118,144.8853248,144.9914228,145.1388326,144.9992332,144.8134936,144.7474447,144.9053233,144.8944837,145.0702976,144.9920352,145.1916003,144.8899337],10,null,null,{"interactive":true,"className":"","stroke":null,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":["#31688E","#FDE725","#31688E","#FDE725","#FDE725","#440154","#440154","#440154","#FDE725","#FDE725","#440154","#440154","#440154","#808080","#31688E","#808080","#808080","#440154","#FDE725","#808080","#808080","#FDE725","#FDE725","#FDE725","#440154","#FDE725","#31688E","#440154","#440154","#FDE725","#440154","#FDE725","#808080","#FDE725","#FDE725","#440154","#FDE725","#FDE725","#FDE725","#31688E","#440154","#FDE725","#440154","#FDE725","#31688E","#808080","#808080","#440154","#FDE725","#31688E","#FDE725","#FDE725","#FDE725","#FDE725","#31688E","#FDE725","#440154","#FDE725","#808080","#440154","#FDE725","#440154","#FDE725","#31688E","#440154","#FDE725","#FDE725","#31688E","#35B779","#440154","#440154","#35B779","#440154","#808080","#FDE725","#FDE725","#31688E","#FDE725","#FDE725","#FDE725","#440154","#FDE725","#FDE725","#FDE725","#FDE725","#808080","#FDE725","#FDE725","#808080","#440154","#31688E","#440154","#31688E","#FDE725","#FDE725","#440154","#FDE725","#FDE725","#31688E","#FDE725","#31688E","#31688E","#FDE725","#FDE725","#440154","#440154","#FDE725","#808080","#31688E","#440154","#31688E","#FDE725","#FDE725","#FDE725","#FDE725","#808080","#808080","#31688E","#440154","#FDE725","#440154","#FDE725","#35B779","#FDE725","#808080","#FDE725","#31688E","#440154","#FDE725","#440154","#31688E","#FDE725","#FDE725","#440154","#FDE725","#FDE725","#FDE725","#FDE725","#808080","#FDE725","#FDE725","#808080","#440154","#440154","#31688E","#FDE725","#440154","#440154","#440154","#440154","#FDE725","#FDE725","#31688E","#808080","#FDE725","#808080","#FDE725","#35B779","#FDE725","#FDE725","#440154","#FDE725","#FDE725","#FDE725","#440154","#31688E","#FDE725","#440154","#440154","#FDE725","#31688E","#440154","#440154","#FDE725","#31688E","#FDE725","#808080","#31688E","#440154","#440154","#808080","#440154","#31688E","#440154","#35B779","#FDE725","#440154","#31688E","#31688E","#808080","#FDE725","#31688E","#31688E","#FDE725","#808080","#31688E","#440154","#440154","#FDE725","#31688E","#808080","#FDE725","#FDE725","#31688E","#808080","#440154","#31688E","#FDE725","#31688E","#31688E","#31688E","#440154","#31688E","#440154","#FDE725","#31688E","#440154","#440154","#FDE725","#440154","#31688E","#440154"],"fillOpacity":0.5},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addLegend","args":[{"colors":["#440154","#31688E","#35B779","#FDE725"],"labels":["1","2","3","4"],"na_color":"#808080","na_label":"NA","opacity":0.5,"position":"bottomleft","type":"factor","title":"cluster","extra":null,"layerId":null,"className":"info legend","group":null}]}],"limits":{"lat":[-38.37423454,-37.57909097],"lng":[144.661118,145.506311]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

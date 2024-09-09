@@ -1,5 +1,5 @@
 ---
-title: "Station Capacity"
+title: "Station Information"
 author: "Paul S"
 date: "6/6/24"
 params: 
@@ -20,8 +20,7 @@ format:
 #| echo: false 
 station = params$station
 
-peak_morning = 7:10
-peak_evening = 16:19
+source('../r/constants.R')
 
 library(knitr)
 library(tidyverse)
@@ -37,7 +36,6 @@ library(plotly)
 source('../r/station_functions.R')
 
 near_properties = get_near_properties(station, fromQuarto = T)
-
 
 yimby_colours <- list(
   hero = "#10461B",
@@ -70,7 +68,19 @@ hourly_factors = readRDS('../r_objects/hourly_factors.Rdata') %>%
 
 ```
 
-## Overall Scores
+## Information & Overall Scores
+
+This page includes information about the seven categories and why they should be considered as factors in priority upzoning:
+
+-   Zoning suitability
+-   Potential number of new homes
+-   Train service frequency in peak
+-   Train service passenger numbers in peak
+-   Number of local services within a 500m walk
+-   Distance to CBD
+-   Existing transport infrastructure.
+
+For `r station`, the scores are shown below in a summary table. The remainder of this page steps through each factor listed above in no particular order.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -101,7 +111,7 @@ transformed_rankings = readRDS('../r_objects/transformed_scores.Rdata') %>%
   mutate(value = round(value, 2)) %>%
   filter(name != 'score') 
 
-
+total_score <- sum(transformed_rankings$value)
 
 rankings %>%
   left_join(transformed_rankings, by = 'name') %>%
@@ -117,15 +127,21 @@ reactable(theme = sandstone(),
 
 ```
 
+`r station` obtained a final score of `r total_score`, placing it. 
+
 ## Service Frequency
+
+(why is frequency important?)
 
 Service frequency is calculated as the mean number of services per hour in two time periods. The chart below shows:
 
--   Number of services between 7 and 10am towards Flinders Street, denoted as blue in the charts.
+-   Number of services between 7 and 10am towards Flinders Street, coloured blue.
 
--   Number of services between 4 and 7pm away from Flinders street, shown as green in the charts.
+-   Number of services between 4 and 7pm away from Flinders street, coloured green.
 
-The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
+The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street. 
+
+The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score. 
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -209,11 +225,15 @@ The morning average freqency is `r morning_to_flinders`, the average evening fre
 
 ## Service Capacity
 
-Service frequency is calculated as the mean patronage of trains in two time periods. The chart below shows:
+(why is capacity important?)
+
+Service capacity is calculated as the mean number of passsengers on any train stopping at `r station` in two peak travel time periods. The chart below shows:
 
 -   Patronage between 7 and 10am towards Flinders Street, denoted as blue in the charts.
 
 -   Patronage between 4 and 7pm away from Flinders street, shown as green in the charts.
+
+The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street. 
 
 The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
 
@@ -270,7 +290,7 @@ patronage_plot <- ggplot() +
   theme_bw(base_size = 13) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   xlab('Hour of day') + 
-  ylab('Patronage') +
+  ylab('Patronage per train') +
   coord_cartesian(ylim = c(0, max(to_plot$avg_patronage) + 50))
 
 interactive_patronage = ggplotly(patronage_plot, height = 550)
@@ -349,7 +369,7 @@ area_ratio = ( ( by_validity %>% filter(isNRZGRZ) %>% pull(total_area) ) / sum(b
 
 ## Key information
 
-Out of `r n_suitable + n_unsuitable` lots within 1km radius of `r station`, `r n_suitable` are easiest to upzone. In terms of area, the easiest properties cover `r area_ratio` of the total area of `r sum(by_validity$total_area) %>% round(.,2)` m^2.
+Out of `r n_suitable + n_unsuitable` lots within 1km radius of `r station`, `r n_suitable` are easiest to upzone. In terms of area, the easiest properties cover `r area_ratio`% of the total area of `r round(sum(by_validity$total_area)/10^6,2)` km^2.
 
 ## Tabular data
 
@@ -467,9 +487,7 @@ There are `r tram_stops_near_station %>% nrow()` tram stops in a 1km radius, and
 
 This yields a total score of `r 2*(tram_stops_near_station %>% nrow()) + (bus_stops_near_station %>% nrow())`.
 
-While not includes in the model directly, bus route(s) `r bus_route_list` and tram route(s) `r tram_route_list` serve this area.
-
-## Distance
+The model does not factor in characteristics of individual bus and tram routes, such as frequency and available capacity due to unavailable data. However, for information's sake, bus route(s) `r bus_route_list` and tram route(s) `r tram_route_list` serve this area.
 
 ## Capacity Delta
 

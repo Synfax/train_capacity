@@ -153,5 +153,8 @@
   },
   "quarto/index.qmd": {
     "index.html": "5c9829c2"
+  },
+  "quarto/analysis.qmd": {
+    "analysis.html": "e2ed9e2d"
   }
 }

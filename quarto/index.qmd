@@ -9,6 +9,24 @@ format:
       
 ---
 
+```{=html}
+<script>
+function modifyMainDiv() {
+  console.log('blue');
+  const mainDiv = document.getElementById('quarto-document-content');
+  if (mainDiv) {
+    console.log('found');
+    mainDiv.classList.remove('column-body');
+    mainDiv.classList.add('column-page-right');
+    // You can add more class modifications here
+  }
+}
+
+// This function will be called by the script in the Quarto document
+modifyMainDiv();
+</script>
+```
+
 ```{r, message=FALSE, warning=FALSE}
 
 library(tidyverse)
@@ -48,6 +66,7 @@ printScores <- function(r) {
   filter(!(name %in% c('score','rank'))) %>%
   mutate(name = translations[name]) %>%
   reactable(theme = cyborg(),
+            class = "pageinforeactable",
             columns = list(
               'name' = colDef(name = 'Metric'),
               'value' = colDef(name = "Score",
@@ -75,11 +94,33 @@ printScores <- function(r) {
 
 :::{focus-on="cr-main"}
 
-This project ranks train stations by 7 key metrics.
+This project seeks to find the train stations in Melbourne that are most suitable for upzoning.
+
 \
-For more info see "here". A map of all stations at the bottom of the page has clickable icons to all train stations.
+
+For each train stations, seven key metrics are calculated:
+
+-   Zoning suitability
+-   Potential number of new homes
+-   Train service frequency in peak
+-   Train service passenger numbers in peak
+-   Number of local services within a 500m walk
+-   Distance to CBD
+-   Existing transport infrastructure.
+
+With these 'raw' metrics, a transformed score is calculated by factoring in how each station scores relative to others on the network. This allows for stations to be compared easily with a single number, or rank.
+:::
+:::{focus-on="cr-main"}
+
+This page is only a summary of the ten most well suited stations.
+
 \
-You can also click on the station names on the individual pages to view them.
+
+Supporting web pages have been created for each individual train station which details how the scores are calculated. A clickable map of all stations and searchable table are at the foot of the document (here).
+
+\
+
+Each of the top ten stations name is also a clickable link to view more details on.
 
 :::
 :::{focus-on="cr-main"}
@@ -93,6 +134,7 @@ You can also click on the station names on the individual pages to view them.
 transformed_scores %>%
   select(station, score) %>%
   reactable(theme = cyborg(),
+            class = "pageinforeactable",
             columns = list(
               'station' = colDef(name = 'station'),
               'score' = colDef(name = "Score",
@@ -366,9 +408,11 @@ printScores(10)
 :::
 :::
 
+:::
+
 ## Clickable Map
 
-Clickable Map
+Zoom in and click on a station of choice to explore more detailed statistics.
 
 ```{r}
 
@@ -432,6 +476,8 @@ function(el, x, data) {
 
   // Ensure the map is fully loaded before adding the event listener
   map.whenReady(function() {
+  
+  
  
     map.on('zoomend', function() {
   
@@ -444,7 +490,7 @@ function(el, x, data) {
 }
 "
 
-m <- leaflet() %>%
+m <- leaflet(width = '100%')%>%
   addPolylines(data = lines_dissolved, color = ~colour, opacity = 1) %>%
   addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.5)) %>%
   addCircleMarkers(lng = locations$lng, lat=locations$lat, radius = 5, color = 'black', fillColor = 'black', fillOpacity = 1, opacity = 0.7) %>%
@@ -464,3 +510,31 @@ m <- leaflet() %>%
 m
 
 ```
+
+\
+
+For a full searchable list of stations, see below
+
+```{r}
+
+translations = c(
+   'Zoning suitability (% residential and not heritage)' = 'grz_nrz_pc',
+   'Potential new homes in broad 1000m upzoning'='capacity_delta',
+   'Train frequency in peak (services per hour)' ='average_peak_service_freq',
+   'Average train patronage in peak'='average_peak_service_cap',
+   'Number of local services within 500m walk'='walkability_score',
+   'Distance to CBD (km)'='distance',
+   'Number of bus and tram stops'='n_bus_tram',
+   'Station Name' = 'station',
+   'Total Score' = 'score'
+)
+
+readRDS('../r_objects/transformed_scores.Rdata') %>%
+  as.data.frame() %>%
+  mutate(across(where(is.numeric), ~round(.x, 2))) %>%
+  rename(!!!translations) %>%
+  reactable(theme = sandstone(),searchable = T, defaultSorted = "Total Score", defaultSortOrder = "desc", defaultPageSize = 10)
+
+```
+
+:::

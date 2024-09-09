@@ -1,5 +1,5 @@
 ---
-title: "Station Capacity"
+title: "Extra Statistics & Analytics"
 author: "Paul S"
 date: "6/6/24"
 params: 
@@ -16,21 +16,84 @@ format:
     page-layout: full
 ---
 
-```{r}
+## Distribution of scores
 
-station_rankings = readRDS('../r_objects/station_rankings.Rdata')
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
 
-station_rankings = station_rankings %>%
-  pivot_longer(cols = -c('station'))
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(stringr)
+library(RColorBrewer)
+library(plotly)
 
-ggplot(station_rankings) + geom_density(aes( x = value)) + facet_grid(rows = vars(name), scales = 'free_y')
+translations = c(
+  'grz_nrz_pc' = 'Zoning suitability',
+  'capacity_delta' = 'Potential new homes',
+  'average_peak_service_freq' = 'Train frequency',
+  'average_peak_service_cap' = 'Available train capacity',
+  'walkability_score' = 'Local services',
+  'distance' = 'Distance to CBD',
+  'n_bus_tram' = 'Other transport infrastructure'
+)
 
-ggplot(station_rankings %>% filter(name == 'distance'), aes(x = value)) + geom_density()
+transformed_scores = readRDS('../r_objects/transformed_scores.Rdata') %>%
+  as.data.frame()
+
+transformed_scores = transformed_scores %>%
+  select(-score) %>%
+  pivot_longer(cols = -c('station')) %>%
+  mutate(name = translations[name])
+
+  # mutate(name = str_wrap(name, width = 5))
+
+# <- ggplot(transformed_scores) + geom_density(aes( x = value)) + facet_grid(rows = vars(name), scales = 'free') + theme_bw()
+
+
+makeDensityPlot <- function(var = 'Zoning suitability') {
+  
+  plot <- ggplot(transformed_scores %>% filter(name == var)) +
+    geom_density(aes(x = value)) +
+    theme_bw() 
+ 
+  print(plot)
+}
 
 ```
 
+:::{.panel-tabset}
+
+##   Zoning suitability
 
 ```{r}
+makeDensityPlot('Zoning suitability')
+```
+
+##  Potential number of new homes
+
+##   Train service frequency in peak
+
+##  Train service passenger numbers in peak
+
+##  Number of local services within a 500m walk
+
+##  Distance to CBD
+
+##  Existing transport infrastructure.
+
+
+:::
+
+
+
+## Top scores by LGA
+
+
+## K-clustering
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
 
 station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
   as.data.frame()
