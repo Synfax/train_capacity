@@ -316,11 +316,24 @@ get_distance_to_flinders <- function(station, fromQuarto = F) {
 
 get_bus_and_tram_stops <- function(station, fromQuarto = F) {
   
-  
   prefix_dir = ifelse(fromQuarto, '../', '')
  
   bus_stops = read_sf('shapefiles/ptv/PTV_METRO_BUS_STOP.shp')
   tram_stops = read_sf('shapefiles/ptv/PTV_METRO_TRAM_STOP.shp')
+  
+  bus_frequencies = readRDS(paste0(prefix_dir, 'r_objects/bus_stop_frequencies.Rdata')) %>%
+    rename(STOP_ID = "stop_id") %>%
+    mutate(STOP_ID = as.character(STOP_ID)) %>%
+    select(peak_type, n, STOP_ID) %>%
+    group_by(STOP_ID) %>%
+    summarise(avg_sph = mean(n))
+  
+  tram_frequencies = readRDS(paste0(prefix_dir, 'r_objects/tram_stop_frequencies.Rdata')) %>%
+    rename(STOP_ID = "stop_id") %>%
+    mutate(STOP_ID = as.character(STOP_ID)) %>%
+    select(peak_type, n, STOP_ID) %>%
+    group_by(STOP_ID) %>%
+    summarise(avg_sph = mean(n))
   
   locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
   
@@ -334,14 +347,22 @@ get_bus_and_tram_stops <- function(station, fromQuarto = F) {
   near_bus_vector <- st_within(bus_stops, buffer, sparse = F)
   
   bus_stops_near_station = bus_stops %>%
-    filter(near_bus_vector) %>% nrow()
+    filter(near_bus_vector) %>%
+    left_join(bus_frequencies, by = 'STOP_ID') %>%
+    pull(avg_sph) %>%
+    sum(., na.rm = T)
   
   near_tram_vector <- st_within(tram_stops, buffer, sparse = F)
   
   tram_stops_near_station = tram_stops %>%
-    filter(near_tram_vector) %>% nrow()
+    filter(near_tram_vector) %>%
+    left_join(tram_frequencies, by = 'STOP_ID') %>%
+    pull(avg_sph) %>%
+    sum(., na.rm = T)
+  
+  #one method is we could sum them.
 
-  tram_weight = 2
+  tram_weight = 1
   bus_weight = 1
   
   #its much more important to be near trams than busses. given their infrequency
@@ -350,6 +371,7 @@ get_bus_and_tram_stops <- function(station, fromQuarto = F) {
 
   return(total_number)     
 }
+
 
 get_number_of_stops_to_flinders <- function(station) {
   

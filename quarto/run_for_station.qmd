@@ -3,7 +3,7 @@ title: "Station Information"
 author: "Paul S"
 date: "6/6/24"
 params: 
-  station: "Brunswick"
+  station: "Prahran"
 format: 
   html: 
     theme: zephyr
@@ -32,6 +32,7 @@ library(htmltools)
 library(htmlwidgets)
 library(reactablefmtr)
 library(plotly)
+library(ggridges)
 
 source('../r/station_functions.R')
 
@@ -225,7 +226,8 @@ The morning average freqency is `r morning_to_flinders`, the average evening fre
 
 ## Service Capacity
 
-```{r}
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
 
 station_lines = readRDS('../r_objects/stations_with_lines.Rdata') %>%
   filter(Station_Name == station) %>%
@@ -466,6 +468,20 @@ tram_stops = read_sf('../shapefiles/ptv/PTV_METRO_TRAM_STOP.shp')
 tram_routes = read_sf('../shapefiles/Order_JRGGG7/ll_gda2020/esrishape/whole_of_dataset/victoria/PTV/PTV_METRO_TRAM_ROUTE.shp')
 bus_routes = read_sf('../shapefiles/Order_JRGGG7/ll_gda2020/esrishape/whole_of_dataset/victoria/PTV/PTV_METRO_BUS_ROUTE.SHP')
 
+bus_frequencies = readRDS(paste0('../r_objects/bus_stop_frequencies.Rdata')) %>%
+    rename(STOP_ID = "stop_id") %>%
+    mutate(STOP_ID = as.character(STOP_ID)) %>%
+    select(peak_type, n, STOP_ID) %>%
+    group_by(STOP_ID) %>%
+    summarise(avg_sph = mean(n))
+  
+tram_frequencies = readRDS(paste0('../r_objects/tram_stop_frequencies.Rdata')) %>%
+    rename(STOP_ID = "stop_id") %>%
+    mutate(STOP_ID = as.character(STOP_ID)) %>%
+    select(peak_type, n, STOP_ID) %>%
+    group_by(STOP_ID) %>%
+    summarise(avg_sph = mean(n))
+
 locations = readRDS(paste0('../r_objects/locations.Rdata'))
   
 station_location = locations %>%
@@ -493,10 +509,12 @@ tram_routes_near_station = tram_routes %>%
   filter(ROUTESHTNM %in% tram_stops_near_station$ROUTEUSSP) %>%
   st_intersection(buffer)
 
-tram_route_list <- tram_routes_near_station %>% st_drop_geometry() %>%
+tram_route_list <- tram_routes_near_station %>%
+  st_drop_geometry() %>%
   pull(ROUTESHTNM) %>% unique()
 
-bus_route_list <- bus_routes_near_station %>% st_drop_geometry() %>%
+bus_route_list <- bus_routes_near_station %>%
+  st_drop_geometry() %>%
   pull(ROUTESHTNM) %>% unique()
 
 leaflet() %>%
@@ -513,13 +531,68 @@ leaflet() %>%
   addPolylines(data = tram_routes_near_station, color = "#78BE20", options = pathOptions(pane = 'polygons'), fillOpacity = 0.7) %>%
   addPolygons(data = buffer, color = 'black', fillColor = 'grey', fillOpacity = 0.3, options = pathOptions(pane = 'polygons'))
 
+tram_f_df <- data.frame( sph = tram_stops_near_station %>%
+  left_join(tram_frequencies, by = 'STOP_ID') %>%
+  pull(avg_sph), mode = 'Tram')
+
+bus_f_df <- data.frame(sph=bus_stops_near_station %>%
+  left_join(bus_frequencies, by = 'STOP_ID') %>%
+  pull(avg_sph), mode = 'Bus')
+
 ```
 
-There are `r tram_stops_near_station %>% nrow()` tram stops in a 1km radius, and `r bus_stops_near_station %>% nrow()` bus stops. In the model, tram stops are weighted to be worth twice as much as bus stops, as trams carry more passengers and are often more frequent.
+
+:::{.panel-tabset}
+
+## Transit information
+
+There are `r tram_stops_near_station %>% nrow()` tram stops in a 1km radius, the average frequency of trams stopping at these stops is `r mean(tram_f_df$sph) `
+
+
+and `r bus_stops_near_station %>% nrow()` bus stops, the average frequency of trams stopping at these stops is `r mean(bus_f_df$sph) `
+
+
 
 This yields a total score of `r 2*(tram_stops_near_station %>% nrow()) + (bus_stops_near_station %>% nrow())`.
 
 The model does not factor in characteristics of individual bus and tram routes, such as frequency and available capacity due to unavailable data. However, for information's sake, bus route(s) `r bus_route_list` and tram route(s) `r tram_route_list` serve this area.
+
+
+## Additional Information
+
+A box and jitter plot is displayed below, which seeks to describe how service frequencies are distributed throughout the 1000m radius. Each 'dot' in the plot represents a specific bus or tram stop.
+
+For stations only served by one bus or tram line, the plot is often very constrained and narrow.
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+tram_f_df = rbind.data.frame(tram_f_df, bus_f_df) %>%
+  filter(!is.na(sph))
+
+# ggplot(tram_f_df, mapping = aes(x = sph, y = mode, fill = mode)) +
+#   geom_density_ridges(alpha = 0.5,bins = 15, stat = 'binline') +
+#   theme_ridges()  +
+#   theme(legend.position = "none") + xlab("Services Per Hour") +
+#   ylab("Mode")
+# 
+# ggplot(tram_f_df, mapping = aes(x = sph)) +
+#   geom_density() +
+#   facet_wrap(~mode, scales = 'free') +
+#   theme_bw()
+
+ggplot(tram_f_df, aes(x = sph, y = mode, fill = mode)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, height = 0.2, alpha = 0.5) +
+  facet_grid(rows = vars(mode), scales = "free") +
+  theme_bw() +
+  theme(legend.position = 'none') + xlab('Services Per Hour') + ylab('Transport Mode')
+
+```
+:::
+
+
+
 
 ## Capacity Delta
 

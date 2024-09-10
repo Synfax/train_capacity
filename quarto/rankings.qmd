@@ -86,11 +86,11 @@ These transformed scores are then summed to produce a final score.
 :::{.callout-note}
 There are some restrictions placed on final rankings:
 
-- Stations within 3km of Flinders Street are excluded to prevent the city loop dominating
+- City loop stations are excluded as they can't be upzoned further.
 
 - Stations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.
 
-This restriction is arbitrary and will be improved.
+This restriction is arbitrary and will be improved alongside the model.
 :::
 <!-- ## Example Transformation -->
 
