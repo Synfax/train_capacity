@@ -368,33 +368,19 @@ get_line_peak_capacity_at_closest_station <- function(station, fromQuarto = F) {
   
   prefix_dir = ifelse(fromQuarto, '../', '')
   
-  city_loop_stations = c('Flagstaff', 'Parliament', 'Melbourne Central', 'Flinders Street', 'Southern Cross')
-  
-  chainage_info = readRDS('r_objects/station_chainages.Rdata') 
   
   hourly_factors = readRDS(paste0(prefix_dir, 'r_objects/hourly_factors.Rdata'))
   
-  lines = patronage_data %>%
-    filter(Station_Name == station) %>%
-    select(Line_Name) %>%
-    distinct() %>%
-    pull()
+  lines = get_lines_serving_station(station)
   
   #check if target_station can ever return multiple results without taking the first
   
-  target_station = chainage_info %>%
-    filter(Line_Name %in% lines) %>%
-    filter(!(Station_Name %in% city_loop_stations)) %>%
-    group_by(Line_Name) %>%
-    arrange(Station_Chainage) %>%
-    slice_head(n=1) %>%
-    ungroup() %>%
-    pull(Station_Name) %>%
-    first()
+  target_station = get_target_stations(station)
   
   hourly_factors %>%
     ungroup() %>%
     as.data.frame() %>%
+    mutate(hour_of_day = as.numeric(hour_of_day)) %>%
     filter(Station_Name == target_station, Day_Type == 'Normal Weekday') %>%
     filter(Line_Name %in% lines) %>%
     mutate(peak_type = ifelse(hour_of_day %in% peak_morning, 'm', NA),
@@ -407,6 +393,42 @@ get_line_peak_capacity_at_closest_station <- function(station, fromQuarto = F) {
     pull(avg_patronage) %>%
     mean() %>%
     return()
+}
+
+get_lines_serving_station <- function(station) {
+  
+  lines = patronage_data %>%
+    filter(Station_Name == station) %>%
+    select(Line_Name) %>%
+    distinct() %>%
+    pull() 
+  
+  return(lines)
+  
+}
+
+get_target_stations <- function(station, returnFirst = T) {
+  
+  chainage_info = readRDS('r_objects/station_chainages.Rdata') 
+  
+  city_loop_stations = c('Flagstaff', 'Parliament', 'Melbourne Central', 'Flinders Street', 'Southern Cross')
+  
+  lines = get_lines_serving_station(station)
+  
+  targets <- chainage_info %>%
+    filter(Line_Name %in% lines) %>%
+    filter(!(Station_Name %in% city_loop_stations)) %>%
+    group_by(Line_Name) %>%
+    arrange(Station_Chainage) %>%
+    slice_head(n=1) %>%
+    ungroup() %>%
+    pull(Station_Name) 
+  
+  if(returnFirst) {
+    return(targets %>% first())
+  } else {
+    return(targets)
+  }
 }
 
 prepare_data_for_the_age = function(station) {

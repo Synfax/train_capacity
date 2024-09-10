@@ -3,7 +3,7 @@ title: "Station Information"
 author: "Paul S"
 date: "6/6/24"
 params: 
-  station: "South Yarra"
+  station: "Brunswick"
 format: 
   html: 
     theme: zephyr
@@ -91,7 +91,7 @@ translations = c(
   'average_peak_service_freq' = 'Train frequency in peak (services per hour)',
   'average_peak_service_cap' = 'Average train patronage in peak',
   'walkability_score' = 'Number of local services within 500m walk',
-  'distance' = 'Distance to CBD (km)',
+  'distance' = 'Distance to CBD (m)',
   'n_bus_tram' = 'Number of bus and tram stops'
 )
 
@@ -225,6 +225,22 @@ The morning average freqency is `r morning_to_flinders`, the average evening fre
 
 ## Service Capacity
 
+```{r}
+
+station_lines = readRDS('../r_objects/stations_with_lines.Rdata') %>%
+  filter(Station_Name == station) %>%
+  pull(lines) %>%
+  unlist() %>%
+  as.vector()
+
+station_targets = readRDS('../r_objects/target_stations.Rdata') %>% 
+  filter(Station_Name == station) %>%
+  pull(targets) %>%
+  unlist() %>%
+  as.vector() %>%
+  first()
+```
+
 This metric aims to measure the amount of space available on trains passing through this station, as there is little point upzoning if there is no capacity to move people.
 
 However, for stations in the middle of a train line, passengers will typically continue to board the train until the city. This means that it is not useful to only look at the patronage as trains pass through a given station as more passengers may board later.
@@ -233,15 +249,15 @@ Instead, it is best to look at the average number of passengers on trains at the
 
 Process for `r station`
 
-1. Find the train lines that serve `r station`. These are: 
+1. Find the train line(s) that serve `r station`: `r station_lines`
 
-2. For each train line, find the station nearest to the CBD. These are: 
+2. For each train line, find the station nearest to the CBD. These are by definition the same for each line: `r station_targets`.
 
-3. For each of these stations just before the CBD, calculate the average patronage of train services.
+3. For each of these stations just before the CBD, calculate the average patronage of train services at that station, but restrict the search to only train services on the lines identified in step 1.
 
-Step 3 is described below, using the example of `r station`.
+Step 3 is described below, using the target station of `r station_targets`.
 
-Service capacity is calculated as the mean number of passsengers on any train stopping at `r station` in two peak travel time periods. The chart below shows:
+Average passenger counts at `r station_targets` across the `r station_lines` line(s) are calculated at two times and directions:
 
 -   Patronage between 7 and 10am towards Flinders Street, denoted as blue in the charts.
 
@@ -255,8 +271,10 @@ The mean values of these two periods are shown as dashed lines, and the mean of 
 #| echo: false 
 
 to_plot <- hourly_factors %>%
-  filter(Station_Name == station) %>%
-  filter(Day_Type == 'Normal Weekday') %>%
+  ungroup() %>%
+  as.data.frame() %>%
+  filter(Station_Name == station_targets, Day_Type == 'Normal Weekday') %>%
+  filter(Line_Name %in% station_lines) %>%
   mutate(hour_of_day = as.numeric(hour_of_day)) %>%
   group_by(hour_of_day, Direction) %>%
   summarise(avg_patronage = mean(avg_patronage))

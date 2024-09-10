@@ -3,14 +3,6 @@ library(fs)
 library(tidyverse)
 
 
-# List of stations
-stations = patronage_data %>%
-  filter(Mode == 'Metro') %>%
-  select(Station_Name) %>%
-  pull() %>%
-  unique()
-
-
 # Render a report for each station
 for (station in stations) {
   print(station)

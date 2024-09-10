@@ -142,3 +142,24 @@ generate_station_stop_number <- function() {
   saveRDS(station_location_on_line_cardinal, 'r_objects/station_chainages.Rdata')
   
 }
+
+generate_lines_serving_stations <- function() {
+  
+  stations_and_lines <- stations %>%
+    map(~ get_lines_serving_station(.x), .progress = T) %>%
+    setNames(stations) %>%
+    enframe(name = "Station_Name", value = "lines")
+  
+  saveRDS(stations_and_lines, 'r_objects/stations_with_lines.Rdata')
+}
+
+generate_target_stations <- function() {
+  
+  target_stations <- stations %>%
+    map(~ get_target_stations(.x, returnFirst = F), .progress = T) %>%
+    setNames(stations) %>%
+    enframe(name = "Station_Name", value = "targets")
+  
+  saveRDS(target_stations, 'r_objects/target_stations.Rdata')
+  
+}

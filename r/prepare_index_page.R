@@ -83,7 +83,6 @@ fitBounds(lng1 = bounds[1], lat1 = bounds[2], lng2 = bounds[3], lat2 = bounds[4]
 
 mapshot(map, file = 'quarto/index_images/main.png')
 
-walk(1:10, .f = writeStationMaps)
   
 writeStationMaps <- function(rank, zm = 17) {
   
@@ -93,4 +92,4 @@ writeStationMaps <- function(rank, zm = 17) {
   mapshot(station_map, file = paste0('quarto/index_images/',as.numeric(rank),'.png'))
 }   
 
-
+walk(1:10, .f = writeStationMaps)

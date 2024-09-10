@@ -14,6 +14,7 @@ library(stringr)
 library(DescTools)
 library(mapview)
 library(geosphere)
+library(chron)
 
 source('r/helpers.r')
 source('r/constants.r')
@@ -41,6 +42,12 @@ hourly_factors = generate_hourly_information()
 service_frequences = generate_service_frequency_information()
 
 generate_station_location_info()
+
+stations = patronage_data %>%
+  filter(Mode == 'Metro') %>%
+  select(Station_Name) %>%
+  pull() %>%
+  unique()
 
 
 #
