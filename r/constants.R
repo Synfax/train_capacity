@@ -12,3 +12,6 @@ weights = c(
   'distance' = -1, 
   'n_bus_tram' = 1
 )
+
+bus_weight = 1
+tram_weight = 2

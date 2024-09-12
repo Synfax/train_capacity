@@ -316,6 +316,7 @@ get_distance_to_flinders <- function(station, fromQuarto = F) {
 
 get_bus_and_tram_stops <- function(station, fromQuarto = F) {
   
+  
   prefix_dir = ifelse(fromQuarto, '../', '')
  
   bus_stops = read_sf('shapefiles/ptv/PTV_METRO_BUS_STOP.shp')
@@ -346,9 +347,20 @@ get_bus_and_tram_stops <- function(station, fromQuarto = F) {
   
   near_bus_vector <- st_within(bus_stops, buffer, sparse = F)
   
+  # old summation method
+  # bus_stops_near_station = bus_stops %>%
+  #   filter(near_bus_vector) %>%
+  #   left_join(bus_frequencies, by = 'STOP_ID') %>%
+  #   pull(avg_sph) %>%
+  #   sum(., na.rm = T)
+  
   bus_stops_near_station = bus_stops %>%
     filter(near_bus_vector) %>%
     left_join(bus_frequencies, by = 'STOP_ID') %>%
+    group_by(ROUTEUSSP) %>%
+    summarise(avg_sph = mean(avg_sph, na.rm=T)) %>%
+    filter(!str_detect(ROUTEUSSP, ',')) %>%
+    st_drop_geometry() %>%
     pull(avg_sph) %>%
     sum(., na.rm = T)
   
@@ -356,13 +368,17 @@ get_bus_and_tram_stops <- function(station, fromQuarto = F) {
   
   tram_stops_near_station = tram_stops %>%
     filter(near_tram_vector) %>%
-    left_join(tram_frequencies, by = 'STOP_ID') %>%
+    left_join(tram_frequencies, by = 'STOP_ID')  %>%
+    group_by(ROUTEUSSP) %>%
+    summarise(avg_sph = mean(avg_sph, na.rm=T)) %>%
+    filter(!str_detect(ROUTEUSSP, ',')) %>%
+    st_drop_geometry() %>%
     pull(avg_sph) %>%
     sum(., na.rm = T)
   
   #one method is we could sum them.
 
-  tram_weight = 1
+  tram_weight = 2
   bus_weight = 1
   
   #its much more important to be near trams than busses. given their infrequency

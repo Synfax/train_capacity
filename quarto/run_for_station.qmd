@@ -3,12 +3,12 @@ title: "Station Information"
 author: "Paul S"
 date: "6/6/24"
 params: 
-  station: "Prahran"
+  station: "Moonee Ponds"
 format: 
   html: 
     theme: zephyr
-    fig-width: 8
-    fig-height: 6
+    fig-width: 6
+    fig-height: 4
     code-fold: false
     toc: true
     toc-depth: 4
@@ -531,67 +531,121 @@ leaflet() %>%
   addPolylines(data = tram_routes_near_station, color = "#78BE20", options = pathOptions(pane = 'polygons'), fillOpacity = 0.7) %>%
   addPolygons(data = buffer, color = 'black', fillColor = 'grey', fillOpacity = 0.3, options = pathOptions(pane = 'polygons'))
 
-tram_f_df <- data.frame( sph = tram_stops_near_station %>%
-  left_join(tram_frequencies, by = 'STOP_ID') %>%
-  pull(avg_sph), mode = 'Tram')
+bus_f_df <- bus_stops_near_station %>%
+   left_join(bus_frequencies, by = 'STOP_ID') %>%
+    group_by(ROUTEUSSP) %>%
+    summarise(avg_sph = mean(avg_sph, na.rm=T)) %>%
+    filter(!str_detect(ROUTEUSSP, ',')) %>%
+    st_drop_geometry() %>%
+  mutate(mode = 'bus')
 
-bus_f_df <- data.frame(sph=bus_stops_near_station %>%
-  left_join(bus_frequencies, by = 'STOP_ID') %>%
-  pull(avg_sph), mode = 'Bus')
+tram_f_df <- tram_stops_near_station %>%
+    left_join(tram_frequencies, by = 'STOP_ID')  %>%
+    group_by(ROUTEUSSP) %>%
+    summarise(avg_sph = mean(avg_sph, na.rm=T)) %>%
+    filter(!str_detect(ROUTEUSSP, ',')) %>%
+    st_drop_geometry() %>%
+  mutate(mode = 'tram')
+
+
+# tram_f_df <- data.frame( sph = tram_stops_near_station %>%
+#   left_join(tram_frequencies, by = 'STOP_ID') %>%
+#   pull(avg_sph), mode = 'Tram')
+# 
+# bus_f_df <- data.frame(sph=bus_stops_near_station %>%
+#   left_join(bus_frequencies, by = 'STOP_ID') %>%
+#   pull(avg_sph), mode = 'Bus')
 
 ```
 
 
+
+
+There are `r tram_stops_near_station %>% nrow()` tram stops in a 1km radius, with route(s) `r tram_route_list` servicing the area. 
+
+For buses, there are `r bus_stops_near_station %>% nrow()`, with route(s) `r bus_route_list`.
+
+The data below shows the frequencies per route in both table and bar chart form.
+
 :::{.panel-tabset}
 
-## Transit information
 
-There are `r tram_stops_near_station %>% nrow()` tram stops in a 1km radius, the average frequency of trams stopping at these stops is `r mean(tram_f_df$sph) `
+## Data
 
-
-and `r bus_stops_near_station %>% nrow()` bus stops, the average frequency of trams stopping at these stops is `r mean(bus_f_df$sph) `
-
-
-
-This yields a total score of `r 2*(tram_stops_near_station %>% nrow()) + (bus_stops_near_station %>% nrow())`.
-
-The model does not factor in characteristics of individual bus and tram routes, such as frequency and available capacity due to unavailable data. However, for information's sake, bus route(s) `r bus_route_list` and tram route(s) `r tram_route_list` serve this area.
-
-
-## Additional Information
-
-A box and jitter plot is displayed below, which seeks to describe how service frequencies are distributed throughout the 1000m radius. Each 'dot' in the plot represents a specific bus or tram stop.
-
-For stations only served by one bus or tram line, the plot is often very constrained and narrow.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
-tram_f_df = rbind.data.frame(tram_f_df, bus_f_df) %>%
-  filter(!is.na(sph))
+merged_f_df = rbind.data.frame(tram_f_df, bus_f_df) %>%
+   filter(!is.na(avg_sph)) %>%
+   arrange(avg_sph) 
 
-# ggplot(tram_f_df, mapping = aes(x = sph, y = mode, fill = mode)) +
-#   geom_density_ridges(alpha = 0.5,bins = 15, stat = 'binline') +
-#   theme_ridges()  +
-#   theme(legend.position = "none") + xlab("Services Per Hour") +
-#   ylab("Mode")
+total_score <- merged_f_df %>%
+  mutate(weight = case_when(mode == "bus" ~ 1, mode == "tram" ~ 2)) %>%
+  mutate(weighted = weight*avg_sph) %>%
+  pull(weighted) %>%
+  sum(na.rm=T)
+
+merged_f_df %>%
+  mutate(mode = stringr::str_to_title(mode) ) %>%
+  mutate(avg_sph = round(avg_sph, 2)) %>%
+  reactable(theme=sandstone(),
+            defaultSorted = 'avg_sph',
+            defaultSortOrder = 'desc',
+            columns =
+              list(ROUTEUSSP = colDef(name = "Route"),
+                   avg_sph = colDef(name = "Service Frequency"),
+                   mode = colDef(name = "Mode")))
+```
+
+
+## Chart
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+
+
+mode_colors <- setNames(c("#FF8200", "#78BE20"), c('bus','tram'))
+
+
+
+col_chart <- ggplot(merged_f_df, mapping = aes(x = reorder(ROUTEUSSP, avg_sph), y = avg_sph, fill = mode), ) + geom_col(width = 0.7 ) +
+  scale_fill_manual(values = mode_colors) +
+  ylab('Services Per Hour') +
+  xlab('Route Number') +
+  theme_bw() + coord_flip()
+
+
+ggplotly(col_chart, height = 350)
 # 
-# ggplot(tram_f_df, mapping = aes(x = sph)) +
-#   geom_density() +
-#   facet_wrap(~mode, scales = 'free') +
-#   theme_bw()
-
-ggplot(tram_f_df, aes(x = sph, y = mode, fill = mode)) +
-  geom_boxplot() +
-  geom_jitter(width = 0.2, height = 0.2, alpha = 0.5) +
-  facet_grid(rows = vars(mode), scales = "free") +
-  theme_bw() +
-  theme(legend.position = 'none') + xlab('Services Per Hour') + ylab('Transport Mode')
+# # ggplot(tram_f_df, mapping = aes(x = sph, y = mode, fill = mode)) +
+# #   geom_density_ridges(alpha = 0.5,bins = 15, stat = 'binline') +
+# #   theme_ridges()  +
+# #   theme(legend.position = "none") + xlab("Services Per Hour") +
+# #   ylab("Mode")
+# # 
+# # ggplot(tram_f_df, mapping = aes(x = sph)) +
+# #   geom_density() +
+# #   facet_wrap(~mode, scales = 'free') +
+# #   theme_bw()
+# 
+# ggplot(tram_f_df, aes(x = sph, y = mode, fill = mode)) +
+#   geom_boxplot() +
+#   geom_jitter(width = 0.2, height = 0.2, alpha = 0.5) +
+#   facet_grid(rows = vars(mode), scales = "free") +
+#   theme_bw() +
+#   theme(legend.position = 'none') + xlab('Services Per Hour') + ylab('Transport Mode')
 
 ```
+
 :::
 
+The final score for 'existing transport infrastructure' is computed by summing the average frequencies of each route and applying a weight to each mode.
 
+The current weights are intended to reflect the throughput each mode is capable of. At a minimum, trams can move twice as many people as buses at the same frequency, so trams are weighted twice as much as buses. 
+
+The final score is `r round(total_score, 2)`.
 
 
 ## Capacity Delta
