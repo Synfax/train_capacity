@@ -3,7 +3,7 @@ title: "Station Information"
 author: "Paul S"
 date: "6/6/24"
 params: 
-  station: "Moonee Ponds"
+  station: "Hawthorn"
 format: 
   html: 
     theme: zephyr
