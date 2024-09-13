@@ -24,13 +24,13 @@ source('r/main_functions.r')
 
 # check directories
 
-if(!dir.exists('r_objects') ) {
-  dir.create('r_objects')
-}
-
-if(!dir.exists('data') ) {
-  dir.create('data')
-}
+# if(!dir.exists('r_objects') ) {
+#   dir.create('r_objects')
+# }
+# 
+# if(!dir.exists('data') ) {
+#   dir.create('data')
+# }
 
 
 # run things for the quarto pages
@@ -52,38 +52,3 @@ stations = patronage_data %>%
 
 #
 
-inner_lgas <- c("Melbourne",
-                "Yarra",
-                "Port Phillip",
-                "Stonnington",
-                "Maribyrnong")
-
-middle_lgas <- c("Boroondara",
-                 "Darebin",
-                 "Glen Eira",
-                 "Merri-bek",
-                 "Banyule",
-                 "Bayside",
-                 "Hobsons Bay",
-                 "Kingston",
-                 "Manningham",
-                 "Monash",
-                 "Moonee Valley",
-                 "Whitehorse",
-                 "Maroondah",
-                 "Brimbank"
-)
-
-outer_lgas <- c("Knox",
-                "Mornington Peninsula",
-                "Nillumbik",
-                "Yarra Ranges",
-                "Greater Dandenong",
-                "Frankston")
-
-greenfield <- c("Cardinia",
-                "Casey",
-                "Hume",
-                "Melton",
-                "Whittlesea",
-                "Wyndham")

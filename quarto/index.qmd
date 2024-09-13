@@ -58,6 +58,23 @@ translations = c(
   'n_bus_tram' = 'Other transport infrastructure'
 )
 
+# compact_data_bars <- function(data, fill_color = "#00bfc4", inside_color = "white", outside_color = "black", force_outside = FALSE, ...) {
+#   orig_formatter <- reactablefmtr::data_bars(data, fill_color = fill_color, force_outside = force_outside, ...)
+#   
+#   function(value, index, name) {
+#     bar <- orig_formatter(value, index, name)
+#     script <- sprintf("
+#       const b = this.querySelector('.bar-cell');
+#       if (b) {
+#         const t = b.querySelector('span');
+#         if (t) t.style.color = (b.querySelector('.bar').offsetWidth < b.offsetWidth && %s) ? '%s' : '%s';
+#       }
+#     ", !force_outside, inside_color, outside_color)
+#     
+#     tagList(bar, tags$script(HTML(script)))
+#   }
+# }
+
 printScores <- function(r) {
   transformed_scores %>% 
   filter(rank == r) %>%
@@ -71,7 +88,9 @@ printScores <- function(r) {
               'name' = colDef(name = 'Metric'),
               'value' = colDef(name = "Score",
                              cell = data_bars(.,
+                                              text_position = 'above',
                                               fill_color = 'white',
+                                              text_color = 'white',
                                               background = 'opaque',
                                               fill_opacity = 1,
                                               bar_height = 24,
@@ -176,6 +195,8 @@ printScores(1)
 
 ```
 
+See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[1]),'/quarto/',san_station(transformed_scores$station[1]),'.html') `).
+
 :::
 
 :::{focus-on="cr-map2"}
@@ -196,7 +217,7 @@ Distribution of scores:
 printScores(2)
 
 ```
-
+See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[2]),'/quarto/',san_station(transformed_scores$station[2]),'.html') `).
 :::
 
 :::{focus-on="cr-map3"}
@@ -217,7 +238,7 @@ Distribution of scores:
 printScores(3)
 
 ```
-
+See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[3]),'/quarto/',san_station(transformed_scores$station[3]),'.html') `).
 :::
 
 :::{focus-on="cr-map4"}
@@ -238,7 +259,7 @@ Distribution of scores:
 printScores(4)
 
 ```
-
+See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[4]),'/quarto/',san_station(transformed_scores$station[4]),'.html') `).
 :::
 
 :::{focus-on="cr-map5"}
@@ -259,7 +280,7 @@ Distribution of scores:
 printScores(5)
 
 ```
-
+See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[5]),'/quarto/',san_station(transformed_scores$station[5]),'.html') `).
 :::
 
 :::{focus-on="cr-map6"}
@@ -280,7 +301,7 @@ Distribution of scores:
 printScores(6)
 
 ```
-
+See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[6]),'/quarto/',san_station(transformed_scores$station[6]),'.html') `).
 :::
 
 :::{focus-on="cr-map7"}
@@ -301,7 +322,7 @@ Distribution of scores:
 printScores(7)
 
 ```
-
+See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[7]),'/quarto/',san_station(transformed_scores$station[7]),'.html') `).
 :::
 
 :::{focus-on="cr-map8"}
@@ -323,6 +344,8 @@ printScores(8)
 
 ```
 
+See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[8]),'/quarto/',san_station(transformed_scores$station[8]),'.html') `).
+
 :::
 
 :::{focus-on="cr-map9"}
@@ -343,6 +366,8 @@ Distribution of scores:
 printScores(9)
 
 ```
+
+See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[9]),'/quarto/',san_station(transformed_scores$station[9]),'.html') `).
 
 :::
 
@@ -366,9 +391,9 @@ printScores(10)
 
 ```
 
+See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[10]),'/quarto/',san_station(transformed_scores$station[10]),'.html') `).
+
 :::
-
-
 
 :::{#cr-main}
 
@@ -414,7 +439,7 @@ printScores(10)
 :::
 :::
 
-:::
+
 
 ## Clickable Map
 
@@ -436,7 +461,9 @@ colours = tribble(
 lines_dissolved <- read_sf('../shapefiles/qgis/final_map.shp') %>%
   left_join(colours, by = 'group') 
 
+
 locations = locations %>%
+  mutate(safe_name = gsub("[^a-zA-Z0-9]", "_", Station_Name)) %>%
   mutate(message = 
            paste0(
              '<div style = \" background-color: black; \">',
@@ -445,7 +472,7 @@ locations = locations %>%
              
            )
   ) %>%
-  mutate(win_url = paste0('stations/', 'South_Yarra', '/quarto/', 'South_Yarra', '.html'))
+  mutate(win_url = paste0('stations/', safe_name, '/quarto/', safe_name, '.html'))
 
 
 
@@ -519,7 +546,8 @@ m
 
 \
 
-For a full searchable list of stations, see below
+## List of Stations
+
 
 ```{r}
 
@@ -543,4 +571,3 @@ readRDS('../r_objects/transformed_scores.Rdata') %>%
 
 ```
 
-:::
