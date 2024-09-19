@@ -86,15 +86,6 @@ For `r station`, the scores are shown below in a summary table. The remainder of
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
-translations = c(
-  'grz_nrz_pc' = 'Zoning suitability (% residential and not heritage)',
-  'capacity_delta' = 'Potential new homes in broad 1000m upzoning',
-  'average_peak_service_freq' = 'Train frequency in peak (services per hour)',
-  'average_peak_service_cap' = 'Average train patronage in peak',
-  'walkability_score' = 'Number of local services within 500m walk',
-  'distance' = 'Distance to CBD (m)',
-  'n_bus_tram' = 'Number of bus and tram stops'
-)
 
 rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
   rename(Station_Name = "station") %>%
@@ -106,7 +97,18 @@ rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
 
 transformed_rankings = readRDS('../r_objects/transformed_scores.Rdata') %>%
   rename(Station_Name = "station") %>%
+  arrange(-score) %>%
+  as.data.frame() %>%
+  mutate(rank = row_number())
+
+nrow <- nrow(transformed_rankings)  
+rank <- transformed_rankings %>%
+    filter(Station_Name == station) %>%
+  pull(rank)
+  
+transformed_rankings = transformed_rankings %>%
   filter(Station_Name == station) %>%
+  select(-rank) %>%
   pivot_longer(-Station_Name) %>%
   select(-Station_Name) %>%
   mutate(value = round(value, 2)) %>%
@@ -120,15 +122,17 @@ rankings %>%
 reactable(theme = sandstone(),
             columns = list(
               'name' = colDef(name = 'Metric'),
-              'value.x' = colDef(name = "Score"),
-              'value.y' = colDef(name = "Transformed Score")
+              'value.x' = colDef(name = "Value"),
+              'value.y' = colDef(name = "Score")
             )
             
             )
 
 ```
 
-`r station` obtained a final score of `r total_score`, placing it. 
+\
+
+`r station` obtained a final score of `r total_score`, placing it number `r rank` out of `r nrow`. 
 
 ## Service Frequency
 
@@ -249,7 +253,7 @@ However, for stations in the middle of a train line, passengers will typically c
 
 Instead, it is best to look at the average number of passengers on trains at their last station before the CBD. This gives a better measure of how busy the line itself is overall.
 
-Process for `r station`
+##### Process for `r station`
 
 1. Find the train line(s) that serve `r station`: `r station_lines`
 
@@ -257,7 +261,7 @@ Process for `r station`
 
 3. For each of these stations just before the CBD, calculate the average patronage of train services at that station, but restrict the search to only train services on the lines identified in step 1.
 
-Step 3 is described below, using the target station of `r station_targets`.
+##### Patronage at `r station_targets` on the `r station_lines` line(s):
 
 Average passenger counts at `r station_targets` across the `r station_lines` line(s) are calculated at two times and directions:
 
@@ -399,13 +403,12 @@ area_ratio = ( ( by_validity %>% filter(isNRZGRZ) %>% pull(total_area) ) / sum(b
 
 ```
 
-:::{.panel-tabset}
 
-## Key information
+Out of `r n_suitable + n_unsuitable` lots within `r radius`m radius of `r station`, `r n_suitable` are suitable for upzoning.
 
-Out of `r n_suitable + n_unsuitable` lots within 1km radius of `r station`, `r n_suitable` are easiest to upzone. In terms of area, the easiest properties cover `r area_ratio`% of the total area of `r round(sum(by_validity$total_area)/10^6,2)` km^2.
+In terms of area, the easiest properties cover `r area_ratio`% of the total area of `r round(sum(by_validity$total_area)/10^6,2)` km^2.
 
-## Tabular data
+For more information, see the table below.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -432,6 +435,7 @@ by_zone_heritage %>%
   group_by(zone_short) %>%
   summarise(n_total = sum(n), percent = n[heritage] / n_total, n_heritage = n[heritage], n_not_heritage = n[!heritage]) %>%
   mutate(percent = round(percent, 2)) %>%
+  mutate(percent = percent * 100) %>%
   relocate(n_total, .after = n_not_heritage) %>%
   reactable(
     theme = sandstone(),
@@ -450,8 +454,6 @@ by_zone_heritage %>%
 ```
 
 
-
-:::
 
 
 
@@ -646,6 +648,10 @@ The final score for 'existing transport infrastructure' is computed by summing t
 The current weights are intended to reflect the throughput each mode is capable of. At a minimum, trams can move twice as many people as buses at the same frequency, so trams are weighted twice as much as buses. 
 
 The final score is `r round(total_score, 2)`.
+
+## Local Services
+
+
 
 
 ## Capacity Delta

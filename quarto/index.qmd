@@ -128,7 +128,13 @@ For each train stations, seven key metrics are calculated:
 -   Existing transport infrastructure.
 
 With these 'raw' metrics, a transformed score is calculated by factoring in how each station scores relative to others on the network. This allows for stations to be compared easily with a single number, or rank.
+
 \
+
+For some metrics, higher values are 'worse' for upzoning, which means their scores are negative.
+
+\
+
 The transformation process is described [here](rankings.html "Rankings Page").
 :::
 :::{focus-on="cr-main"}
@@ -479,7 +485,7 @@ locations = locations %>%
 js_code <- "
 function(el, x, data) {
 
-  var marker = document.getElementsByClassName('leaflet-interactive');
+    var marker = document.getElementsByClassName('leaflet-interactive');
   for(var i=0; i < marker.length; i++){
     (function(){
       var v = data.win_url[i];

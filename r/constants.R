@@ -13,6 +13,20 @@ weights = c(
   'n_bus_tram' = 1
 )
 
+translations = c(
+  'grz_nrz_pc' = 'Zoning suitability (% residential and not heritage)',
+  'capacity_delta' = 'Potential new homes in broad 1000m upzoning',
+  'average_peak_service_freq' = 'Train frequency in peak (services per hour)',
+  'average_peak_service_cap' = 'Average patronage of train line(s) in peak',
+  'walkability_score' = 'Number of local services within 500m walk',
+  'distance' = 'Distance to CBD (m)',
+  'n_bus_tram' = 'Mode weighted bus and tram frequencies'
+)
+
+translations_inverse = c(
+  
+)
+
 bus_weight = 1
 tram_weight = 2
 
