@@ -15,6 +15,7 @@ library(DescTools)
 library(mapview)
 library(geosphere)
 library(chron)
+library(osmdata)
 
 source('r/helpers.r')
 source('r/constants.r')

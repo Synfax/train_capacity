@@ -21,10 +21,10 @@ stations = patronage_data %>%
 
 #set globals
 
-walkability = read_parquet('data/walkability_by_node.parquet')%>%
-  janitor::clean_names() %>%
-  st_set_geometry('geometry') %>%
-  st_set_crs('wgs84')
+# walkability = read_parquet('data/walkability_by_node.parquet')%>%
+#   janitor::clean_names() %>%
+#   st_set_geometry('geometry') %>%
+#   st_set_crs('wgs84')
 
 dwelling_data = readRDS(paste0('data/final_dwelling_data.Rdata')) %>%
   st_transform( 'wgs84')

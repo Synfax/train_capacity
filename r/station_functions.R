@@ -207,27 +207,151 @@ get_peak_service_capacity <- function(station, fromQuarto = F) {
   
 }
 
+map_amenities <- function(amenities) {
+  
+  amenPal <- colorFactor(brewer.pal(name = 'Set1', n = length(unique(amenities$type))), domain = amenities$type)
+  
+  leaflet() %>%
+    addProviderTiles('CartoDB.Positron') %>%
+    addCircles(data = amenities, radius = 2, color = ~amenPal(type), opacity = 1) %>%
+    addLegend(position = 'bottomleft', pal = amenPal, values = amenities$type) %>%
+    addPolygons(data = buffer)
+  
+}
+
 get_walkability_score <- function(station) {
   
-  #todo: fix
-  critical_variables = c('restaurant', 'grocery', 'cafe', 'bar', 'school', 'child_care', 'park')
+  near_osm <- get_near_osm(station) 
   
-  walkability = get_near_osm(station)
+  map_amenities(near_osm)
   
-  walkability = walkability %>%
+  tab <- near_osm %>%
     st_drop_geometry() %>%
-    select(ends_with('500m')) %>%
-    select(starts_with(critical_variables))
+    group_by(type) %>%
+    count() %>%
+    mutate(log_n = log(n))
   
-  average_walkability_score = walkability %>%
-    summarise(across(dplyr::everything(), mean)) %>%
-    mutate(avg = mean( c_across(dplyr::everything()))) %>%
-    select(avg) %>%
-    unlist() %>%
-    as.vector()
   
-  return(average_walkability_score)
+  return(tab %>% pull(log_n) %>% sum())
+  
+  #todo: fix
+  # critical_variables = c('restaurant', 'grocery', 'cafe' , 'bar', 'school', 'child_care', 'park')
+  # 
+  # walkability_near_station = get_near_osm(station)
+  # 
+  # #map_osm_nodes(walkability)
+  # 
+  # walkability_near_station = walkability_near_station %>%
+  #   select(-cell_number) %>%
+  #   select(ends_with('500m')) %>%
+  #   select(starts_with(critical_variables))
+  # 
+  # average_walkability_score = walkability_near_station %>%
+  #   summarise(across(dplyr::everything(), median)) %>%
+  #   mutate(avg = median( c_across(dplyr::everything()))) %>%
+  #   select(avg) %>%
+  #   unlist() %>%
+  #   as.vector()
+  # 
+  # return(average_walkability_score)
 
+}
+
+
+return_cleaned_osm_nodes <- function(type_key = 'amenity', amenity_value = 'cafe', buffer) {
+  
+  buffer_wgs <- st_transform(buffer, 'wgs84')
+  
+  print(amenity_value)
+  
+  osm <- opq(bbox = st_bbox(buffer)) %>%
+    add_osm_feature(key = type_key, value = amenity_value) %>%
+    osmdata_sf() %>%
+    unique_osmdata()
+  
+  if(nrow(osm$osm_points) > 0) {
+    osm_sf_points <- osm$osm_points %>%
+      st_as_sf() %>%
+      dplyr::select(osm_id, !!type_key)
+    
+    osm_sf_points <- osm_sf_points %>%
+      filter(st_intersects(osm_sf_points, buffer_wgs, sparse = F))
+    
+  } else {
+    osm_sf_points <- st_sf(st_sfc())
+  }
+  
+  if(nrow(osm$osm_polygons) > 0) {
+    osm_sf_poly <- osm$osm_polygons %>%
+      st_as_sf() %>%
+      dplyr::select(osm_id, !!type_key)
+    
+    leaflet() %>%
+      addProviderTiles('CartoDB.Positron') %>%
+      addPolygons(data = osm_sf_poly) %>%
+      addPolygons(data = buffer_wgs)
+    
+    osm_sf_poly <- osm_sf_poly %>%
+      filter(st_intersects(osm_sf_poly, buffer_wgs, sparse = F))
+    
+  } else {
+    osm_sf_poly <- st_sf(st_sfc())
+  }
+  
+  if( nrow(osm_sf_points) == 0 & nrow(osm_sf_poly) == 0) {
+    #print('both NA')
+    return()
+  }
+  
+  # leaflet(osm_sf_points) %>%
+  #   addProviderTiles('CartoDB.Positron') %>%
+  #   addCircleMarkers(radius = 3)
+  # 
+  # leaflet(osm_sf_poly) %>%
+  #   addProviderTiles('CartoDB.Positron') %>%
+  #   addPolygons()
+  
+  if(nrow(osm_sf_poly) > 0 ) {
+    poly_centroids <- osm_sf_poly %>%
+      st_centroid()
+    
+    if(nrow(osm_sf_points) > 0) {
+      #print('both not NA')
+      merged_point_sf <- rbind.data.frame(osm_sf_points, poly_centroids) %>%
+        rename(type = !!type_key)
+      
+      # leaflet(merged_point_sf) %>%
+      #   addProviderTiles('CartoDB.Positron') %>%
+      #   addCircleMarkers(radius = 3) %>%
+      #   addPolygons(data = buffer_wgs)
+      
+      return(merged_point_sf)
+      
+    }
+    
+    if( nrow(osm_sf_points) == 0 ) {
+      #print('poly not NA, points NA')
+      return(poly_centroids %>%
+               rename(type = !!type_key ))
+    }
+  }
+  if( nrow(osm_sf_poly) == 0 ) {
+    
+    if(  nrow(osm_sf_points) > 0 ) {
+      #print('poly NA, points not NA')
+      return(osm_sf_points %>%
+               rename(type = !!type_key))
+    }
+  }
+}
+
+
+map_osm_nodes <- function(nodes) {
+  
+  leaflet(nodes) %>%
+    addProviderTiles('CartoDB.Positron') %>%
+    addCircleMarkers(stroke = NA, fill = 'blue', opacity = 1,radius = 2,  fillColor = 'blue', weight = 2)
+  
 }
 
 get_near_osm <- function(station, fromQuarto = F) {
@@ -243,21 +367,64 @@ get_near_osm <- function(station, fromQuarto = F) {
   } else {
     
     locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
-    
+
     station_location = locations %>%
       filter(Station_Name == station) %>%
       st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
-    
+
     buffer = st_buffer(station_location, dist = radius)
+    buffer_wgs = st_transform(buffer, 'wgs84')
     
-    within_nodes <- st_within(walkability, buffer, sparse = F)
+    critical_variables = data.frame(val = c('restaurant', 'supermarket', 'cafe', 'bar', 'school', 'childcare', 'park'),
+                                    key =  c('amenity', 'shop', 'amenity', 'amenity', 'amenity', 'amenity', 'leisure'))
     
-    walkability_near_station = walkability %>%
-      filter(within_nodes)
+    amenity_results <- map2(critical_variables$key, critical_variables$val, return_cleaned_osm_nodes, buffer) 
+    amenity_results <- amenity_results[lengths(amenity_results) != 0] %>%
+      list_rbind()  %>%
+      st_set_geometry('geometry')
     
-    saveRDS(walkability_near_station, file_dir)
+    amenity_results = st_intersection(amenity_results, buffer_wgs)
     
-    return(walkability_near_station)
+    saveRDS(amenity_results, file_dir)
+    
+    return(amenity_results)
+    # 
+    # locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
+    # 
+    # station_location = locations %>%
+    #   filter(Station_Name == station) %>%
+    #   st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
+    # 
+    # buffer = st_buffer(station_location, dist = radius)
+    # 
+    # grid_buffer <- st_make_grid(buffer, cellsize = 0.0025) %>%
+    #   st_as_sf() %>%
+    #   mutate(cell_number = row_number())
+    # 
+    # within_nodes <- st_within(walkability, buffer, sparse = F)
+    # 
+    # walkability_near_station = walkability %>%
+    #   filter(within_nodes) %>%
+    #   st_as_sf()
+    # 
+    # # leaflet(walkability_near_station) %>%
+    # #   addProviderTiles('CartoDB.Positron') %>%
+    # #   addCircleMarkers() %>%
+    # #   addPolygons(data = grid_buffer)
+    # 
+    # in_grid_buffer <- st_join(walkability_near_station, grid_buffer)
+    # 
+    # in_grid_buffer = in_grid_buffer %>%
+    #   group_by(cell_number) %>%
+    #   filter(row_number() == 1) %>%
+    #   filter(!is.na(osmid)) %>%
+    #   st_as_sf()
+    # 
+    # # leaflet(in_grid_buffer) %>%
+    # #   addProviderTiles('CartoDB.Positron') %>%
+    # #   addCircleMarkers()
+    # 
+    
     
   }
   
