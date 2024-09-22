@@ -1,18 +1,29 @@
 
 
-return_information <- function(station) {
+return_information <- function(station, debug = F) {
   
-  return(c(
+  if(debug) {
+    print(station)
+  }
+  
+  
+  amenity_res <- get_walkability_score(station)
+  
+  
+  other_metric_list <- c(
     "station" = station,
     "grz_nrz_pc" = find_zoning_suitability(station),
     "capacity_delta" = find_zoned_capacity(station),
     #"heritage_pc" = find_heritage_pc(station),
     "average_peak_service_freq" = get_peak_service_frequency(station),
     "average_peak_service_cap" = get_line_peak_capacity_at_closest_station(station),
-    "walkability_score" = get_walkability_score(station),
     "distance" = get_distance_to_flinders(station),
     "n_bus_tram" = get_bus_and_tram_stops(station)
-  ))
+  )
+  
+  combined_list <- c(other_metric_list, amenity_res)
+  
+  return(combined_list)
   
 }
 
@@ -223,16 +234,25 @@ get_walkability_score <- function(station) {
   
   near_osm <- get_near_osm(station) 
   
-  map_amenities(near_osm)
+  #map_amenities(near_osm)
   
   tab <- near_osm %>%
     st_drop_geometry() %>%
     group_by(type) %>%
-    count() %>%
-    mutate(log_n = log(n))
+    count()
+  
+  missing_amenities <- setdiff(critical_variables$val, tab$type)
+  
+  missing_df <- data.frame(type = missing_amenities, n = rep(0, length(missing_amenities)))
+  
+  tab = rbind.data.frame(tab, missing_df)
+  
+  test <- as.character(tab$n)
+  names(test) <- tab$type
   
   
-  return(tab %>% pull(log_n) %>% sum())
+  #return(tab %>% pull(log_n) %>% sum())
+  return(test)
   
   #todo: fix
   # critical_variables = c('restaurant', 'grocery', 'cafe' , 'bar', 'school', 'child_care', 'park')
@@ -262,7 +282,7 @@ return_cleaned_osm_nodes <- function(type_key = 'amenity', amenity_value = 'cafe
   
   buffer_wgs <- st_transform(buffer, 'wgs84')
   
-  print(amenity_value)
+  #print(amenity_value)
   
   osm <- opq(bbox = st_bbox(buffer)) %>%
     add_osm_feature(key = type_key, value = amenity_value) %>%
@@ -375,8 +395,6 @@ get_near_osm <- function(station, fromQuarto = F) {
     buffer = st_buffer(station_location, dist = radius)
     buffer_wgs = st_transform(buffer, 'wgs84')
     
-    critical_variables = data.frame(val = c('restaurant', 'supermarket', 'cafe', 'bar', 'school', 'childcare', 'park'),
-                                    key =  c('amenity', 'shop', 'amenity', 'amenity', 'amenity', 'amenity', 'leisure'))
     
     amenity_results <- map2(critical_variables$key, critical_variables$val, return_cleaned_osm_nodes, buffer) 
     amenity_results <- amenity_results[lengths(amenity_results) != 0] %>%

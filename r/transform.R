@@ -89,6 +89,24 @@ ranked_by_lga = function() {
   
 }
 
+transform_walkability_scores <- function(walk_df) {
+  
+  xminmaxtransform = walk_df %>%
+    mutate( across(-station, ~ as.numeric(.) )) %>%
+    filter(!(station %in% city_loop_stations)) %>%
+    filter(distance < 25000) %>%
+    select(-distance) %>%
+    mutate( across(-station, .fns = function(x) { ( x - min(x, na.rm= T)) / ( max(x, na.rm= T) - min(x, na.rm= T)  ) } )) %>%
+    rowwise() %>%
+    mutate(score = sum(across(-station))) %>%
+    arrange(desc(score)) %>%
+    rename(walkability_score = score) %>%
+    select(station, walkability_score)
+  
+  return(xminmaxtransform)
+  
+}
+
 make_map <- function() {
   
   

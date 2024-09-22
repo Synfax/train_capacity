@@ -616,7 +616,7 @@ col_chart <- ggplot(merged_f_df, mapping = aes(x = reorder(ROUTEUSSP, avg_sph), 
   scale_fill_manual(values = mode_colors) +
   ylab('Services Per Hour') +
   xlab('Route Number') +
-  theme_bw() + coord_flip()
+   coord_flip()
 
 
 ggplotly(col_chart, height = 350)
@@ -651,7 +651,52 @@ The final score is `r round(total_score, 2)`.
 
 ## Local Services
 
+The plot below shows the number of local services within a `r radius`m radius. Data is drawn from OpenStreetMaps classifications. Black dotted lines represent the means across all stations that meet the criteria for ranking.
 
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+walkability_df <- readRDS('../r_objects/station_walkability.Rdata')
+
+walkability_this_station = walkability_df %>%
+  rename(Station_Name = 'station') %>%
+  filter(Station_Name == station) %>%
+  as.data.frame() %>%
+  pivot_longer(cols = (-Station_Name)) %>%
+  arrange(desc(value))
+
+valid_stations <- readRDS('../r_objects/transformed_scores.Rdata') %>%
+  pull(station) 
+
+amenity_means = walkability_df %>%
+  filter(station %in% valid_stations) %>%
+  summarise(across(-station, mean)) %>%
+  pivot_longer(cols = everything()) %>%
+  left_join(walkability_this_station, by = 'name') %>%
+  arrange(desc(value.y))
+
+col_width = 0.7
+
+ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
+
+(ggplot(amenity_means, aes(x = name, y = value.y, fill = name)) +
+  geom_col(width = col_width) +
+    ylim(0, ymax) +
+  guides(fill = 'none') +
+    xlab('Amenity') +
+    ylab('Number in radius') +
+  geom_segment(aes(x = as.numeric(factor(name)) - col_width/2,
+                   xend = as.numeric(factor(name)) + col_width/2,
+                   y = value.x, yend = value.x),
+               color = "black", size = 1, linetype = "dashed") ) %>%
+  ggplotly()
+    
+    
+  # xlab('Amenity') +
+  # ylab('Number in radius') +
+  # theme_bw() ) %>% ggplotly()
+
+```
 
 
 ## Capacity Delta

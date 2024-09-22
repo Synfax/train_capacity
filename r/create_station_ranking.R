@@ -8,13 +8,6 @@ if(!dir.exists('station_walkability_info')) {
   dir.create('station_walkability_info')
 }
 
-stations = patronage_data %>%
-  filter(Mode == 'Metro') %>%
-  select(Station_Name) %>%
-  distinct() %>%
-  slice_sample(prop = 1) %>%
-  unlist() %>% 
-  as.vector()
 
 #or
 
@@ -30,18 +23,32 @@ dwelling_data = readRDS(paste0('data/final_dwelling_data.Rdata')) %>%
   st_transform( 'wgs84')
 
 station_rankings <- stations %>%
-  map(~ as_tibble(as.list(return_information(.x))), .progress = T) %>%
+  map(~ as_tibble(as.list(return_information(.x, debug = T))), .progress = T) %>%
   list_rbind() %>%
-  mutate(across(-station, as.numeric)) %>%
-  filter(!is.nan(walkability_score)) 
+  mutate(across(-station, as.numeric)) 
 
+walkability_df = station_rankings %>% 
+  select(c('station', 'distance', critical_variables$val))
+
+saveRDS(walkability_df %>% select(-distance), 'r_objects/station_walkability.Rdata')
+
+walkability_df = transform_walkability_scores(walkability_df)
+
+station_rankings_ = station_rankings %>% 
+  select(-c(critical_variables$val)) %>%
+  left_join(walkability_df, by = 'station') %>%
+  filter(!is.na(walkability_score))
+  
+  
 #write_csv(station_rankings, 'data/csv_output.csv')
 
-saveRDS(station_rankings, 'r_objects/station_rankings.Rdata')
+#split intwo two dfs
+
+saveRDS(station_rankings_, 'r_objects/station_rankings.Rdata')
 
 #station_rankings = readRDS('r_objects/station_rankings.Rdata') 
 
-transformed_scores = transform_scores_xminxmax(station_rankings)
+transformed_scores = transform_scores_xminxmax(station_rankings_)
 
 saveRDS(transformed_scores, 'r_objects/transformed_scores.Rdata')
 

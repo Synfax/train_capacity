@@ -15,12 +15,12 @@ library(DescTools)
 library(mapview)
 library(geosphere)
 library(chron)
+library(RColorBrewer)
 library(osmdata)
 
 source('r/helpers.r')
 source('r/constants.r')
 source('r/main_functions.r')
-
 
 
 # check directories

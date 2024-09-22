@@ -13,6 +13,11 @@ weights = c(
   'n_bus_tram' = 1
 )
 
+critical_variables = data.frame(val = c('restaurant', 'supermarket', 'cafe', 'bar', 'school', 'childcare', 'park'),
+                                key =  c('amenity', 'shop', 'amenity', 'amenity', 'amenity', 'amenity', 'leisure'))
+
+city_loop_stations = c('Flagstaff', 'Flinders Street', 'Melbourne Central', 'Southern Cross', 'Parliament')
+
 translations = c(
   'grz_nrz_pc' = 'Zoning suitability (% residential and not heritage)',
   'capacity_delta' = 'Potential new homes in broad 1000m upzoning',
