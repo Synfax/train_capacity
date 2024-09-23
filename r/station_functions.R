@@ -218,16 +218,61 @@ get_peak_service_capacity <- function(station, fromQuarto = F) {
   
 }
 
-map_amenities <- function(amenities) {
+map_amenities <- function(amenities, station, fromQuarto = T) {
   
-  amenPal <- colorFactor(brewer.pal(name = 'Set1', n = length(unique(amenities$type))), domain = amenities$type)
+  print(paste0('mapping amenities for ', station))
   
-  leaflet() %>%
-    addProviderTiles('CartoDB.Positron') %>%
-    addCircles(data = amenities, radius = 2, color = ~amenPal(type), opacity = 1) %>%
-    addLegend(position = 'bottomleft', pal = amenPal, values = amenities$type) %>%
-    addPolygons(data = buffer)
+  prefix_dir = ifelse(fromQuarto, '../', '')
+  file_path = paste0(prefix_dir, 'amenity_property_maps/', station, '.Rdata')
   
+  if(file.exists(file_path)) {
+    
+    test_ <- readRDS(file_path)
+    
+    return(test_)
+    
+  } else {
+    
+    amenities = amenities %>%
+      mutate(uniq = paste0('a', row_number()))
+    
+    
+    buffer = get_buffer(station, fromQuarto = fromQuarto)
+    print('buffer collected')
+    # leaflet() %>%
+    #   addProviderTiles('CartoDB.Positron') %>%
+    #   addCircles(data = amenities, radius = 2, color = ~amenPal(type), opacity = 1) %>%
+    #   addLegend(position = 'bottomleft', pal = amenPal, values = amenities$type) %>%
+    #   addPolygons(data = buffer)
+    
+    #attempt join to dwelling_data
+    
+    print('performing intersection')
+    
+    dd_in_buffer <- st_intersection(dwelling_data, buffer)
+    
+    print('spatial join')
+    
+    filtered_properties <- st_join(dd_in_buffer, amenities)
+    
+    filtered_properties <- filtered_properties %>%
+      filter(!is.na(type)) %>%
+      select(type, uniq) 
+    
+    test_ <- amenities %>%
+      as.data.frame() %>%
+      left_join(filtered_properties, by = 'uniq') %>%
+      st_set_geometry('geometry.y')
+    
+    print('saving')
+    
+    saveRDS(test_, file_path)
+    
+    return(test_)
+    
+  }
+  
+
 }
 
 get_walkability_score <- function(station) {
@@ -280,7 +325,7 @@ get_walkability_score <- function(station) {
 
 return_cleaned_osm_nodes <- function(type_key = 'amenity', amenity_value = 'cafe', buffer) {
   
-  buffer_wgs <- st_transform(buffer, 'wgs84')
+  buffer_wgs <- st_transform(get_buffer(), 'wgs84')
   
   #print(amenity_value)
   
@@ -374,6 +419,24 @@ map_osm_nodes <- function(nodes) {
   
 }
 
+get_buffer <- function(station, fromQuarto = F) {
+  
+
+  prefix_dir = ifelse(fromQuarto, '../', '')
+  
+  file_dir = paste0(prefix_dir, 'r_objects/locations.Rdata')
+  
+  locations = readRDS(file_dir)
+  
+  station_location = locations %>%
+    filter(Station_Name == station) %>%
+    st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
+  
+  buffer = st_buffer(station_location, dist = radius)
+  
+  return(buffer)
+}
+
 get_near_osm <- function(station, fromQuarto = F) {
   
   prefix_dir = ifelse(fromQuarto, '../', '')
@@ -386,13 +449,7 @@ get_near_osm <- function(station, fromQuarto = F) {
     
   } else {
     
-    locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
-
-    station_location = locations %>%
-      filter(Station_Name == station) %>%
-      st_as_sf(coords = c('lng','lat'), crs = 'wgs84')
-
-    buffer = st_buffer(station_location, dist = radius)
+    buffer = get_buffer(station, fromQuarto)
     buffer_wgs = st_transform(buffer, 'wgs84')
     
     

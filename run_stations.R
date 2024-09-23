@@ -7,6 +7,8 @@ already_rendered <- list.dirs('stations/', recursive = F, full.names = F) %>%
 
 edited_station_list = setdiff(stations, already_rendered)
 
+edited_station_list = 'Brunswick'
+
 # Render a report for each station
 for (station in edited_station_list) {
   print(station)

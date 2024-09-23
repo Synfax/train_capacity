@@ -11,6 +11,9 @@ if(!dir.exists('station_walkability_info')) {
 
 #or
 
+walk(stations, .f = function(x) { map_amenities( get_near_osm(x, fromQuarto = F), x, fromQuarto = F) })
+
+map_amenities(get_near_osm('Hawthorn', fromQuarto = F), 'Hawthorn', fromQuarto = F)
 
 #set globals
 
@@ -38,6 +41,7 @@ station_rankings_ = station_rankings %>%
   select(-c(critical_variables$val)) %>%
   left_join(walkability_df, by = 'station') %>%
   filter(!is.na(walkability_score))
+
   
   
 #write_csv(station_rankings, 'data/csv_output.csv')

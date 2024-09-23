@@ -44,6 +44,26 @@ station_rankings %>%
 
 ```
 
+#Full Methodology
+
+
+#Line Capacity
+
+This metric aims to measure the amount of space available on trains passing through this station, as there is little point upzoning if there is no capacity to move people.
+
+However, for stations in the middle of a train line, passengers will typically continue to board the train until the city. This means that it is not useful to only look at the patronage as trains pass through a given station as more passengers may board later.
+
+Instead, it is best to look at the average number of passengers on trains at their last station before the CBD. This gives a better measure of how busy the line itself is overall.
+
+##### Process for `r station`
+
+1. Find the train line(s) that serve `r station`: `r station_lines`
+
+2. For each train line, find the station nearest to the CBD. These are by definition the same for each line: `r station_targets`.
+
+3. For each of these stations just before the CBD, calculate the average patronage of train services at that station, but restrict the search to only train services on the lines identified in step 1.
+
+
 ## How does the transformation work?
 
 Each raw score is in different units, so the first task is to transform all the metrics into something that can be summed into one total score.

@@ -17,6 +17,7 @@ library(geosphere)
 library(chron)
 library(RColorBrewer)
 library(osmdata)
+library(collapse)
 
 source('r/helpers.r')
 source('r/constants.r')

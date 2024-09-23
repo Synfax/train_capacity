@@ -3,7 +3,7 @@ title: "Station Information"
 author: "Paul S"
 date: "6/6/24"
 params: 
-  station: "Hawthorn"
+  station: "Brunswick"
 format: 
   html: 
     theme: zephyr
@@ -32,7 +32,9 @@ library(htmltools)
 library(htmlwidgets)
 library(reactablefmtr)
 library(plotly)
+library(RColorBrewer)
 library(ggridges)
+library(collapse)
 
 source('../r/station_functions.R')
 
@@ -247,19 +249,6 @@ station_targets = readRDS('../r_objects/target_stations.Rdata') %>%
   first()
 ```
 
-This metric aims to measure the amount of space available on trains passing through this station, as there is little point upzoning if there is no capacity to move people.
-
-However, for stations in the middle of a train line, passengers will typically continue to board the train until the city. This means that it is not useful to only look at the patronage as trains pass through a given station as more passengers may board later.
-
-Instead, it is best to look at the average number of passengers on trains at their last station before the CBD. This gives a better measure of how busy the line itself is overall.
-
-##### Process for `r station`
-
-1. Find the train line(s) that serve `r station`: `r station_lines`
-
-2. For each train line, find the station nearest to the CBD. These are by definition the same for each line: `r station_targets`.
-
-3. For each of these stations just before the CBD, calculate the average patronage of train services at that station, but restrict the search to only train services on the lines identified in step 1.
 
 ##### Patronage at `r station_targets` on the `r station_lines` line(s):
 
@@ -649,14 +638,59 @@ The current weights are intended to reflect the throughput each mode is capable 
 
 The final score is `r round(total_score, 2)`.
 
-## Local Services
+## Local Amenities
+
+(why local amenities are important) 
+
+The map below shows 
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+  walkability_df <- readRDS('../r_objects/station_walkability.Rdata')
+
+  buffer = get_buffer(station, fromQuarto = T)
+
+  full_prop_list = map_amenities(get_near_osm(station, fromQuarto = T), station, fromQuarto = T)
+  
+  amenPal <- colorFactor(brewer.pal(name = 'Set1', n = length(unique(full_prop_list$type))), domain = full_prop_list$type)
+
+  unmatched_props <- full_prop_list %>%
+    filter(st_is_empty(geometry.y)) %>%
+    st_set_geometry('geometry')
+  
+  matched_props <- full_prop_list %>%
+    filter(!st_is_empty(geometry.y)) %>%
+    st_set_geometry('geometry.y') %>%
+    select(-geometry, - geometry.x)
+  
+  matched_props = matched_props %>%
+    group_by(geometry.y) %>%
+    summarise(n = n(), type = fmode(type) )
+  
+  leaflet() %>%
+    fitBounds(bounds[1], bounds[2], bounds[3], bounds[4]) %>%
+  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = 14.5) %>%
+    addMapPane("background_map", zIndex = 410) %>%  # Level 1: bottom
+    addMapPane("polygons", zIndex = 420) %>%        # Level 2: middle
+    addMapPane("labels", zIndex = 430) %>%  
+    addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.7, pane = "background_map")) %>%
+    addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(pane = "labels")) %>%
+    addPolygons(data = matched_props, fillColor = ~amenPal(type), fillOpacity = 0.7, color = 'black', options = pathOptions(pane = 'polygons'), weight = 1) %>%
+    addCircles(data = unmatched_props, fillColor = ~amenPal(type), fillOpacity = 0.7,  color = 'black', options = pathOptions(pane = 'polygons'), weight = 1) %>%
+    addLegend(position = 'bottomleft', pal = amenPal, values = full_prop_list$type) %>%
+    addPolygons(data = buffer, color = 'black', fillColor = 'grey', fillOpacity = 0.3, options = pathOptions(pane = 'polygons'))
+  
+  
+
+
+```
 
 The plot below shows the number of local services within a `r radius`m radius. Data is drawn from OpenStreetMaps classifications. Black dotted lines represent the means across all stations that meet the criteria for ranking.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
-walkability_df <- readRDS('../r_objects/station_walkability.Rdata')
 
 walkability_this_station = walkability_df %>%
   rename(Station_Name = 'station') %>%
