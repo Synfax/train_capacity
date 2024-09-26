@@ -26,6 +26,8 @@ The next section details the transformation process, and the final section conta
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
+station = params$station
+
 library(tidyverse)
 library(reactablefmtr)
 
@@ -46,6 +48,23 @@ station_rankings %>%
 
 #Full Methodology
 
+This page includes information about the seven categories and why they should be considered as factors in priority upzoning:
+
+-   Zoning suitability
+-   Potential number of new homes
+-   Train service frequency in peak
+-   Train service passenger numbers in peak
+-   Number of local services within a 500m walk
+-   Distance to CBD
+-   Existing transport infrastructure.
+
+# Zoning suitability
+
+The number of lots within 1km of stations zoned as either Neighbourhood Residential or General Residential, and NOT under heritage protection is an approximation of 'ease of upzoning' for a given station.
+
+#Zoned Capacity
+
+Zoned capacity is a measure of how many dwellings could fit in an area, given the current zoning. It is a theoretic maximum. This section looks at the current zoned capacity, and compares it to a theoretic zoned capacity under 'Missing Middle' zoning. To reiterate, the potential future zoned capacity is **a theoretic maximum**, and extremely unlikely to be realised if upzoning occured.
 
 #Line Capacity
 

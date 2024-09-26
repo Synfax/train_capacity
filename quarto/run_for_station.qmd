@@ -4,11 +4,12 @@ author: "Paul S"
 date: "6/6/24"
 params: 
   station: "Brunswick"
+css: run_for_station.css
 format: 
   html: 
     theme: zephyr
     fig-width: 6
-    fig-height: 4
+    fig-height: 6
     code-fold: false
     toc: true
     toc-depth: 4
@@ -19,6 +20,8 @@ format:
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 station = params$station
+
+zoom_level = 15
 
 source('../r/constants.R')
 
@@ -71,19 +74,15 @@ hourly_factors = readRDS('../r_objects/hourly_factors.Rdata') %>%
 
 ```
 
-## Information & Overall Scores
-
-This page includes information about the seven categories and why they should be considered as factors in priority upzoning:
-
--   Zoning suitability
--   Potential number of new homes
--   Train service frequency in peak
--   Train service passenger numbers in peak
--   Number of local services within a 500m walk
--   Distance to CBD
--   Existing transport infrastructure.
+##Overall Scores
 
 For `r station`, the scores are shown below in a summary table. The remainder of this page steps through each factor listed above in no particular order.
+
+::: {.callout-note icon="false"}
+## Full Methodology
+
+The full methodology for how these scores are calculated and why they are important for consideration in upzoning is here.
+:::
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -134,21 +133,23 @@ reactable(theme = sandstone(),
 
 \
 
-`r station` obtained a final score of `r total_score`, placing it number `r rank` out of `r nrow`. 
+`r station` obtained a final score of **`r total_score`**, placing it number `r rank` out of `r nrow`.
 
 ## Service Frequency
 
-(why is frequency important?)
+Service frequency is calculated as the mean number of services per hour in two time periods:
 
-Service frequency is calculated as the mean number of services per hour in two time periods. The chart below shows:
+-   Between 7 and 10am towards Flinders Street, shown in blue.
 
--   Number of services between 7 and 10am towards Flinders Street, coloured blue.
+-   Between 4 and 7pm away from Flinders Street, shown in green.
 
--   Number of services between 4 and 7pm away from Flinders street, coloured green.
+::: column-margin
+The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street.
 
-The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street. 
+\
 
-The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score. 
+The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
+:::
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -208,7 +209,7 @@ sph_plot <- ggplot() +
   scale_fill_manual(values = c('morning' = 'blue', 'evening' = 'green')) +
   scale_x_continuous(breaks = 0:23, limits = c(0, 23)) +
   labs(title = "Service Frequency by time of day", fill = " Peak Period") +
-  theme_bw(base_size = 13) +
+  theme(base_size = 13) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(legend.position = "bottom") + 
   xlab('Hour of day') + 
@@ -228,9 +229,9 @@ div(class = "plot", interactive_sph)
 #interactive_sph
 ```
 
-The morning average freqency is `r morning_to_flinders`, the average evening frequency is `r evening_away_from_flinders`, which forms a mean score of `r final_frequency_score`.
+The morning average freqency is `r morning_to_flinders`, the average evening frequency is `r evening_away_from_flinders`, which forms a mean score of **`r final_frequency_score`**.
 
-## Service Capacity
+## Available Line Capacity
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -249,18 +250,13 @@ station_targets = readRDS('../r_objects/target_stations.Rdata') %>%
   first()
 ```
 
+<!-- ##### Patronage at `r station_targets` on the `r station_lines` line(s): -->
 
-##### Patronage at `r station_targets` on the `r station_lines` line(s):
+The chart below shows the average patronage on the `r station_lines` line(s) at the last stop before the CBD. It is calculated for two times:
 
-Average passenger counts at `r station_targets` across the `r station_lines` line(s) are calculated at two times and directions:
+-   Between 7 and 10am towards Flinders Street, denoted as blue.
 
--   Patronage between 7 and 10am towards Flinders Street, denoted as blue in the charts.
-
--   Patronage between 4 and 7pm away from Flinders street, shown as green in the charts.
-
-The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street. 
-
-The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
+-   Between 4 and 7pm away from Flinders street, shown as green.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -314,7 +310,7 @@ patronage_plot <- ggplot() +
   scale_fill_manual(values = c('morning' = 'blue', 'evening' = 'green')) +
   scale_x_continuous(breaks = 0:23, limits = c(0, 23)) +
   labs(title = "Average patronage by time of day", fill = " Peak Period") +
-  theme_bw(base_size = 13) +
+  theme(base_size = 13) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   xlab('Hour of day') + 
   ylab('Patronage per train') +
@@ -333,18 +329,28 @@ div(class = 'plot', interactive_patronage)
 
 ```
 
-The morning average patronage is `r morning_to_flinders`, the average evening patronage is `r evening_away_from_flinders`, which forms a mean score of `r final_patronage_score`.
+::: column-margin
+The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street.
+
+\
+
+The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
+:::
+
+The morning average patronage is `r morning_to_flinders`, the average evening patronage is `r evening_away_from_flinders`, which forms a mean score of **`r final_patronage_score`.**
 
 ## Zoning Suitability
 
-The number of lots within 1km of stations zoned as either Neighbourhood Residential or General Residential, and NOT under heritage protection is an approximation of 'ease of upzoning' for a given station.
+The map below shows the properties within 1km of `r station` that are suitable for upzoning in orange, properties that do not meet the conditions described above are black.
 
-The map below shows the properties within 1km of `r station` that meet the conditions above, shaded in orange. Properties that do not meet the conditions described above are black.
+::: column-margin
+Suitable properties are either neighbourhood residential or general residential and not under heritage restrictions.
+:::
 
-Additional information on land use and heritage is provided in tables below the map.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
+#| column: page
 
 
 # grz_nrz = near_properties %>%
@@ -362,7 +368,7 @@ bounds <- c(min(grz_nrz$lon, na.rm = T), min(grz_nrz$lat, na.rm = T),
 
 leaflet(grz_nrz) %>%
   fitBounds(bounds[1], bounds[2], bounds[3], bounds[4]) %>%
-  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = 14.5) %>%
+  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = zoom_level) %>%
   addMapPane("background_map", zIndex = 410) %>%  # Level 1: bottom
   addMapPane("polygons", zIndex = 420) %>%        # Level 2: middle
   addMapPane("labels", zIndex = 430) %>%  
@@ -392,10 +398,11 @@ area_ratio = ( ( by_validity %>% filter(isNRZGRZ) %>% pull(total_area) ) / sum(b
 
 ```
 
+\
 
 Out of `r n_suitable + n_unsuitable` lots within `r radius`m radius of `r station`, `r n_suitable` are suitable for upzoning.
 
-In terms of area, the easiest properties cover `r area_ratio`% of the total area of `r round(sum(by_validity$total_area)/10^6,2)` km^2.
+In terms of area, the most suitable properties cover **`r area_ratio*100`**% of the total area of `r round(sum(by_validity$total_area)/10^6,2)` km\^2.
 
 For more information, see the table below.
 
@@ -442,17 +449,13 @@ by_zone_heritage %>%
 
 ```
 
-
-
-
-
 ## Existing Transport Infrastructure
 
 The map below shows tram routes and tram stops in green, as well as bus routes and bus stops in orange.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-
+#| column: page
  
 bus_stops = read_sf('../shapefiles/ptv/PTV_METRO_BUS_STOP.shp')
 tram_stops = read_sf('../shapefiles/ptv/PTV_METRO_TRAM_STOP.shp')
@@ -510,7 +513,7 @@ bus_route_list <- bus_routes_near_station %>%
 
 leaflet() %>%
   fitBounds(bounds[1], bounds[2], bounds[3], bounds[4]) %>%
-  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = 14.5) %>%
+  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = zoom_level) %>%
   addMapPane("background_map", zIndex = 410) %>%  # Level 1: bottom
   addMapPane("polygons", zIndex = 420) %>%        # Level 2: middle
   addMapPane("labels", zIndex = 430) %>%  
@@ -549,20 +552,16 @@ tram_f_df <- tram_stops_near_station %>%
 
 ```
 
+\
 
-
-
-There are `r tram_stops_near_station %>% nrow()` tram stops in a 1km radius, with route(s) `r tram_route_list` servicing the area. 
+There are `r tram_stops_near_station %>% nrow()` tram stops in a 1km radius, with route(s) `r tram_route_list` servicing the area.
 
 For buses, there are `r bus_stops_near_station %>% nrow()`, with route(s) `r bus_route_list`.
 
 The data below shows the frequencies per route in both table and bar chart form.
 
-:::{.panel-tabset}
-
-
+::: panel-tabset
 ## Data
-
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -577,7 +576,7 @@ total_score <- merged_f_df %>%
   pull(weighted) %>%
   sum(na.rm=T)
 
-merged_f_df %>%
+frequency_chart <- merged_f_df %>%
   mutate(mode = stringr::str_to_title(mode) ) %>%
   mutate(avg_sph = round(avg_sph, 2)) %>%
   reactable(theme=sandstone(),
@@ -587,8 +586,9 @@ merged_f_df %>%
               list(ROUTEUSSP = colDef(name = "Route"),
                    avg_sph = colDef(name = "Service Frequency"),
                    mode = colDef(name = "Mode")))
-```
 
+frequency_chart
+```
 
 ## Chart
 
@@ -608,7 +608,7 @@ col_chart <- ggplot(merged_f_df, mapping = aes(x = reorder(ROUTEUSSP, avg_sph), 
    coord_flip()
 
 
-ggplotly(col_chart, height = 350)
+freq_bar_chart <- ggplotly(col_chart, height = 350)
 # 
 # # ggplot(tram_f_df, mapping = aes(x = sph, y = mode, fill = mode)) +
 # #   geom_density_ridges(alpha = 0.5,bins = 15, stat = 'binline') +
@@ -628,24 +628,41 @@ ggplotly(col_chart, height = 350)
 #   theme_bw() +
 #   theme(legend.position = 'none') + xlab('Services Per Hour') + ylab('Transport Mode')
 
-```
+freq_bar_chart
 
+```
 :::
+
+```{r}
+#| column: page
+#| layout-nrow: 1
+
+
+```
 
 The final score for 'existing transport infrastructure' is computed by summing the average frequencies of each route and applying a weight to each mode.
 
-The current weights are intended to reflect the throughput each mode is capable of. At a minimum, trams can move twice as many people as buses at the same frequency, so trams are weighted twice as much as buses. 
+The current weights are intended to reflect the throughput each mode is capable of. At a minimum, trams can move twice as many people as buses at the same frequency, so trams are weighted twice as much as buses.
 
-The final score is `r round(total_score, 2)`.
+The final score is **`r round(total_score, 2)`**.
 
 ## Local Amenities
 
-(why local amenities are important) 
+The map below shows the local amenities near `r station` within a `r radius`m radius.
 
-The map below shows 
+::: {.callout-caution collapse="true"}
+## Notes on Data Visualisation
+
+OpenStreetMap point locations were joined to polygon dwelling data for this visualisation. Some points could not be joined and are displayed as circles on the map.
+
+\
+
+Some points are within the same building, e.g. shopping centres. In these cases, the colour assigned is the most common amenity type.
+:::
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
+#| column: page
 
   walkability_df <- readRDS('../r_objects/station_walkability.Rdata')
 
@@ -670,7 +687,7 @@ The map below shows
   
   leaflet() %>%
     fitBounds(bounds[1], bounds[2], bounds[3], bounds[4]) %>%
-  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = 14.5) %>%
+  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = zoom_level) %>%
     addMapPane("background_map", zIndex = 410) %>%  # Level 1: bottom
     addMapPane("polygons", zIndex = 420) %>%        # Level 2: middle
     addMapPane("labels", zIndex = 430) %>%  
@@ -686,11 +703,13 @@ The map below shows
 
 ```
 
+\
+
 The plot below shows the number of local services within a `r radius`m radius. Data is drawn from OpenStreetMaps classifications. Black dotted lines represent the means across all stations that meet the criteria for ranking.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-
+#| fig-height: 4
 
 walkability_this_station = walkability_df %>%
   rename(Station_Name = 'station') %>%
@@ -732,10 +751,13 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
 
 ```
 
+\
+
+Calculation of the final score for local services uses an index measure. It is described in more detail here.
 
 ## Capacity Delta
 
-Zoned capacity is a measure of how many dwellings could fit in an area, given the current zoning. It is a theoretic maximum. This section looks at the current zoned capacity, and compares it to a theoretic zoned capacity under 'Missing Middle' zoning. To reiterate, the potential future zoned capacity is **a theoretic maximum**, and extremely unlikely to be realised if upzoning occured.
+
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 

@@ -220,7 +220,7 @@ get_peak_service_capacity <- function(station, fromQuarto = F) {
 
 map_amenities <- function(amenities, station, fromQuarto = T) {
   
-  print(paste0('mapping amenities for ', station))
+  #print(paste0('mapping amenities for ', station))
   
   prefix_dir = ifelse(fromQuarto, '../', '')
   file_path = paste0(prefix_dir, 'amenity_property_maps/', station, '.Rdata')

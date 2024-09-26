@@ -19,11 +19,11 @@ critical_variables = data.frame(val = c('restaurant', 'supermarket', 'cafe', 'ba
 city_loop_stations = c('Flagstaff', 'Flinders Street', 'Melbourne Central', 'Southern Cross', 'Parliament')
 
 translations = c(
-  'grz_nrz_pc' = 'Zoning suitability (% residential and not heritage)',
+  'grz_nrz_pc' = 'Zoning suitability (% of land residential and not heritage)',
   'capacity_delta' = 'Potential new homes in broad 1000m upzoning',
-  'average_peak_service_freq' = 'Train frequency in peak (services per hour)',
-  'average_peak_service_cap' = 'Average patronage of train line(s) in peak',
-  'walkability_score' = 'Number of local services within 500m walk',
+  'average_peak_service_freq' = 'Train frequency in peak (trains per hour)',
+  'average_peak_service_cap' = 'Average patronage of train line(s) in peak (people)',
+  'walkability_score' = 'Existing local amenities (composite index)',
   'distance' = 'Distance to CBD (m)',
   'n_bus_tram' = 'Mode weighted bus and tram frequencies'
 )
