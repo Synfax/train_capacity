@@ -238,33 +238,22 @@ map_amenities <- function(amenities, station, fromQuarto = T) {
     
     
     buffer = get_buffer(station, fromQuarto = fromQuarto)
-    print('buffer collected')
-    # leaflet() %>%
-    #   addProviderTiles('CartoDB.Positron') %>%
-    #   addCircles(data = amenities, radius = 2, color = ~amenPal(type), opacity = 1) %>%
-    #   addLegend(position = 'bottomleft', pal = amenPal, values = amenities$type) %>%
-    #   addPolygons(data = buffer)
-    
-    #attempt join to dwelling_data
-    
-    print('performing intersection')
-    
-    dd_in_buffer <- st_intersection(dwelling_data, buffer)
-    
-    print('spatial join')
+
+    dd_in_buffer = get_near_properties(station, fromQuarto)
     
     filtered_properties <- st_join(dd_in_buffer, amenities)
     
     filtered_properties <- filtered_properties %>%
       filter(!is.na(type)) %>%
-      select(type, uniq) 
+      select(type, uniq)  %>%
+      rename(poly_geom = 'geom')
     
     test_ <- amenities %>%
+      rename(point_geom = "geometry") %>%
       as.data.frame() %>%
-      left_join(filtered_properties, by = 'uniq') %>%
-      st_set_geometry('geometry.y')
+      left_join(filtered_properties , by = 'uniq') %>%
+      st_set_geometry('poly_geom')
     
-    print('saving')
     
     saveRDS(test_, file_path)
     
@@ -737,4 +726,6 @@ prepare_data_for_the_age = function(station) {
   suitable_pc = ifelse(is_empty(suitable_pc), 0, suitable_pc)
   
   return(c( station = station, total_heritage = heritage_pc, residential = residential_pc, suitable = suitable_pc ))
+  
+  map_amenities(get_near_osm('Prahran'), 'Prahran', fromQuarto = F)
 }

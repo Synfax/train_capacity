@@ -1,11 +1,15 @@
 .narrative {
-  background-color: rgba(0, 0, 0, 0.75);
+  
+ /* background-color: rgba(0, 0, 0, 0.75); */
+ 
   padding: 20px !important;
   border: 6px solid black;
    font-family: 'Helvetica' !important;
 
-    color: rgba(255, 255, 255, 1) !important;
+    /*color: rgba(255, 255, 255, 1) !important;*/
+    
 }
+
 
 .narrative a, .narrative h2 {
   color: rgba(255, 255, 255, 1) !important;
@@ -21,7 +25,9 @@
 }
 
 #quarto-document-content {
+  background-color: #fdffee; !important
   margin: 0 !important;
+  color: rgb(16, 70, 27); !important
 }
 
 .sticky {

@@ -15,16 +15,8 @@ format:
     toc-location: left
     page-layout: full
 ---
-This page aims to describe how scores are transformed from their raw calculations into a rank which allows comparison across stations.
 
-The first table contains the raw scores in a searchable table. 
-
-The next section details the transformation process, and the final section contains a searchable table of the final scores.
-
-## Raw Scores
-
-```{r warning=FALSE,message=FALSE}
-#| echo: false 
+```{r}
 
 station = params$station
 
@@ -34,6 +26,94 @@ library(reactablefmtr)
 source('../r/station_functions.R')
 source('../r/constants.R')
 source('../r/transform.R')
+```
+
+# Full Methodology
+
+This page aims to describe how each metric is calculated and why it is important to consider. Each metric is stepped through in no particular order before an explanation of the mechanism used to transform and rank the scores is provided.
+
+-   Zoning suitability
+-   Potential number of new homes
+-   Train service frequency in peak
+-   Train service passenger numbers in peak
+-   Number of local services within a 500m walk
+-   Distance to CBD
+-   Existing transport infrastructure.
+
+Metrics were chosen based on two factors
+
+-   data being available to support the analysis
+-   data is able to be manipulated into a single number
+
+The rankings are intended to capture which stations should be upzoned as a priority **right now** without having to amend any legislation, alter zoning, change public transport service frequencies or build new infrastructure. Hence, some metrics are a representation of the day they were calculated and are likely to change over time, requiring the model to be re-run when new data is available.
+
+callout box: for example the metro tunnel throws all this out.
+
+## Service Frequency
+
+## Number of Local Services
+
+## Distance to CBD
+
+## Existing Transport Infrastructure
+
+## Zoning suitability
+
+This measure intends to capture the suitability of existing zoning surrounding train stations.
+
+An ideal station would have many low density residential lots that are able to be redeveloped and not subject to external heritage controls.
+
+Therefore, a 'suitable lot' is defined as:
+
+-   Either Neighbourhood Residential or General Residential
+
+-   Not under any heritage control
+
+The measure is calculated as the area of suitable properties in square metres, divided by the total area of all properties within a suitable radius. Train stations that score poorly in this metric are likely to either be mostly non-residential already, or be subject to extreme heritage controls, which meets the intention for this metric.
+
+## Zoned Capacity
+
+Zoned capacity is a measure of how many dwellings could fit in an area, given the current zoning. It is a theoretic maximum. This section looks at the current zoned capacity, and compares it to a theoretic zoned capacity under 'Missing Middle' zoning. To reiterate, the potential future zoned capacity is **a theoretic maximum**, and extremely unlikely to be realised if upzoning occured.
+
+## Line Capacity
+
+```{r}
+
+station_lines = readRDS('../r_objects/stations_with_lines.Rdata') %>%
+  filter(Station_Name == station) %>%
+  pull(lines) %>%
+  unlist() %>%
+  as.vector()
+
+station_targets = readRDS('../r_objects/target_stations.Rdata') %>% 
+  filter(Station_Name == station) %>%
+  pull(targets) %>%
+  unlist() %>%
+  as.vector() %>%
+  first()
+
+```
+
+This metric aims to measure the amount of space available on trains passing through this station, as there is little point upzoning if there is no capacity to move people.
+
+However, for stations in the middle of a train line, passengers will typically continue to board the train until the city. This means that it is not useful to only look at the patronage as trains pass through a given station as more passengers may board later.
+
+Instead, it is best to look at the average number of passengers on trains at their last station before the CBD. This gives a better measure of how busy the line itself is overall.
+
+##### Process for `r station`
+
+1.  Find the train line(s) that serve `r station`: `r station_lines`
+
+2.  For each train line, find the station nearest to the CBD. These are by definition the same for each line: `r station_targets`.
+
+3.  For each of these stations just before the CBD, calculate the average patronage of train services at that station, but restrict the search to only train services on the lines identified in step 1.
+
+## Raw Scores
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+
 
 
 station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
@@ -45,43 +125,6 @@ station_rankings %>%
     theme = sandstone(), searchable = T)
 
 ```
-
-#Full Methodology
-
-This page includes information about the seven categories and why they should be considered as factors in priority upzoning:
-
--   Zoning suitability
--   Potential number of new homes
--   Train service frequency in peak
--   Train service passenger numbers in peak
--   Number of local services within a 500m walk
--   Distance to CBD
--   Existing transport infrastructure.
-
-# Zoning suitability
-
-The number of lots within 1km of stations zoned as either Neighbourhood Residential or General Residential, and NOT under heritage protection is an approximation of 'ease of upzoning' for a given station.
-
-#Zoned Capacity
-
-Zoned capacity is a measure of how many dwellings could fit in an area, given the current zoning. It is a theoretic maximum. This section looks at the current zoned capacity, and compares it to a theoretic zoned capacity under 'Missing Middle' zoning. To reiterate, the potential future zoned capacity is **a theoretic maximum**, and extremely unlikely to be realised if upzoning occured.
-
-#Line Capacity
-
-This metric aims to measure the amount of space available on trains passing through this station, as there is little point upzoning if there is no capacity to move people.
-
-However, for stations in the middle of a train line, passengers will typically continue to board the train until the city. This means that it is not useful to only look at the patronage as trains pass through a given station as more passengers may board later.
-
-Instead, it is best to look at the average number of passengers on trains at their last station before the CBD. This gives a better measure of how busy the line itself is overall.
-
-##### Process for `r station`
-
-1. Find the train line(s) that serve `r station`: `r station_lines`
-
-2. For each train line, find the station nearest to the CBD. These are by definition the same for each line: `r station_targets`.
-
-3. For each of these stations just before the CBD, calculate the average patronage of train services at that station, but restrict the search to only train services on the lines identified in step 1.
-
 
 ## How does the transformation work?
 
@@ -122,15 +165,16 @@ weights_df %>%
 
 These transformed scores are then summed to produce a final score.
 
-:::{.callout-note}
+::: callout-note
 There are some restrictions placed on final rankings:
 
-- City loop stations are excluded as they can't be upzoned further.
+-   City loop stations are excluded as they can't be upzoned further.
 
-- Stations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.
+-   Stations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.
 
 This restriction is arbitrary and will be improved alongside the model.
 :::
+
 <!-- ## Example Transformation -->
 
 ```{r warning=FALSE,message=FALSE}

@@ -3,7 +3,7 @@ title: "Station Information"
 author: "Paul S"
 date: "6/6/24"
 params: 
-  station: "Brunswick"
+  station: "Merri"
 css: run_for_station.css
 format: 
   html: 
@@ -72,21 +72,6 @@ specified_colors <- c("Already developed"                       = "#989898",
 hourly_factors = readRDS('../r_objects/hourly_factors.Rdata') %>%
   as.data.frame()
 
-```
-
-##Overall Scores
-
-For `r station`, the scores are shown below in a summary table. The remainder of this page steps through each factor listed above in no particular order.
-
-::: {.callout-note icon="false"}
-## Full Methodology
-
-The full methodology for how these scores are calculated and why they are important for consideration in upzoning is here.
-:::
-
-```{r warning=FALSE,message=FALSE}
-#| echo: false 
-
 
 rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
   rename(Station_Name = "station") %>%
@@ -117,6 +102,25 @@ transformed_rankings = transformed_rankings %>%
 
 total_score <- sum(transformed_rankings$value)
 
+```
+
+## Overall Scores
+
+`r station` obtained a final score of **`r total_score`**, placing it number `r rank` out of `r nrow`.
+
+The remainder of this page steps through each factor listed below in no particular order.
+
+::: {.callout-note icon="false"}
+## Full Methodology
+
+The full methodology for how these scores are calculated and why they are important for consideration in upzoning is [here](https://paulspasojevic.com/stations/rankings.qmd).
+:::
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+
+
 rankings %>%
   left_join(transformed_rankings, by = 'name') %>%
   mutate(name = translations[name]) %>%
@@ -131,10 +135,6 @@ reactable(theme = sandstone(),
 
 ```
 
-\
-
-`r station` obtained a final score of **`r total_score`**, placing it number `r rank` out of `r nrow`.
-
 ## Service Frequency
 
 Service frequency is calculated as the mean number of services per hour in two time periods:
@@ -142,14 +142,6 @@ Service frequency is calculated as the mean number of services per hour in two t
 -   Between 7 and 10am towards Flinders Street, shown in blue.
 
 -   Between 4 and 7pm away from Flinders Street, shown in green.
-
-::: column-margin
-The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street.
-
-\
-
-The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
-:::
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -228,6 +220,16 @@ interactive_sph = layout(interactive_sph, height = "550", autosize = T, legend =
 div(class = "plot", interactive_sph)
 #interactive_sph
 ```
+
+::: column-margin
+The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street.
+
+\
+
+The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
+:::
+
+\
 
 The morning average freqency is `r morning_to_flinders`, the average evening frequency is `r evening_away_from_flinders`, which forms a mean score of **`r final_frequency_score`**.
 
@@ -337,16 +339,17 @@ The chart is also split by direction of travel, which in Melbourne's radial netw
 The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
 :::
 
+\
+
 The morning average patronage is `r morning_to_flinders`, the average evening patronage is `r evening_away_from_flinders`, which forms a mean score of **`r final_patronage_score`.**
 
 ## Zoning Suitability
 
-The map below shows the properties within 1km of `r station` that are suitable for upzoning in orange, properties that do not meet the conditions described above are black.
+The map below shows the properties within 1km of `r station` that are suitable for upzoning in orange, with unsuitable properties in black.
 
 ::: column-margin
 Suitable properties are either neighbourhood residential or general residential and not under heritage restrictions.
 :::
-
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -402,7 +405,7 @@ area_ratio = ( ( by_validity %>% filter(isNRZGRZ) %>% pull(total_area) ) / sum(b
 
 Out of `r n_suitable + n_unsuitable` lots within `r radius`m radius of `r station`, `r n_suitable` are suitable for upzoning.
 
-In terms of area, the most suitable properties cover **`r area_ratio*100`**% of the total area of `r round(sum(by_validity$total_area)/10^6,2)` km\^2.
+In terms of area, the most suitable properties cover **`r area_ratio*100`**% of the total area.
 
 For more information, see the table below.
 
@@ -566,6 +569,7 @@ The data below shows the frequencies per route in both table and bar chart form.
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
+
 merged_f_df = rbind.data.frame(tram_f_df, bus_f_df) %>%
    filter(!is.na(avg_sph)) %>%
    arrange(avg_sph) 
@@ -655,9 +659,7 @@ The map below shows the local amenities near `r station` within a `r radius`m ra
 
 OpenStreetMap point locations were joined to polygon dwelling data for this visualisation. Some points could not be joined and are displayed as circles on the map.
 
-\
-
-Some points are within the same building, e.g. shopping centres. In these cases, the colour assigned is the most common amenity type.
+Some amenities are within the same building, e.g. multiple shops in shopping centres. In these cases, the building is assigned a colour corresponding to the most common amenity within it.
 :::
 
 ```{r warning=FALSE,message=FALSE}
@@ -668,21 +670,22 @@ Some points are within the same building, e.g. shopping centres. In these cases,
 
   buffer = get_buffer(station, fromQuarto = T)
 
-  full_prop_list = map_amenities(get_near_osm(station, fromQuarto = T), station, fromQuarto = T)
+  full_prop_list = map_amenities(get_near_osm(station, fromQuarto = T), station, fromQuarto = T) %>%
+    rename(type = 'type.x')
   
   amenPal <- colorFactor(brewer.pal(name = 'Set1', n = length(unique(full_prop_list$type))), domain = full_prop_list$type)
 
   unmatched_props <- full_prop_list %>%
-    filter(st_is_empty(geometry.y)) %>%
-    st_set_geometry('geometry')
+    filter(st_is_empty(poly_geom)) %>%
+    st_set_geometry('point_geom')
   
   matched_props <- full_prop_list %>%
-    filter(!st_is_empty(geometry.y)) %>%
-    st_set_geometry('geometry.y') %>%
-    select(-geometry, - geometry.x)
+    filter(!st_is_empty(poly_geom)) %>%
+    st_set_geometry('poly_geom') %>%
+    select( - point_geom)
   
   matched_props = matched_props %>%
-    group_by(geometry.y) %>%
+    group_by(poly_geom) %>%
     summarise(n = n(), type = fmode(type) )
   
   leaflet() %>%
@@ -753,11 +756,11 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
 
 \
 
-Calculation of the final score for local services uses an index measure. It is described in more detail here.
+Calculation of the final score for local services uses an index measure. It is described in more detail [here](https://paulspasojevic.com/stations/rankings.html).
 
-## Capacity Delta
+## Zoned Capacity
 
-
+Zoned Capacity is a measure of the **theoretical** number of dwellings possible under different zoning implementations.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -774,4 +777,10 @@ delta %>% reactable(theme = sandstone(),
                       new_yield = colDef(name = "Potential Future Zoned Capacity")
                     )) 
 
+sum_delta <- sum(delta$new_yield)
+
 ```
+
+\
+
+Under 'Missing Middle' zoning, `r station` could **theoretically** host `r prettyNum(sum_delta, big.mark = ',')` homes.
