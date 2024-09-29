@@ -16,7 +16,8 @@ format:
     page-layout: full
 ---
 
-```{r}
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
 
 station = params$station
 
@@ -43,19 +44,71 @@ This page aims to describe how each metric is calculated and why it is important
 Metrics were chosen based on two factors
 
 -   data being available to support the analysis
--   data is able to be manipulated into a single number
+-   data is able to be captured by a single number
 
 The rankings are intended to capture which stations should be upzoned as a priority **right now** without having to amend any legislation, alter zoning, change public transport service frequencies or build new infrastructure. Hence, some metrics are a representation of the day they were calculated and are likely to change over time, requiring the model to be re-run when new data is available.
 
 callout box: for example the metro tunnel throws all this out.
 
+This page describes the functions that generate the station rankings, of which the code is primarily here on [GitHub](https://github.com/Synfax/train_capacity/blob/main/r/station_functions.R).
+
 ## Service Frequency
+
+Service frequency is critical for the viability of upzoning a train station. (blh blah blah)
+
+The metric is calculated by using PTV's [Patronage Data](https://discover.data.vic.gov.au/dataset/train-service-passenger-counts), which details the patronage for each train service in Melbourne. For a given station, the average number of departures is taken across two periods and directions:
+
+\- Between 7 and 10am towards Flinders Street
+
+\- Between 4 and 7pm away from Flinders Street
+
+The average of these two periods then comprises the final score. It is measured in 'Services per hour'. For example 4 services per hour corresponds to a service every 15 minutes.
+
+Public holidays, school holidays and weekends are excluded from the data.
 
 ## Number of Local Services
 
+While train stations themselves are useful for travelling around the city, ideal upzoning locations also have many local amenities and are in a nice neighbourhood.
+
+To measure this, critical amenities are pulled from `OpenStreetMap` using the `osmdata` package. These are: `r critical_variables$val`.
+
+This yields the number of each type of amenity for any given stations.
+
+To combine these amenity counts into a single value, an xmin-xmax transformation is used, which is the same process for how each station is assigned its rank which is described at the end of this document.
+
+Each column is transformed through:
+
+$$
+x = \frac{x - \min{x} }{ \max{x} - \min{x} }
+$$
+
+In this way, each value is now represented as a percentage of the range (max - min) of ALL stations in the sample, bounded between zero and one. A zero corresponds to the lowest value out of all stations, and a one corresponds to the highest value.
+
+After the transformation is applied, each station has a 0-1 value for each amenity type, which can be summed together to form a single metric for how many local services are nearby.
+
+The scoring method takes into account that raw numbers mean different things for different amenities, which a simple summation or mean would not consider. For example, having 45 cafes in an area is less important than having 45 schools, although without manual weighting, a mean or sum would be unable to distinguish the two.
+
+The downside is that the resulting 'value' does not have a nice interpretation.
+
 ## Distance to CBD
 
+Stations that are closer to the CBD are likely to have better access to jobs, and higher 'desirability' to live there. Importantly, stations closer to the CBD are likely to have higher land prices, which makes upzoning far more economically feasible.
+
+Therefore, distance is included 'as the crow flies' from the station to Flinders Street Station, in metres.
+
 ## Existing Transport Infrastructure
+
+While rail provides high-capacity service in and out of the CBD, it is only in a radial direction. It is also important to measure the other transport modes that service the properties near the stations, trams and buses.
+
+The model works by first finding which bus and tram stops are within the specified radius of the train station, and pulling the list of services which service those stops. ([Bus Stops](https://discover.data.vic.gov.au/dataset/ptv-metro-bus-stops), [Tram Stops](https://discover.data.vic.gov.au/dataset/ptv-metro-tram-stops))
+
+The next step of the model uses the [PTV GTFS Timetable API](https://discover.data.vic.gov.au/dataset/timetable-and-geographic-information-gtfs) to pull service timetables on a typical weekday. For each route, the average number of departures per hour is calculated. [Code](https://github.com/Synfax/train_capacity/blob/main/r/tram_gtfs_analysis.R)
+
+A weight is applied to the tram routes, as typically they can carry at least twice the number of passengers a bus can. As such, they are weighted twice that of buses.
+
+An important consideration is that this measure does not factor in the number of stops within the radius of the station, only that there is at least one stop.
+
+The stop counts were not included as having more stops does not neccessarily mean the area is better connected: they could be served infrequently, be clustered on the edge of the radius, or be so close together the service is slow.
 
 ## Zoning suitability
 
@@ -71,13 +124,18 @@ Therefore, a 'suitable lot' is defined as:
 
 The measure is calculated as the area of suitable properties in square metres, divided by the total area of all properties within a suitable radius. Train stations that score poorly in this metric are likely to either be mostly non-residential already, or be subject to extreme heritage controls, which meets the intention for this metric.
 
+[Data](https://discover.data.vic.gov.au/dataset/vicmap-planning-planning-scheme-overlay-polygon1)
+
 ## Zoned Capacity
 
 Zoned capacity is a measure of how many dwellings could fit in an area, given the current zoning. It is a theoretic maximum. This section looks at the current zoned capacity, and compares it to a theoretic zoned capacity under 'Missing Middle' zoning. To reiterate, the potential future zoned capacity is **a theoretic maximum**, and extremely unlikely to be realised if upzoning occured.
 
+The numbers as theoretical limits are from YIMBYMelbourne's *Housing Targets* report, with initial yields from Michael Buxton, tweaked by Jonathan Nolan. [Code for the brave](https://github.com/Synfax/train_capacity/blob/main/r/add_mm_zoning_info.R)
+
 ## Line Capacity
 
-```{r}
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
 
 station_lines = readRDS('../r_objects/stations_with_lines.Rdata') %>%
   filter(Station_Name == station) %>%
@@ -107,6 +165,8 @@ Instead, it is best to look at the average number of passengers on trains at the
 2.  For each train line, find the station nearest to the CBD. These are by definition the same for each line: `r station_targets`.
 
 3.  For each of these stations just before the CBD, calculate the average patronage of train services at that station, but restrict the search to only train services on the lines identified in step 1.
+
+[Patronage Data](https://discover.data.vic.gov.au/dataset/train-service-passenger-counts)
 
 ## Raw Scores
 

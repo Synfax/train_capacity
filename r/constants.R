@@ -17,6 +17,7 @@ critical_variables = data.frame(val = c('restaurant', 'supermarket', 'cafe', 'ba
                                 key =  c('amenity', 'shop', 'amenity', 'amenity', 'amenity', 'amenity', 'leisure'))
 
 city_loop_stations = c('Flagstaff', 'Flinders Street', 'Melbourne Central', 'Southern Cross', 'Parliament')
+other_important_stations = c('North Melbourne', 'South Yarra', 'Richmond')
 
 translations = c(
   'grz_nrz_pc' = 'Zoning suitability (% land area)',
