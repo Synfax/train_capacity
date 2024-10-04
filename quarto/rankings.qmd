@@ -4,11 +4,13 @@ author: "Paul S"
 date: "6/6/24"
 params: 
   station: "Brunswick"
+css: run_for_station.css
 format: 
   html: 
     theme: zephyr
     fig-width: 8
     fig-height: 8
+
     code-fold: false
     toc: true
     toc-depth: 4
@@ -22,6 +24,7 @@ format:
 station = params$station
 
 library(tidyverse)
+library(plotly)
 library(reactablefmtr)
 
 source('../r/station_functions.R')
@@ -31,7 +34,9 @@ source('../r/transform.R')
 
 # Full Methodology
 
-This page aims to describe how each metric is calculated and why it is important to consider. Each metric is stepped through in no particular order before an explanation of the mechanism used to transform and rank the scores is provided.
+This page aims to describe the process used to rank each train station in Melbourne for upzoning. In doing so, the page steps through each of the metrics used to quantify different aspects of the station, before concluding with an explanation of the process used to turn the raw data into a score for easy comparison.
+
+The seven metrics chosen (so far) are:
 
 -   Zoning suitability
 -   Potential number of new homes
@@ -44,7 +49,7 @@ This page aims to describe how each metric is calculated and why it is important
 Metrics were chosen based on two factors
 
 -   data being available to support the analysis
--   data is able to be captured by a single number
+-   data is able to be measured by a single number
 
 The rankings are intended to capture which stations should be upzoned as a priority **right now** without having to amend any legislation, alter zoning, change public transport service frequencies or build new infrastructure. Hence, some metrics are a representation of the day they were calculated and are likely to change over time, requiring the model to be re-run when new data is available.
 
@@ -66,13 +71,23 @@ The average of these two periods then comprises the final score. It is measured 
 
 Public holidays, school holidays and weekends are excluded from the data.
 
+A limitation of only capturing peak services is that it is a poorer indicator for those who do not subscribe to the typical 9-5 office commute. On the other hand, peak hours are when most people use trains, and an average over the whole day may drown out information regarding service frequency when people use them most.
+
 ## Number of Local Services
 
 While train stations themselves are useful for travelling around the city, ideal upzoning locations also have many local amenities and are in a nice neighbourhood.
 
 To measure this, critical amenities are pulled from `OpenStreetMap` using the `osmdata` package. These are: `r critical_variables$val`.
 
-This yields the number of each type of amenity for any given stations.
+::: column-margin
+The choice of the amenities is arbitrary, and intended to measure essential living necessities that makes neighbourhoods nice. A further benefit is that for the chosen amenities, OpenStreetMap contains reasonably accurate data. More extravagant and precise amenity choices could be limited by poor data.
+:::
+
+This yields the number of each type of amenity for any given station.
+
+However, for the overall transformation process to work, these amenity numbers must be compressed into a single number for comparison with other stations.
+
+One could sum all the amenities to get a total number of services nearby, however, this results in no difference between a station surrounded by 100 cafes, or one with 20 of each amenity. Other methods, such as median number of amenities or mean number suffer from similar problems.
 
 To combine these amenity counts into a single value, an xmin-xmax transformation is used, which is the same process for how each station is assigned its rank which is described at the end of this document.
 
@@ -86,13 +101,17 @@ In this way, each value is now represented as a percentage of the range (max - m
 
 After the transformation is applied, each station has a 0-1 value for each amenity type, which can be summed together to form a single metric for how many local services are nearby.
 
-The scoring method takes into account that raw numbers mean different things for different amenities, which a simple summation or mean would not consider. For example, having 45 cafes in an area is less important than having 45 schools, although without manual weighting, a mean or sum would be unable to distinguish the two.
+::: column-margin
+No weighting is applied for this sum. Each amenity type is treated equally as important as each other. It would be trivial to change the amenity weights in the code and re-run if desired.
+:::
+
+The scoring method takes into account that raw numbers mean different things for different amenities, which a simple summation or mean would not consider. For example, having 45 cafes in an area is less important than having 45 schools, although without additional manual weighting, a mean or sum would be unable to distinguish the two.
 
 The downside is that the resulting 'value' does not have a nice interpretation.
 
 ## Distance to CBD
 
-Stations that are closer to the CBD are likely to have better access to jobs, and higher 'desirability' to live there. Importantly, stations closer to the CBD are likely to have higher land prices, which makes upzoning far more economically feasible.
+Stations closer to the CBD are likely to have higher land prices, which makes upzoning far more economically feasible. They are also likely to have increased job access.
 
 Therefore, distance is included 'as the crow flies' from the station to Flinders Street Station, in metres.
 
@@ -100,15 +119,17 @@ Therefore, distance is included 'as the crow flies' from the station to Flinders
 
 While rail provides high-capacity service in and out of the CBD, it is only in a radial direction. It is also important to measure the other transport modes that service the properties near the stations, trams and buses.
 
-The model works by first finding which bus and tram stops are within the specified radius of the train station, and pulling the list of services which service those stops. ([Bus Stops](https://discover.data.vic.gov.au/dataset/ptv-metro-bus-stops), [Tram Stops](https://discover.data.vic.gov.au/dataset/ptv-metro-tram-stops))
+The model works by first finding which [bus stops](https://discover.data.vic.gov.au/dataset/ptv-metro-bus-stops) and [tram stops](https://discover.data.vic.gov.au/dataset/ptv-metro-tram-stops) are within the specified radius of the train station, and pulling the list of services which service those stops.
 
-The next step of the model uses the [PTV GTFS Timetable API](https://discover.data.vic.gov.au/dataset/timetable-and-geographic-information-gtfs) to pull service timetables on a typical weekday. For each route, the average number of departures per hour is calculated. [Code](https://github.com/Synfax/train_capacity/blob/main/r/tram_gtfs_analysis.R)
+The next step of the model uses the [PTV GTFS Timetable API](https://discover.data.vic.gov.au/dataset/timetable-and-geographic-information-gtfs) to pull service timetables on a typical weekday. For each route, the average number of departures per hour is calculated ([Code](https://github.com/Synfax/train_capacity/blob/main/r/tram_gtfs_analysis.R)).
 
 A weight is applied to the tram routes, as typically they can carry at least twice the number of passengers a bus can. As such, they are weighted twice that of buses.
 
 An important consideration is that this measure does not factor in the number of stops within the radius of the station, only that there is at least one stop.
 
 The stop counts were not included as having more stops does not neccessarily mean the area is better connected: they could be served infrequently, be clustered on the edge of the radius, or be so close together the service is slow.
+
+A downside of this method is it does not (and could not reasonably) consider the direction the services travel, or if the services travel to useful places.
 
 ## Zoning suitability
 
@@ -124,7 +145,7 @@ Therefore, a 'suitable lot' is defined as:
 
 The measure is calculated as the area of suitable properties in square metres, divided by the total area of all properties within a suitable radius. Train stations that score poorly in this metric are likely to either be mostly non-residential already, or be subject to extreme heritage controls, which meets the intention for this metric.
 
-[Data](https://discover.data.vic.gov.au/dataset/vicmap-planning-planning-scheme-overlay-polygon1)
+[Data](https://discover.data.vic.gov.au/dataset/vicmap-planning-planning-scheme-overlay-polygon1) from DataVic.
 
 ## Zoned Capacity
 
@@ -136,6 +157,8 @@ The numbers as theoretical limits are from YIMBYMelbourne's *Housing Targets* re
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
+
+station = 'Victoria Park'
 
 station_lines = readRDS('../r_objects/stations_with_lines.Rdata') %>%
   filter(Station_Name == station) %>%
@@ -152,13 +175,13 @@ station_targets = readRDS('../r_objects/target_stations.Rdata') %>%
 
 ```
 
-This metric aims to measure the amount of space available on trains passing through this station, as there is little point upzoning if there is no capacity to move people.
+This metric aims to measure the amount of space available on trains passing through this station, as there is little point upzoning if there is no capacity to move people. It uses the DataVic [Patronage Data](https://discover.data.vic.gov.au/dataset/train-service-passenger-counts).
 
 However, for stations in the middle of a train line, passengers will typically continue to board the train until the city. This means that it is not useful to only look at the patronage as trains pass through a given station as more passengers may board later.
 
-Instead, it is best to look at the average number of passengers on trains at their last station before the CBD. This gives a better measure of how busy the line itself is overall.
+Instead, it is best to look at the average number of passengers on trains at their last station before the CBD as this is when trains are their busiest. This gives a better measure of how busy the line itself is overall.
 
-##### Process for `r station`
+##### Sample Process for `r station`
 
 1.  Find the train line(s) that serve `r station`: `r station_lines`
 
@@ -166,25 +189,57 @@ Instead, it is best to look at the average number of passengers on trains at the
 
 3.  For each of these stations just before the CBD, calculate the average patronage of train services at that station, but restrict the search to only train services on the lines identified in step 1.
 
-[Patronage Data](https://discover.data.vic.gov.au/dataset/train-service-passenger-counts)
-
-## Raw Scores
+The process described above yields a single score for all stations that share the same lines. These values are shown below to try and describe the process.
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
 
 
+station_lines = readRDS('../r_objects/stations_with_lines.Rdata') 
 
 station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+  rename(Station_Name = "station") %>%
+  as.data.frame()
+
+(station_rankings %>%
+  filter_stations(., "Station_Name") %>%
+  left_join(station_lines, by = 'Station_Name') %>%
+  select(average_peak_service_cap, lines) %>%
+  unique() %>%
+  rowwise() %>%
+  mutate(lines = lines %>% unlist() %>% as.vector() %>% paste0(.,collapse = ',') ) %>%
+  ggplot(mapping = aes(y = reorder(lines, average_peak_service_cap), x = average_peak_service_cap)) +
+  geom_col() +
+  xlab("Avg number of people on peak train before flinders") +
+  ylab("Lines serving station")) %>%
+  ggplotly()
+
+```
+
+Stations only served by the Sunbury line typically have the most packed trains, whereas Frankston only stations are typically the emptiest.
+
+## Raw Scores
+
+::: graph
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+
+station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+  rename(!!!translations_simple_inv) %>%
   mutate(across(-station, as.numeric)) %>%
   mutate(across(where(is.numeric), .fns = function(x) {round(x,2)}))
 
 station_rankings %>%
   reactable( pagination = T,
-    theme = sandstone(), searchable = T)
+    theme = sandstone(), defaultColDef = colDef(),
+    columns = list(
+      station = colDef(name = 'Station', filterable = T)
+    ))
 
 ```
+:::
 
 ## How does the transformation work?
 
@@ -196,12 +251,21 @@ $$
 x = \frac{x - \min{x} }{ \max{x} - \min{x} }
 $$
 
-The problem is that some metrics are beneficial, e.g. NRZ/GRZ Percentage. However, some metrics are detrimental, e.g. distance.
+::: callout-note
+One downside of the xmin-xmax scaler is its high sensitivity to outliers. Very high or very low values imply that reasonable variance in the original data is flattened to very similar values after scaling.
 
-To deal with this problem, weights are applied to each metric, with negative weights representing unwanted metrics.
+To see the distributions of the raw variables and scaled variables, see [here.](analysis.qmd)
+:::
+
+For some metrics however, a larger value implies a station that is less suited for upzoning. For example, a large distance value is actually undesired from the model's perspective.
+
+
+To deal with this problem, weights are applied to each metric, with negative weights representing unwanted metrics. This also allows customisation of the model by any interested parties.
+
 
 By default, weights are set as:
 
+::: graph
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -219,20 +283,24 @@ weights_df = weights_df %>%
 rownames(weights_df) = "Weight"
 
 weights_df %>%
+  rename(!!!translations_simple_inv) %>%
   reactable(rownames = T, theme = sandstone())
 
 ```
+:::
 
 These transformed scores are then summed to produce a final score.
 
 ::: callout-note
+
 There are some restrictions placed on final rankings:
 
 -   City loop stations are excluded as they can't be upzoned further.
 
+-   Edge transfer stations (North Melbourne, South Yarra, Richmond) were excluded due to extreme outliers in the data impacting the transformation process.
+
 -   Stations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.
 
-This restriction is arbitrary and will be improved alongside the model.
 :::
 
 <!-- ## Example Transformation -->
@@ -256,6 +324,7 @@ This restriction is arbitrary and will be improved alongside the model.
 
 ## Transformed Scores
 
+::: graph
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -264,11 +333,14 @@ transformed_scores = readRDS('../r_objects/transformed_scores.Rdata') %>%
   mutate(across(where(is.numeric), .fns = function(x) {round(x,2)}))
 
 transformed_scores %>%
+  rename(!!!translations_simple_inv) %>%
   reactable( theme = sandstone(),
-             searchable = T,
              defaultSorted = 'score',
              defaultSortOrder = 'desc',
+             defaultColDef = colDef(),
              columns = list(
+                station = colDef(name = 'Station', filterable = T)
              ) )
 
 ```
+:::

@@ -3,7 +3,7 @@ title: "Station Information"
 author: "Paul S"
 date: "6/6/24"
 params: 
-  station: "Merri"
+  station: "Mentone"
 css: run_for_station.css
 format: 
   html: 
@@ -23,7 +23,6 @@ station = params$station
 
 zoom_level = 15
 
-source('../r/constants.R')
 
 library(knitr)
 library(tidyverse)
@@ -38,6 +37,8 @@ library(plotly)
 library(RColorBrewer)
 library(ggridges)
 library(collapse)
+
+source('../r/constants.R')
 
 source('../r/station_functions.R')
 
@@ -115,7 +116,7 @@ The remainder of this page steps through each factor listed below in no particul
 
 The full methodology for how these scores are calculated and why they are important for consideration in upzoning is [here](https://paulspasojevic.com/stations/rankings.qmd).
 :::
-
+:::{.graph}
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -134,7 +135,7 @@ reactable(theme = sandstone(),
             )
 
 ```
-
+:::
 ## Service Frequency
 
 Service frequency is calculated as the mean number of services per hour in two time periods:
@@ -143,6 +144,7 @@ Service frequency is calculated as the mean number of services per hour in two t
 
 -   Between 4 and 7pm away from Flinders Street, shown in green.
 
+:::{.graph}
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -220,7 +222,7 @@ interactive_sph = layout(interactive_sph, height = "550", autosize = T, legend =
 div(class = "plot", interactive_sph)
 #interactive_sph
 ```
-
+:::
 ::: column-margin
 The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street.
 
@@ -254,12 +256,13 @@ station_targets = readRDS('../r_objects/target_stations.Rdata') %>%
 
 <!-- ##### Patronage at `r station_targets` on the `r station_lines` line(s): -->
 
-The chart below shows the average patronage on the `r station_lines` line(s) at the last stop before the CBD. It is calculated for two times:
+The chart below shows the average patronage on the `r station_lines` line(s) at the last stop before the CBD (`r station_targets`). It is calculated for two times:
 
 -   Between 7 and 10am towards Flinders Street, denoted as blue.
 
 -   Between 4 and 7pm away from Flinders street, shown as green.
 
+:::{.graph}
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -311,7 +314,7 @@ patronage_plot <- ggplot() +
   geom_point(data = to_plot, mapping = aes(x = hour_of_day, y = avg_patronage, group = 1)) +
   scale_fill_manual(values = c('morning' = 'blue', 'evening' = 'green')) +
   scale_x_continuous(breaks = 0:23, limits = c(0, 23)) +
-  labs(title = "Average patronage by time of day", fill = " Peak Period") +
+  labs(title = paste0("Average patronage by time of day at ", station_targets), fill = " Peak Period") +
   theme(base_size = 13) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   xlab('Hour of day') + 
@@ -330,7 +333,7 @@ interactive_patronage = layout(interactive_patronage, autosize = T, height = '55
 div(class = 'plot', interactive_patronage)
 
 ```
-
+:::
 ::: column-margin
 The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street.
 
@@ -409,6 +412,7 @@ In terms of area, the most suitable properties cover **`r area_ratio*100`**% of 
 
 For more information, see the table below.
 
+:::{.graph}
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -451,6 +455,7 @@ by_zone_heritage %>%
 
 
 ```
+:::
 
 ## Existing Transport Infrastructure
 
@@ -710,6 +715,7 @@ Some amenities are within the same building, e.g. multiple shops in shopping cen
 
 The plot below shows the number of local services within a `r radius`m radius. Data is drawn from OpenStreetMaps classifications. Black dotted lines represent the means across all stations that meet the criteria for ranking.
 
+:::{.graph}
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 #| fig-height: 4
@@ -753,6 +759,7 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
   # theme_bw() ) %>% ggplotly()
 
 ```
+:::
 
 \
 
@@ -762,6 +769,7 @@ Calculation of the final score for local services uses an index measure. It is d
 
 Zoned Capacity is a measure of the **theoretical** number of dwellings possible under different zoning implementations.
 
+:::{.graph}
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -780,6 +788,7 @@ delta %>% reactable(theme = sandstone(),
 sum_delta <- sum(delta$new_yield)
 
 ```
+:::
 
 \
 

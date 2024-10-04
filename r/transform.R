@@ -39,6 +39,15 @@
 # }
 # 
 
+filter_stations <- function(dataframe, name_var = 'station') {
+  dataframe %>%
+    filter(!(get(name_var) %in% city_loop_stations)) %>%
+    filter(!(get(name_var) %in% other_important_stations)) %>%
+    filter(!(get(name_var) %in% event_stations)) %>%
+    filter(distance < 25000) %>%
+    return()
+}
+
 
 transform_scores_xminxmax <- function(station_rankings) {
   
@@ -46,8 +55,7 @@ transform_scores_xminxmax <- function(station_rankings) {
   
   xminmaxtransform = station_rankings %>%
     mutate( across(-station, ~ as.numeric(.) )) %>%
-    filter(!(station %in% city_loop_stations)) %>%
-    filter(distance < 25000) %>%
+    filter_stations(.) %>%
     mutate( across(-station, .fns = function(x) { ( x - min(x, na.rm= T)) / ( max(x, na.rm= T) - min(x, na.rm= T)  ) } )) %>%
     mutate(across(-station, .fns = function(x) { x*(weights[cur_column()] %>% as.vector())  }  )) %>%
     rowwise() %>%

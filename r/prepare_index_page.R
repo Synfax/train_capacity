@@ -1,16 +1,7 @@
 
 locations = readRDS(paste0('r_objects/locations.Rdata'))
 
-colours = tribble(
-  ~group, ~ colour,
-  'Sandringham' , "#F178AF",
-  'CrossCity' , "#028430",
-  'Cran/Pak' , "#279FD5",
-  "Burnley" , "#152C6B",
-  "Northern" , "#FFBE00",
-  "Eastern" , "#BE1014",
-  'event' , "#95979A"
-)
+
 
 data_to_map <- readRDS('r_objects/transformed_scores.Rdata') %>%
   as.data.frame() %>%

@@ -121,17 +121,18 @@ This project seeks to find the train stations in Melbourne that are most suitabl
 
 \
 
-For each train stations, seven key metrics are calculated:
+For each train station, key metrics are calculated on:
 
 -   Zoning suitability
 -   Potential number of new homes
 -   Train service frequency in peak
--   Train service passenger numbers in peak
--   Number of local services within a 500m walk
+-   Train line patronage in peak
+-   Local amenities nearby
 -   Distance to CBD
--   Existing transport infrastructure.
+-   Bus and tram frequencies
 
-With these 'raw' metrics, a transformed score is calculated by factoring in how each station scores relative to others on the network. This allows for stations to be compared easily with a single number, or rank.
+The raw metrics are transformed to a score between zero and one. Zero represents the lowest score across all stations, and one is the highest. For example, an individual station score of 0.8 corresponds to a score that is 80% of the maximum value across all stations.
+
 
 \
 
@@ -139,7 +140,7 @@ For some metrics, higher values are 'worse' for upzoning, which means their scor
 
 \
 
-The transformation process is described [here](rankings.html "Rankings Page").
+The full methodology, including a description of the transformation process is [here](rankings.html "Rankings Page").
 :::
 :::{focus-on="cr-main"}
 
@@ -158,32 +159,7 @@ A clickable map of all stations and searchable table are at the foot of the docu
 Each of the top ten stations name is also a clickable link to view more details on.
 
 :::
-:::{focus-on="cr-main"}
 
-## Total Scores
-
-\
-
-```{r}
-
-transformed_scores %>%
-  select(station, score) %>%
-  reactable(theme = cyborg(),
-            class = "pageinforeactable",
-            columns = list(
-              'station' = colDef(name = 'station'),
-              'score' = colDef(name = "Score",
-                             cell = data_bars(.,
-                                              fill_color = 'white',
-                                              background = 'opaque'))
-            )
-            
-            )
-
-
-```
-
-:::
 
 
 :::{focus-on="cr-map1"}
