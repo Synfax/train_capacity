@@ -191,6 +191,8 @@ Instead, it is best to look at the average number of passengers on trains at the
 
 The process described above yields a single score for all stations that share the same lines. These values are shown below to try and describe the process.
 
+::: graph
+
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -211,11 +213,14 @@ station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
   mutate(lines = lines %>% unlist() %>% as.vector() %>% paste0(.,collapse = ',') ) %>%
   ggplot(mapping = aes(y = reorder(lines, average_peak_service_cap), x = average_peak_service_cap)) +
   geom_col() +
-  xlab("Avg number of people on peak train before flinders") +
+  theme_minimal() +
+  xlab("Mean number of people on peak train before flinders") +
   ylab("Lines serving station")) %>%
   ggplotly()
 
 ```
+
+:::
 
 Stations only served by the Sunbury line typically have the most packed trains, whereas Frankston only stations are typically the emptiest.
 

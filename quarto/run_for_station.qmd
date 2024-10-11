@@ -4,7 +4,7 @@ author: "Paul S"
 date: "6/6/24"
 params: 
   station: "Mentone"
-css: run_for_station.css
+css: ../../../run_for_station.css
 format: 
   html: 
     theme: zephyr
@@ -114,7 +114,7 @@ The remainder of this page steps through each factor listed below in no particul
 ::: {.callout-note icon="false"}
 ## Full Methodology
 
-The full methodology for how these scores are calculated and why they are important for consideration in upzoning is [here](https://paulspasojevic.com/stations/rankings.qmd).
+The full methodology for how these scores are calculated and why they are important for consideration in upzoning is [here](../../../rankings.html).
 :::
 :::{.graph}
 ```{r warning=FALSE,message=FALSE}
@@ -206,6 +206,7 @@ sph_plot <- ggplot() +
   theme(base_size = 13) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(legend.position = "bottom") + 
+  theme_minimal() +
   xlab('Hour of day') + 
   ylab('Services per hour') + 
   coord_cartesian(ylim = c(0, max(for_select_station$sph) + 1 ))
@@ -317,6 +318,7 @@ patronage_plot <- ggplot() +
   labs(title = paste0("Average patronage by time of day at ", station_targets), fill = " Peak Period") +
   theme(base_size = 13) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme_minimal() +
   xlab('Hour of day') + 
   ylab('Patronage per train') +
   coord_cartesian(ylim = c(0, max(to_plot$avg_patronage) + 50))
@@ -613,6 +615,7 @@ mode_colors <- setNames(c("#FF8200", "#78BE20"), c('bus','tram'))
 col_chart <- ggplot(merged_f_df, mapping = aes(x = reorder(ROUTEUSSP, avg_sph), y = avg_sph, fill = mode), ) + geom_col(width = 0.7 ) +
   scale_fill_manual(values = mode_colors) +
   ylab('Services Per Hour') +
+  theme_minimal() +
   xlab('Route Number') +
    coord_flip()
 
@@ -746,6 +749,7 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
     ylim(0, ymax) +
   guides(fill = 'none') +
     xlab('Amenity') +
+    theme_minimal() +
     ylab('Number in radius') +
   geom_segment(aes(x = as.numeric(factor(name)) - col_width/2,
                    xend = as.numeric(factor(name)) + col_width/2,
@@ -763,7 +767,7 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
 
 \
 
-Calculation of the final score for local services uses an index measure. It is described in more detail [here](https://paulspasojevic.com/stations/rankings.html).
+Calculation of the final score for local services uses an index measure. It is described in more detail [here](../../../rankings.html)..
 
 ## Zoned Capacity
 

@@ -179,7 +179,34 @@ aaa
 
 :::
 
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
 
+station_lines = readRDS('../r_objects/stations_with_lines.Rdata') 
+
+transformed_scores = readRDS('../r_objects/transformed_scores.Rdata') %>%
+  as.data.frame() %>%
+  rename(Station_Name = "station") %>%
+  arrange(desc(score)) %>%
+  mutate(rank = row_number())
+
+transformed_scores %>%
+  left_join(station_lines, by = 'Station_Name') %>%
+  slice_head(n = n_slice) %>%
+  select(Station_Name, rank, lines) %>%
+  unnest(lines) %>%
+  count(lines, sort = T) %>%
+  filter(lines != "Richmond and City Loop") %>%
+  rename(line = 'lines') %>%
+  left_join(line_groups, by = 'line') %>%
+  ggplot(., mapping = aes(x = reorder(line, -n) , y = n)) +
+  geom_col(aes(fill = group)) +
+  scale_fill_manual(values = setNames(colours$colour, colours$group)) +
+  guides(x = guide_axis(angle = 45)) +
+  xlab("Train Line") +
+  ylab(paste0("Number of stops in top ", n_slice ))
+
+```
 
 
 ##
@@ -288,5 +315,37 @@ ggplot(scree_data, aes(x = PC, y = VarExplained)) +
   geom_point() +
   theme_minimal() +
   ggtitle("Scree Plot")
+
+```
+
+
+## correlations
+
+```{r}
+
+# means <- patronage_data %>%
+#   group_by(Business_Date, hour_of_day, Station_Name) %>%
+#   summarise(patronage = mean(Passenger_Boardings))
+# 
+# 
+# means_long <- means %>%
+#   pivot_wider(names_from = Station_Name, values_from = patronage)
+# 
+# date_hour <- means_long %>% select(hour_of_day, Business_Date)
+# 
+# means_long <- means_long %>%
+#   ungroup() %>%
+#   select(!c(hour_of_day, Business_Date))
+# 
+# means_long[is.na(means_long)] <- 0
+# 
+# means_long = scale(means_long)
+# 
+# cors <- cor(means_long)
+# 
+# 
+# cors = cors %>%
+#   as.data.frame() %>%
+#   mutate(station_name = rownames(cors))
 
 ```

@@ -123,13 +123,13 @@ This project seeks to find the train stations in Melbourne that are most suitabl
 
 For each train station, key metrics are calculated on:
 
--   Zoning suitability
--   Potential number of new homes
--   Train service frequency in peak
--   Train line patronage in peak
--   Local amenities nearby
--   Distance to CBD
--   Bus and tram frequencies
+-   Zoning suitability (%)
+-   Potential number of new homes (#)
+-   Train service frequency in peak (Trains per hour)
+-   Train line patronage in peak (# People)
+-   Local amenities nearby (Composite Index)
+-   Distance to CBD (m)
+-   Bus and tram frequencies (Services per hour)
 
 The raw metrics are transformed to a score between zero and one. Zero represents the lowest score across all stations, and one is the highest. For example, an individual station score of 0.8 corresponds to a score that is 80% of the maximum value across all stations.
 
@@ -169,7 +169,7 @@ Each of the top ten stations name is also a clickable link to view more details 
 
 ###### Rank: 1
 
-###### Total Score: `r transformed_scores$score[1]`
+###### Total Score: `r transformed_scores$score[1]` / 5
 
 \
 
@@ -192,7 +192,7 @@ See more information [here](`r paste0('../stations/stations/',san_station(transf
 
 ###### Rank: 2
 
-###### Total Score: `r transformed_scores$score[2]`
+###### Total Score: `r transformed_scores$score[2]` / 5
 
 \
 
@@ -213,7 +213,7 @@ See more information [here](`r paste0('../stations/stations/',san_station(transf
 
 ###### Rank: 3
 
-###### Total Score: `r transformed_scores$score[3]`
+###### Total Score: `r transformed_scores$score[3]` / 5
 
 \
 
@@ -234,7 +234,7 @@ See more information [here](`r paste0('../stations/stations/',san_station(transf
 
 ###### Rank: 4
 
-###### Total Score: `r transformed_scores$score[4]`
+###### Total Score: `r transformed_scores$score[4]` / 5
 
 \
 
@@ -255,7 +255,7 @@ See more information [here](`r paste0('../stations/stations/',san_station(transf
 
 ###### Rank: 5
 
-###### Total Score: `r transformed_scores$score[5]`
+###### Total Score: `r transformed_scores$score[5]` / 5
 
 \
 
@@ -276,7 +276,7 @@ See more information [here](`r paste0('../stations/stations/',san_station(transf
 
 ###### Rank: 6
 
-###### Total Score: `r transformed_scores$score[6]`
+###### Total Score: `r transformed_scores$score[6]` / 5
 
 \
 
@@ -297,7 +297,7 @@ See more information [here](`r paste0('../stations/stations/',san_station(transf
 
 ###### Rank: 7
 
-###### Total Score: `r transformed_scores$score[7]`
+###### Total Score: `r transformed_scores$score[7]` / 5
 
 \
 
@@ -318,7 +318,7 @@ See more information [here](`r paste0('../stations/stations/',san_station(transf
 
 ###### Rank: 8
 
-###### Total Score: `r transformed_scores$score[8]`
+###### Total Score: `r transformed_scores$score[8]` / 5
 
 \
 
@@ -341,7 +341,7 @@ See more information [here](`r paste0('../stations/stations/',san_station(transf
 
 ###### Rank: 9
 
-###### Total Score: `r transformed_scores$score[9]`
+###### Total Score: `r transformed_scores$score[9]` / 5
 
 \
 
@@ -365,7 +365,7 @@ See more information [here](`r paste0('../stations/stations/',san_station(transf
 
 ###### Rank: 10
 
-###### Total Score: `r transformed_scores$score[10]`
+###### Total Score: `r transformed_scores$score[10]` / 5
 
 \
 
