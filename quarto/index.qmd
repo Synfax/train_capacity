@@ -6,7 +6,6 @@ format:
     image: "index_images/main.png"
     cr-section:
       layout: "overlay-left"
-      
 ---
 
 ```{=html}
@@ -26,7 +25,6 @@ function modifyMainDiv() {
 modifyMainDiv();
 </script>
 ```
-
 ```{r, message=FALSE, warning=FALSE}
 
 library(tidyverse)
@@ -38,6 +36,20 @@ library(reactablefmtr)
 
 locations <- readRDS('../r_objects/locations.Rdata')
 source('../r/constants.r')
+
+source('../r/graphs.r')
+
+transformed_scores <- readRDS('../r_objects/transformed_scores.Rdata')
+original_values <- readRDS('../r_objects/station_rankings.Rdata')
+
+
+# combined_scores <- original_values %>%
+#   left_join(transformed_scores, by = 'station') %>%
+#   arrange(desc(score)) %>%
+#   slice_head(n = 10) %>%
+#   mutate(across(where(is.numeric), .fns = function(x) round(x, 2) )) %>%
+#   mutate(rank = row_number())
+
 
 transformed_scores <- readRDS('../r_objects/transformed_scores.Rdata') %>%
   as.data.frame() %>%
@@ -80,21 +92,22 @@ translations <- translations <- gsub("\\s*\\([^)]+\\)", "", translations)
 
 
 printScores <- function(r) {
+  
   transformed_scores %>% 
   filter(rank == r) %>%
   pivot_longer(-station) %>%
   select(-station) %>%
   filter(!(name %in% c('score','rank'))) %>%
   mutate(name = translations[name]) %>%
-  reactable(theme = cyborg(),
+  reactable(
             class = "pageinforeactable",
             columns = list(
               'name' = colDef(name = 'Metric'),
               'value' = colDef(name = "Score",
                              cell = data_bars(.,
                                               text_position = 'above',
-                                              fill_color = 'white',
-                                              text_color = 'white',
+                                              fill_color = '#1B5E20',
+                                              text_color = 'black',
                                               background = 'opaque',
                                               fill_opacity = 1,
                                               bar_height = 24,
@@ -103,69 +116,120 @@ printScores <- function(r) {
             
             ) %>%
   return()
+  
 }
 
 ```
-:::{.cr-section}
+:::{.column-body-outset .title}
 
-:::{focus-on="cr-main"}
+\
 
-# Train Station Upzoning Rankings
+\
+
+# Train Station Upzoning Rankings: Executive Summary
+:::
+::: column-body
+
+\
+
+Melbourne is going to have to make some choices soon about where to build more housing.
+
+Locating new dwellings nearby to train stations as a form of Transit Oriented Development has emerged as a favoured solution by policymakers, with recent applications in Sydney.
+
+However, policymakers face difficult choices in choosing which stations to upzone. For example, train stations close to the the city may be ideal for locating people near employment opportunities, although they may already be developed, or, the train line may lack spare passenger capacity. Stations further away may be less developed, although they might have poorer service frequencies or other nearby amenities.
+
+The purpose of this report is to tackle these trade-offs by building a robust and data-driven framework to identify the train stations that are best suited for this broad upzoning.
+
+### Methodology
+
+\
+
+For each train station, metrics are calculated on:
+
+-   Zoning suitability (% land area)
+-   Potential number of new homes (# homes)
+-   Train service frequency in peak (trains per hour)
+-   Spare train line capacity in peak (# passengers)
+-   Local amenities nearby (composite index)
+-   Proximity to CBD (metres)
+-   Bus and tram frequencies (services per hour)
+
+Each metric calculated uses different units of measurement, and need to be transformed into comparable units so that a single score can be generated for each train station.
+
+This report uses xmin-xmax scaling, which transforms each 'raw' metric into a value between zero and one. If a station receives a 'transformed' score of zero, it corresponds to the lowest value out of all stations. Likewise, a value of one represents the best out of all stations in Melbourne.
+
+These 'transformed' scores are summed together to produce a final score for each station.
+
+The full methodology is contained in the full report.
+
+### Key Result: Top 10 Train Stations
+
+\
+
+**`r transformed_scores %>% filter(rank == 1) %>% pull(station)`** was the best station out of those considered in this project.
+
+There is a searchable table and interactive map at the foot of this document to find your own station and see where it ranks.
+
+A map below shows the top 10 stations, with their values contained in the 'Chart' tab. One thing of note is how close many of the stations are in terms of final score, without a standout jump between the top 10.
+
+::: column-page
+::: panel-tabset
+## Map
+
+::: 
+![](index_images/main.png)
+:::
+
+## Chart
+
+```{r}
+ top_10_chart()
+```
+:::
+:::
+
+### Key result: Distribution by LGA
+
+\
+
+The best stations for upzoning are not equally distributed across Melbourne.
+
+Local government areas in the inner south east, such as Stonnington & Boroondara, have the most stations in the top 25 ranking stations.
+
+Hover over the bar chart below for an interactive effect.
 
 :::
 
+::: column-page
 
-:::{focus-on="cr-main"}
+```{r}
 
-This project seeks to find the train stations in Melbourne that are most suitable for upzoning.
+top_stations_by_lga() 
 
-\
-
-For each train station, key metrics are calculated on:
-
--   Zoning suitability (%)
--   Potential number of new homes (#)
--   Train service frequency in peak (Trains per hour)
--   Train line patronage in peak (# People)
--   Local amenities nearby (Composite Index)
--   Distance to CBD (m)
--   Bus and tram frequencies (Services per hour)
-
-The raw metrics are transformed to a score between zero and one. Zero represents the lowest score across all stations, and one is the highest. For example, an individual station score of 0.8 corresponds to a score that is 80% of the maximum value across all stations.
-
-
-\
-
-For some metrics, higher values are 'worse' for upzoning, which means their scores are negative.
-
-\
-
-The full methodology, including a description of the transformation process is [here](rankings.html "Rankings Page").
-:::
-:::{focus-on="cr-main"}
-
-This page is only a summary of the ten most well suited stations.
-
-\
-
-Supporting web pages have been created for each individual train station which details why each metric is important for upzoning considerations, and how each are calculated.
-
-\
-
-A clickable map of all stations and searchable table are at the foot of the document (here).
-
-\
-
-Each of the top ten stations name is also a clickable link to view more details on.
+```
 
 :::
 
+::: column-body
 
+# In-Depth Analysis of Top 10 Stations
 
-:::{focus-on="cr-map1"}
+This next section will step through each 10 highest ranked stations. It will include a breakdown of how its score was formed, which uses the transformed scores discussed in the methodology section. These scores are bounded between zero and one.
 
-## [`r transformed_scores$station[1]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[1]),'/quarto/',san_station(transformed_scores$station[1]),'.html') `)
+A table below shows a *rough* guide of how to interpret the transformed scores.
 
+| Transformed Value | Interpretation |
+|-------------------|----------------|
+| 0-0.35            | Poor           |
+| 0.35 - 0.6        | Low            |
+| 0.6 - 0.8         | Good           |
+| 0.8 - 1           | Excellent      |
+
+Use a laptop or desktop for the best viewing experience.
+:::
+::: cr-section
+::: {focus-on="cr-map1"}
+## [`r transformed_scores$station[1]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B1%5D),'/quarto/',san_station(transformed_scores$station%5B1%5D),'.html')%20%60)
 
 ###### Rank: 1
 
@@ -181,14 +245,11 @@ printScores(1)
 
 ```
 
-See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[1]),'/quarto/',san_station(transformed_scores$station[1]),'.html') `).
-
+See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B1%5D),'/quarto/',san_station(transformed_scores$station%5B1%5D),'.html')%20%60).
 :::
 
-:::{focus-on="cr-map2"}
-
-## [`r transformed_scores$station[2]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[2]),'/quarto/',san_station(transformed_scores$station[2]),'.html') `)
-
+::: {focus-on="cr-map2"}
+## [`r transformed_scores$station[2]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B2%5D),'/quarto/',san_station(transformed_scores$station%5B2%5D),'.html')%20%60)
 
 ###### Rank: 2
 
@@ -203,13 +264,12 @@ Distribution of scores:
 printScores(2)
 
 ```
-See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[2]),'/quarto/',san_station(transformed_scores$station[2]),'.html') `).
+
+See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B2%5D),'/quarto/',san_station(transformed_scores$station%5B2%5D),'.html')%20%60).
 :::
 
-:::{focus-on="cr-map3"}
-
-## [`r transformed_scores$station[3]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[3]),'/quarto/',san_station(transformed_scores$station[3]),'.html') `)
-
+::: {focus-on="cr-map3"}
+## [`r transformed_scores$station[3]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B3%5D),'/quarto/',san_station(transformed_scores$station%5B3%5D),'.html')%20%60)
 
 ###### Rank: 3
 
@@ -224,13 +284,12 @@ Distribution of scores:
 printScores(3)
 
 ```
-See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[3]),'/quarto/',san_station(transformed_scores$station[3]),'.html') `).
+
+See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B3%5D),'/quarto/',san_station(transformed_scores$station%5B3%5D),'.html')%20%60).
 :::
 
-:::{focus-on="cr-map4"}
-
-## [`r transformed_scores$station[4]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[4]),'/quarto/',san_station(transformed_scores$station[4]),'.html') `)
-
+::: {focus-on="cr-map4"}
+## [`r transformed_scores$station[4]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B4%5D),'/quarto/',san_station(transformed_scores$station%5B4%5D),'.html')%20%60)
 
 ###### Rank: 4
 
@@ -245,13 +304,12 @@ Distribution of scores:
 printScores(4)
 
 ```
-See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[4]),'/quarto/',san_station(transformed_scores$station[4]),'.html') `).
+
+See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B4%5D),'/quarto/',san_station(transformed_scores$station%5B4%5D),'.html')%20%60).
 :::
 
-:::{focus-on="cr-map5"}
-
-## [`r transformed_scores$station[5]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[5]),'/quarto/',san_station(transformed_scores$station[5]),'.html') `)
-
+::: {focus-on="cr-map5"}
+## [`r transformed_scores$station[5]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B5%5D),'/quarto/',san_station(transformed_scores$station%5B5%5D),'.html')%20%60)
 
 ###### Rank: 5
 
@@ -266,13 +324,12 @@ Distribution of scores:
 printScores(5)
 
 ```
-See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[5]),'/quarto/',san_station(transformed_scores$station[5]),'.html') `).
+
+See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B5%5D),'/quarto/',san_station(transformed_scores$station%5B5%5D),'.html')%20%60).
 :::
 
-:::{focus-on="cr-map6"}
-
-## [`r transformed_scores$station[6]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[6]),'/quarto/',san_station(transformed_scores$station[6]),'.html') `)
-
+::: {focus-on="cr-map6"}
+## [`r transformed_scores$station[6]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B6%5D),'/quarto/',san_station(transformed_scores$station%5B6%5D),'.html')%20%60)
 
 ###### Rank: 6
 
@@ -287,13 +344,12 @@ Distribution of scores:
 printScores(6)
 
 ```
-See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[6]),'/quarto/',san_station(transformed_scores$station[6]),'.html') `).
+
+See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B6%5D),'/quarto/',san_station(transformed_scores$station%5B6%5D),'.html')%20%60).
 :::
 
-:::{focus-on="cr-map7"}
-
-## [`r transformed_scores$station[7]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[7]),'/quarto/',san_station(transformed_scores$station[7]),'.html') `)
-
+::: {focus-on="cr-map7"}
+## [`r transformed_scores$station[7]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B7%5D),'/quarto/',san_station(transformed_scores$station%5B7%5D),'.html')%20%60)
 
 ###### Rank: 7
 
@@ -308,13 +364,12 @@ Distribution of scores:
 printScores(7)
 
 ```
-See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[7]),'/quarto/',san_station(transformed_scores$station[7]),'.html') `).
+
+See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B7%5D),'/quarto/',san_station(transformed_scores$station%5B7%5D),'.html')%20%60).
 :::
 
-:::{focus-on="cr-map8"}
-
-## [`r transformed_scores$station[8]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[8]),'/quarto/',san_station(transformed_scores$station[8]),'.html') `)
-
+::: {focus-on="cr-map8"}
+## [`r transformed_scores$station[8]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B8%5D),'/quarto/',san_station(transformed_scores$station%5B8%5D),'.html')%20%60)
 
 ###### Rank: 8
 
@@ -330,14 +385,11 @@ printScores(8)
 
 ```
 
-See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[8]),'/quarto/',san_station(transformed_scores$station[8]),'.html') `).
-
+See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B8%5D),'/quarto/',san_station(transformed_scores$station%5B8%5D),'.html')%20%60).
 :::
 
-:::{focus-on="cr-map9"}
-
-## [`r transformed_scores$station[9]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[9]),'/quarto/',san_station(transformed_scores$station[9]),'.html') `)
-
+::: {focus-on="cr-map9"}
+## [`r transformed_scores$station[9]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B9%5D),'/quarto/',san_station(transformed_scores$station%5B9%5D),'.html')%20%60)
 
 ###### Rank: 9
 
@@ -353,15 +405,11 @@ printScores(9)
 
 ```
 
-See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[9]),'/quarto/',san_station(transformed_scores$station[9]),'.html') `).
-
+See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B9%5D),'/quarto/',san_station(transformed_scores$station%5B9%5D),'.html')%20%60).
 :::
 
-
-:::{focus-on="cr-map10"}
-
-## [`r transformed_scores$station[10]`](`r paste0('../stations/stations/',san_station(transformed_scores$station[10]),'/quarto/',san_station(transformed_scores$station[10]),'.html') `)
-
+::: {focus-on="cr-map10"}
+## [`r transformed_scores$station[10]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B10%5D),'/quarto/',san_station(transformed_scores$station%5B10%5D),'.html')%20%60)
 
 ###### Rank: 10
 
@@ -377,12 +425,10 @@ printScores(10)
 
 ```
 
-See more information [here](`r paste0('../stations/stations/',san_station(transformed_scores$station[10]),'/quarto/',san_station(transformed_scores$station[10]),'.html') `).
-
+See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B10%5D),'/quarto/',san_station(transformed_scores$station%5B10%5D),'.html')%20%60).
 :::
 
-:::{focus-on="cr-click"}
-
+::: {focus-on="cr-click"}
 ## Clickable Map
 
 You can find more details about your own local station by zooming in on the map and clicking on the label.
@@ -423,10 +469,10 @@ Alternatively, use the searchable table below.
   select(-safe_name)
 
 reactable(df_with_links,
-          theme = cyborg(),
           filterable = T,
   columns = list(
     station = colDef(
+      name = "Station",
       cell = function(value, index) {
         url <- df_with_links$win_url[index]
         htmltools::a(href = url, value, target = "_blank")
@@ -437,52 +483,42 @@ reactable(df_with_links,
 )
 
 ```
-
 :::
 
-:::{#cr-main}
-
-:::
-:::{#cr-map1}
-
+::: {#cr-main}
 :::
 
-:::{#cr-map2}
-
+::: {#cr-map1}
 :::
 
-:::{#cr-map3}
-
+::: {#cr-map2}
 :::
 
-:::{#cr-map4}
-
+::: {#cr-map3}
 :::
 
-:::{#cr-map5}
-
+::: {#cr-map4}
 :::
 
-:::{#cr-map6}
-
+::: {#cr-map5}
 :::
 
-:::{#cr-map7}
-
+::: {#cr-map6}
 :::
 
-:::{#cr-map8}
-
+::: {#cr-map7}
 :::
 
-:::{#cr-map9}
-
+::: {#cr-map8}
 :::
 
-:::{#cr-map10}
-
+::: {#cr-map9}
 :::
-:::{#cr-click}
+
+::: {#cr-map10}
+:::
+
+::: {#cr-click}
 ```{r}
 
 colours = tribble(

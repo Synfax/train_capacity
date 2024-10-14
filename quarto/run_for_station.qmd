@@ -771,6 +771,8 @@ Calculation of the final score for local services uses an index measure. It is d
 
 ## Zoned Capacity
 
+include how many homes currently.
+
 Zoned Capacity is a measure of the **theoretical** number of dwellings possible under different zoning implementations.
 
 :::{.graph}

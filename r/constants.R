@@ -7,11 +7,13 @@ weights = c(
   "grz_nrz_pc" = 1,
   "capacity_delta" = 1,
   'average_peak_service_freq' = 1,
-  'average_peak_service_cap' = -1,
+  'average_peak_service_cap' = 1,
   'walkability_score' = 1,
-  'distance' = -1, 
+  'distance' = 1, 
   'n_bus_tram' = 1
 )
+
+columns_to_negate <- c('average_peak_service_cap', 'distance')
 
 critical_variables = data.frame(val = c('restaurant', 'supermarket', 'cafe', 'bar', 'school', 'childcare', 'park'),
                                 key =  c('amenity', 'shop', 'amenity', 'amenity', 'amenity', 'amenity', 'leisure'))
@@ -24,9 +26,9 @@ translations = c(
   'grz_nrz_pc' = 'Zoning suitability (% land area)',
   'capacity_delta' = 'Potential new homes in broad 1000m upzoning',
   'average_peak_service_freq' = 'Train frequency in peak (trains per hour)',
-  'average_peak_service_cap' = 'Average patronage of train line(s) in peak (people)',
+  'average_peak_service_cap' = 'Spare capacity on train line in peak (# people)',
   'walkability_score' = 'Existing local amenities (composite index)',
-  'distance' = 'Distance to CBD (m)',
+  'distance' = 'Proximity to the CBD (m)',
   'n_bus_tram' = 'Mode weighted bus and tram frequencies'
 )
 
@@ -34,9 +36,9 @@ translations_simple = c(
   'grz_nrz_pc' = 'Zoning suitability',
   'capacity_delta' = 'Potential new homes',
   'average_peak_service_freq' = 'Train frequency',
-  'average_peak_service_cap' = 'Line Capacity',
+  'average_peak_service_cap' = 'Spare line Capacity',
   'walkability_score' = 'Local Amenities',
-  'distance' = 'Distance to CBD',
+  'distance' = 'Proximity to CBD',
   'n_bus_tram' = 'Other transport connections'
 )
 

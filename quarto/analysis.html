@@ -22,40 +22,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -69,26 +35,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="analysis_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="analysis_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<link href="analysis_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
-<script src="analysis_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
-<script src="analysis_files/libs/plotly-binding-4.10.4/plotly.js"></script>
-<script src="analysis_files/libs/typedarray-0.1/typedarray.min.js"></script>
-<script src="analysis_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
-<link href="analysis_files/libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
-<script src="analysis_files/libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
-<link href="analysis_files/libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
-<script src="analysis_files/libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
-<link href="analysis_files/libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
-<script src="analysis_files/libs/leaflet-1.3.1/leaflet.js"></script>
-<link href="analysis_files/libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
-<script src="analysis_files/libs/proj4-2.6.2/proj4.min.js"></script>
-<script src="analysis_files/libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
-<link href="analysis_files/libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
-<script src="analysis_files/libs/leaflet-binding-2.2.2/leaflet.js"></script>
-<script src="analysis_files/libs/leaflet-providers-2.0.0/leaflet-providers_2.0.0.js"></script>
-<script src="analysis_files/libs/leaflet-providers-plugin-2.2.2/leaflet-providers-plugin.js"></script>
 
 
+<link rel="stylesheet" href="run_for_station.css">
 </head>
 
 <body>
@@ -107,9 +56,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#top-scores-by-lga" id="toc-top-scores-by-lga" class="nav-link" data-scroll-target="#top-scores-by-lga">Top scores by LGA</a></li>
   <li><a href="#top-scores-by-line" id="toc-top-scores-by-line" class="nav-link" data-scroll-target="#top-scores-by-line">Top Scores by Line</a></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
-  <li><a href="#k-clustering" id="toc-k-clustering" class="nav-link" data-scroll-target="#k-clustering">K-clustering</a></li>
-  <li><a href="#pca" id="toc-pca" class="nav-link" data-scroll-target="#pca">PCA</a></li>
   </ul>
 </nav>
 </div>
@@ -155,9 +101,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Shown below are density plots of the scores, both raw and after transformation. The density plots seek to show how the underlying data is distributed, as well as how many extreme values there are.</p>
 <section id="transformed-scores" class="level4 page-columns page-full">
 <h4 class="anchored" data-anchor-id="transformed-scores">Transformed scores</h4>
+<div class="graph">
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="analysis_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="768"></p>
+</div>
 </div>
 </div>
 
@@ -166,9 +114,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div></div></section>
 <section id="raw-scores" class="level4">
 <h4 class="anchored" data-anchor-id="raw-scores">Raw scores</h4>
+<div class="graph">
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="analysis_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="768"></p>
+</div>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -189,126 +139,22 @@ Note
 <section id="top-scores-by-lga" class="level2">
 <h2 class="anchored" data-anchor-id="top-scores-by-lga">Top scores by LGA</h2>
 <p>The chart below breaks down the best 25 stations into their Local Government Areas. It is clear to see that the highest ranked stations are typically located in the south east of Melbourne or in the inner north.</p>
+<div class="graph">
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="768"></p>
+</div>
 </div>
 </div>
 </section>
 <section id="top-scores-by-line" class="level2">
 <h2 class="anchored" data-anchor-id="top-scores-by-line">Top Scores by Line</h2>
 <p>The below plot shows which train lines how the 25 top stations are located on. For stations on many lines, each line is counted once.</p>
-<div class="margin-content">
-<p>aaa</p>
-</div>
+<div class="graph">
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="768"></p>
 </div>
-</div>
-</section>
-<section id="section" class="level2">
-<h2 class="anchored" data-anchor-id="section"></h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>station_lines <span class="ot">=</span> <span class="fu">readRDS</span>(<span class="st">'../r_objects/stations_with_lines.Rdata'</span>) </span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>station_rankings <span class="ot">=</span> <span class="fu">readRDS</span>(<span class="st">'../r_objects/station_rankings.Rdata'</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Station_Name =</span> <span class="st">"station"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>(station_rankings <span class="sc">%&gt;%</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter_stations</span>(., <span class="st">"Station_Name"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(station_lines, <span class="at">by =</span> <span class="st">'Station_Name'</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(average_peak_service_cap, lines) <span class="sc">%&gt;%</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">lines =</span> lines <span class="sc">%&gt;%</span> <span class="fu">unlist</span>() <span class="sc">%&gt;%</span> <span class="fu">as.vector</span>() <span class="sc">%&gt;%</span> <span class="fu">paste0</span>(.,<span class="at">collapse =</span> <span class="st">','</span>) ) <span class="sc">%&gt;%</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">reorder</span>(lines, average_peak_service_cap), <span class="at">x =</span> average_peak_service_cap)) <span class="sc">+</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Avg number of people on peak train before flinders"</span>) <span class="sc">+</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Lines serving station"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplotly</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="plotly html-widget html-fill-item" id="htmlwidget-128bdc7928a2c87da718" style="width:100%;height:487px;"></div>
-<script type="application/json" data-for="htmlwidget-128bdc7928a2c87da718">{"x":{"data":[{"orientation":"v","width":[251.91391311161601,206.75822596694999,287.84336871106802,201.66664235402399,368.45621335637298,288.31566680988198,420.13923778412698,328.38594008312702,278.86100481120502,348.19463686481402,274.68855068876098,347.31503930742599,234.04303362208501,266.38568127694202,300.00004585808301,234.278417455398,291.23652716010599,431.52325071148698,325.31154102740402,337.9987683439,413.00658258646098],"base":[4.5499999999999998,1.55,8.5500000000000007,0.55000000000000004,17.550000000000001,9.5500000000000007,19.550000000000001,13.550000000000001,7.5499999999999998,16.550000000000001,6.5499999999999998,15.550000000000001,2.5499999999999998,5.5499999999999998,11.550000000000001,3.5499999999999998,10.550000000000001,20.550000000000001,12.550000000000001,14.550000000000001,18.550000000000001],"x":[125.95695655580801,103.379112983475,143.92168435553401,100.833321177012,184.22810667818649,144.15783340494099,210.06961889206349,164.19297004156351,139.43050240560251,174.09731843240701,137.34427534438049,173.657519653713,117.0215168110425,133.19284063847101,150.00002292904151,117.139208727699,145.618263580053,215.76162535574349,162.65577051370201,168.99938417195,206.50329129323049],"y":[0.90000000000000036,0.90000000000000013,0.89999999999999858,0.89999999999999991,0.89999999999999858,0.89999999999999858,0.89999999999999858,0.89999999999999858,0.89999999999999947,0.89999999999999858,0.90000000000000036,0.89999999999999858,0.90000000000000036,0.90000000000000036,0.89999999999999858,0.90000000000000036,0.89999999999999858,0.89999999999999858,0.89999999999999858,0.89999999999999858,0.89999999999999858],"text":["average_peak_service_cap: 251.9139<br />reorder(lines, average_peak_service_cap): Glen Waverley","average_peak_service_cap: 206.7582<br />reorder(lines, average_peak_service_cap): Alamein","average_peak_service_cap: 287.8434<br />reorder(lines, average_peak_service_cap): Belgrave,Alamein,Lilydale","average_peak_service_cap: 201.6666<br />reorder(lines, average_peak_service_cap): Frankston","average_peak_service_cap: 368.4562<br />reorder(lines, average_peak_service_cap): Belgrave","average_peak_service_cap: 288.3157<br />reorder(lines, average_peak_service_cap): Lilydale","average_peak_service_cap: 420.1392<br />reorder(lines, average_peak_service_cap): Pakenham,Cranbourne","average_peak_service_cap: 328.3859<br />reorder(lines, average_peak_service_cap): Belgrave,Lilydale","average_peak_service_cap: 278.8610<br />reorder(lines, average_peak_service_cap): Glen Waverley,Belgrave,Alamein,Lilydale","average_peak_service_cap: 348.1946<br />reorder(lines, average_peak_service_cap): Werribee","average_peak_service_cap: 274.6886<br />reorder(lines, average_peak_service_cap): Hurstbridge","average_peak_service_cap: 347.3150<br />reorder(lines, average_peak_service_cap): Frankston,Pakenham,Cranbourne","average_peak_service_cap: 234.0430<br />reorder(lines, average_peak_service_cap): Sandringham","average_peak_service_cap: 266.3857<br />reorder(lines, average_peak_service_cap): Upfield","average_peak_service_cap: 300.0000<br />reorder(lines, average_peak_service_cap): Hurstbridge,Mernda","average_peak_service_cap: 234.2784<br />reorder(lines, average_peak_service_cap): Williamstown","average_peak_service_cap: 291.2365<br />reorder(lines, average_peak_service_cap): Werribee,Williamstown","average_peak_service_cap: 431.5233<br />reorder(lines, average_peak_service_cap): Sunbury","average_peak_service_cap: 325.3115<br />reorder(lines, average_peak_service_cap): Mernda","average_peak_service_cap: 337.9988<br />reorder(lines, average_peak_service_cap): Sunbury,Werribee,Williamstown","average_peak_service_cap: 413.0066<br />reorder(lines, average_peak_service_cap): Craigieburn"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(89,89,89,1)","line":{"width":1.8897637795275593,"color":"transparent"}},"showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":25.74124809741248,"r":7.3059360730593621,"b":39.69558599695587,"l":253.51598173515993},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-21.576162535574351,453.09941324706131],"tickmode":"array","ticktext":["0","100","200","300","400"],"tickvals":[0,100.00000000000001,200,300,400],"categoryorder":"array","categoryarray":["0","100","200","300","400"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Avg number of people on peak train before flinders","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,21.600000000000001],"tickmode":"array","ticktext":["Frankston","Alamein","Sandringham","Williamstown","Glen Waverley","Upfield","Hurstbridge","Glen Waverley,Belgrave,Alamein,Lilydale","Belgrave,Alamein,Lilydale","Lilydale","Werribee,Williamstown","Hurstbridge,Mernda","Mernda","Belgrave,Lilydale","Sunbury,Werribee,Williamstown","Frankston,Pakenham,Cranbourne","Werribee","Belgrave","Craigieburn","Pakenham,Cranbourne","Sunbury"],"tickvals":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,14.999999999999998,15.999999999999998,17,18,19,20,21],"categoryorder":"array","categoryarray":["Frankston","Alamein","Sandringham","Williamstown","Glen Waverley","Upfield","Hurstbridge","Glen Waverley,Belgrave,Alamein,Lilydale","Belgrave,Alamein,Lilydale","Lilydale","Werribee,Williamstown","Hurstbridge,Mernda","Mernda","Belgrave,Lilydale","Sunbury,Werribee,Williamstown","Frankston,Pakenham,Cranbourne","Werribee","Belgrave","Craigieburn","Pakenham,Cranbourne","Sunbury"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716894984},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Lines serving station","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.8897637795275593,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"7bf825c7da0":{"x":{},"y":{},"type":"bar"}},"cur_data":"7bf825c7da0","visdat":{"7bf825c7da0":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
-</div>
-</div>
-</section>
-<section id="k-clustering" class="level2">
-<h2 class="anchored" data-anchor-id="k-clustering">K-clustering</h2>
-<div class="cell">
-<div class="cell-output-display">
-<div class="leaflet html-widget html-fill-item" id="htmlwidget-8e6917ae3553099ea03f" style="width:100%;height:487px;"></div>
-<script type="application/json" data-for="htmlwidget-8e6917ae3553099ea03f">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["CartoDB.Positron",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addCircleMarkers","args":[[-37.86660595,-37.86832039,-37.77765281,-37.77839363,-37.8671476,-37.76124203,-37.85645238,-37.77530609,-37.86196753,-38.02722019,-37.82239831,-37.86948773,-37.73352285,-38.19404306,-37.84173004,-38.05083135,-37.9091021,-37.74556212,-37.91742457,-38.04040829,-38.33739032,-37.82007075,-38.06294478,-37.8604518,-37.81922165,-37.92648432,-37.68304926,-37.76772055,-37.82756022,-37.85156328,-37.82656714,-37.82448518,-38.07129047,-37.88624148,-38.07489292,-37.87745946,-37.82429952,-38.05195538,-37.96664989,-37.92468255,-37.78865745,-37.74234502,-37.80452593,-37.66100253,-37.6018169,-38.09953731,-38.36612338,-37.764101,-37.79543697,-37.98996792,-37.77496341,-37.86895684,-37.77918729,-37.67329744,-37.62701651,-37.76358553,-37.82589419,-37.87693002,-38.084284,-37.82639995,-38.03805602,-37.88475311,-37.71354967,-37.65238715,-37.7560117,-37.77917126,-37.71462129,-37.88169799,-37.81198131,-37.78813995,-37.78720192,-37.81830513,-37.80108298,-38.14299007,-37.89669508,-37.85327908,-37.75751083,-37.85930842,-37.87950407,-37.74720985,-37.82146682,-37.88971946,-37.70453633,-37.700678,-37.70395408,-38.01774038,-37.93797681,-37.84398457,-38.30565853,-37.84459087,-37.622992,-37.82182601,-37.81889537,-37.82832227,-37.75707293,-37.83467244,-37.948425,-37.87440222,-37.88327618,-37.89488129,-37.91101734,-37.63939817,-37.76889674,-37.69513079,-37.77498702,-37.81652702,-37.87360339,-38.12174203,-37.72927934,-37.79378022,-37.69487012,-37.83992894,-37.82078023,-37.66585075,-37.86369404,-38.152034,-37.75551777,-38.05734118,-37.79426673,-37.7260123,-37.8662533,-37.91030903,-37.80993877,-37.9818654,-38.07900048,-37.72093389,-37.602549,-37.77784668,-37.91513441,-37.8025047,-37.644062,-37.81800987,-37.71529624,-37.76570666,-37.93435329,-37.78474883,-38.00658295,-37.75448484,-38.35403334,-37.87525526,-37.89019832,-38.02780932,-37.78732767,-37.84271757,-37.96723193,-37.90488721,-37.80630984,-37.81039836,-37.85733348,-37.76986537,-37.82060317,-37.71794973,-37.90037214,-38.06614572,-37.90321167,-38.08061397,-37.99307882,-37.81105406,-37.73075596,-37.92514919,-37.84951848,-37.73867424,-37.72840277,-37.71688492,-37.82407446,-37.81588648,-37.81196804,-37.87590643,-37.83150543,-37.7428786,-37.63823121,-37.78119293,-37.78321711,-37.70789754,-37.95650457,-37.95033018,-38.10402104,-37.86784231,-37.80900514,-37.7835,-38.22534196,-37.79953087,-37.6491588,-37.83844935,-37.81793643,-37.958758,-37.83063888,-37.94950878,-37.74486131,-38.37423454,-37.74359132,-37.57909097,-37.78853633,-37.87622963,-37.90811849,-37.68033809,-37.75505179,-37.85077381,-37.84936553,-37.7992509,-38.259815,-37.823477,-37.66607779,-37.8926717,-37.90369097,-37.79915782,-37.70112872,-37.71095798,-37.66396792,-37.89937805,-37.8018087,-37.81494896,-37.93849121,-37.7806207,-37.86516348,-37.86986533,-37.86775292,-37.86398189,-37.83571565,-37.85605308,-37.97825454,-37.81585044],[144.7608094,145.0796557,144.8247036,145.0312549,144.8296447,144.960684,145.0193255,144.9218207,145.0813438,145.1021496,145.0458437,144.9935121,144.9628406,145.1605261,145.2681364,145.3660737,145.3552913,145.000155,145.0369951,145.3457261,145.1780265,145.1500135,145.1196804,145.2843851,145.1214289,144.9891536,144.9196132,144.9595865,145.0075551,145.0805111,145.0586972,145.0812242,145.437791,145.0585751,145.1224183,145.0425248,145.0886479,145.1160413,145.0545579,145.1205344,144.9954167,144.9633363,144.9937497,144.9260556,144.9433203,145.280599,145.2040433,144.9970562,145.2805978,145.2097254,145.038476,145.0629508,145.0082416,145.1585062,144.7199224,145.0539427,145.0681902,145.069393,145.506311,144.9970657,145.1085355,145.0008979,145.147822,145.0301217,144.9161975,145.0169053,144.960545,145.2952513,144.9556538,144.9393233,144.9075887,144.9669643,144.9031992,145.1261623,145.0041684,145.0516547,144.8095734,145.0582249,145.1620575,144.9209387,145.0364388,145.0422229,144.9172204,144.9588743,145.1082474,145.2697768,145.0014706,145.0755596,145.1859799,145.0021421,145.097396,145.0228987,145.2127872,145.2445554,145.0606855,145.0226353,145.0418718,145.090662,144.7009549,145.0776351,145.1023643,145.1920169,145.0454252,144.9158505,144.9587169,144.9840983,145.1120902,145.1352953,144.7937381,144.9305244,145.0118838,145.0335516,145.1407027,145.0171932,144.7726167,145.139534,145.3477102,145.2492751,144.9361663,145.0691433,145.0292939,145.038299,144.9625935,145.0651659,145.2635114,144.9613135,145.100883,144.9929725,144.9962991,144.8914721,145.09214,145.1919735,145.1215157,144.9191607,145.0367383,145.3124024,145.0876594,144.961823,145.1896025,145.1280557,145.0673749,145.3039694,144.9289785,144.8835999,145.1769357,145.002605,144.9415102,144.9925003,144.8890695,144.9952772,145.1748917,144.9215188,145.0883079,145.4109872,145.0396134,145.4863791,145.0763268,144.9729109,144.9281956,145.03547,144.9898599,145.000522,145.0027726,145.0069958,144.9901643,145.2289685,145.2501909,144.9952366,145.069646,145.0661403,144.9354037,144.9523013,144.9924071,145.0095166,145.1628259,145.0045614,145.1282304,144.8409577,144.8956716,144.915,145.1762449,144.925469,145.0670324,144.9923422,144.9514112,145.049124,144.8859335,145.1534518,144.8000505,145.2218375,144.9273157,144.7273188,144.8328782,145.1497805,145.3429946,145.0142789,144.9985715,145.0139086,145.0417337,144.8629449,145.1864007,145.1000368,144.9467399,145.3075302,145.3313334,144.9944514,144.7741805,145.0837934,145.1816145,144.661118,144.8853248,144.9914228,145.1388326,144.9992332,144.8134936,144.7474447,144.9053233,144.8944837,145.0702976,144.9920352,145.1916003,144.8899337],10,null,null,{"interactive":true,"className":"","stroke":null,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":["#31688E","#440154","#31688E","#440154","#31688E","#35B779","#35B779","#35B779","#440154","#808080","#35B779","#35B779","#35B779","#808080","#808080","#808080","#808080","#35B779","#440154","#808080","#808080","#31688E","#808080","#808080","#35B779","#440154","#31688E","#35B779","#35B779","#440154","#35B779","#440154","#808080","#35B779","#808080","#31688E","#440154","#808080","#440154","#31688E","#35B779","#35B779","#FDE725","#31688E","#31688E","#808080","#808080","#35B779","#808080","#808080","#440154","#440154","#440154","#440154","#808080","#440154","#35B779","#440154","#808080","#35B779","#808080","#35B779","#440154","#31688E","#35B779","#440154","#440154","#808080","#808080","#35B779","#35B779","#808080","#FDE725","#808080","#440154","#35B779","#31688E","#35B779","#440154","#31688E","#35B779","#440154","#31688E","#440154","#440154","#808080","#440154","#440154","#808080","#35B779","#31688E","#35B779","#31688E","#31688E","#440154","#35B779","#440154","#440154","#31688E","#31688E","#31688E","#808080","#440154","#31688E","#35B779","#FDE725","#440154","#808080","#31688E","#35B779","#31688E","#35B779","#31688E","#31688E","#31688E","#808080","#808080","#808080","#35B779","#440154","#35B779","#440154","#808080","#440154","#808080","#35B779","#808080","#35B779","#440154","#35B779","#31688E","#31688E","#440154","#35B779","#440154","#808080","#440154","#35B779","#808080","#440154","#31688E","#808080","#35B779","#31688E","#31688E","#440154","#FDE725","#FDE725","#440154","#35B779","#31688E","#31688E","#31688E","#808080","#440154","#808080","#440154","#808080","#31688E","#440154","#35B779","#35B779","#440154","#440154","#FDE725","#31688E","#440154","#35B779","#440154","#440154","#31688E","#35B779","#35B779","#440154","#31688E","#440154","#808080","#31688E","#35B779","#440154","#808080","#35B779","#31688E","#FDE725","#808080","#440154","#31688E","#31688E","#31688E","#808080","#31688E","#808080","#35B779","#440154","#808080","#31688E","#35B779","#35B779","#35B779","#31688E","#808080","#440154","#31688E","#808080","#808080","#FDE725","#31688E","#440154","#808080","#808080","#31688E","#FDE725","#31688E","#35B779","#31688E","#31688E","#35B779","#35B779","#440154","#35B779","#808080","#35B779"],"fillOpacity":0.5},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addLegend","args":[{"colors":["#440154","#31688E","#35B779","#FDE725"],"labels":["1","2","3","4"],"na_color":"#808080","na_label":"NA","opacity":0.5,"position":"bottomleft","type":"factor","title":"cluster","extra":null,"layerId":null,"className":"info legend","group":null}]}],"limits":{"lat":[-38.37423454,-37.57909097],"lng":[144.661118,145.506311]}},"evals":[],"jsHooks":[]}</script>
-</div>
-</div>
-</section>
-<section id="pca" class="level2">
-<h2 class="anchored" data-anchor-id="pca">PCA</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>station_rankings <span class="ot">=</span> <span class="fu">readRDS</span>(<span class="st">'../r_objects/station_rankings.Rdata'</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pca_result <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(station_rankings <span class="sc">%&gt;%</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>station), <span class="at">center =</span> <span class="cn">TRUE</span>, <span class="at">scale. =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 4: View PCA summary</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pca_result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Importance of components:
-                          PC1    PC2    PC3    PC4     PC5     PC6     PC7
-Standard deviation     1.6862 1.1606 0.9818 0.8741 0.68871 0.64649 0.43527
-Proportion of Variance 0.4062 0.1924 0.1377 0.1092 0.06776 0.05971 0.02707
-Cumulative Proportion  0.4062 0.5986 0.7363 0.8455 0.91323 0.97293 1.00000</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 5: Visualize results</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pca_data <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca_result<span class="sc">$</span>x)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>pca_data <span class="ot">=</span> pca_data <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">name =</span> station_rankings<span class="sc">$</span>station)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pca_data, <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2)) <span class="sc">+</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"PCA: First two principal components"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="768"></p>
-</div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 6: Analyze loadings</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(pca_result<span class="sc">$</span>rotation)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                  PC1          PC2         PC3         PC4
-grz_nrz_pc                -0.51392464 -0.049296750  0.32064468 -0.04490636
-capacity_delta            -0.30447354 -0.423273555  0.65481023 -0.15885592
-average_peak_service_freq  0.24980273  0.415813745  0.23508353 -0.83230249
-average_peak_service_cap   0.01975212  0.652896510  0.46434441  0.41414851
-distance                  -0.42723158  0.423337552 -0.07215145  0.13438510
-n_bus_tram                 0.42911560 -0.199826233  0.37675161  0.24527982
-walkability_score          0.46229727 -0.009444548  0.22446147  0.17401222
-                                  PC5         PC6         PC7
-grz_nrz_pc                -0.29510191  0.07287609  0.73227430
-capacity_delta             0.10011299 -0.18346354 -0.48004399
-average_peak_service_freq -0.05622312  0.11538649  0.01519051
-average_peak_service_cap   0.39268149 -0.17020364  0.05507492
-distance                  -0.53359208  0.31866313 -0.47825371
-n_bus_tram                -0.07176145  0.75334399  0.03388868
-walkability_score         -0.67502759 -0.49967342  0.01389447</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 7: Calculate variance explained</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>var_explained <span class="ot">&lt;-</span> pca_result<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="fu">sum</span>(pca_result<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(var_explained)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.40617947 0.19241782 0.13771414 0.10915647 0.06775984 0.05970696 0.02706530</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 8: Scree plot</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>scree_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">PC =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(var_explained), </span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">VarExplained =</span> var_explained)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(scree_data, <span class="fu">aes</span>(<span class="at">x =</span> PC, <span class="at">y =</span> VarExplained)) <span class="sc">+</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Scree Plot"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="analysis_files/figure-html/unnamed-chunk-9-2.png" class="img-fluid" width="768"></p>
 </div>
 </div>
 </section>

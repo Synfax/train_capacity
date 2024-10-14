@@ -6,6 +6,8 @@ try_render_stupid_quarto_files <- function() {
   already_rendered <- list.dirs('stations/', recursive = F, full.names = F) %>%
     str_replace_all(., '_', ' ')
   
+  valid_stations <- readRDS('r_objects/transformed_scores.Rdata') %>% pull(station)
+  
   edited_station_list = setdiff(stations, already_rendered)
   
   

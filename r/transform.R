@@ -51,12 +51,12 @@ filter_stations <- function(dataframe, name_var = 'station') {
 
 transform_scores_xminxmax <- function(station_rankings) {
   
-  bad_columns = c('heritage_pc', 'average_peak_service_cap', 'distance')
   
   xminmaxtransform = station_rankings %>%
     mutate( across(-station, ~ as.numeric(.) )) %>%
     filter_stations(.) %>%
     mutate( across(-station, .fns = function(x) { ( x - min(x, na.rm= T)) / ( max(x, na.rm= T) - min(x, na.rm= T)  ) } )) %>%
+    mutate(across(any_of(columns_to_negate), .fns = function(x) {1-x} )) %>%
     mutate(across(-station, .fns = function(x) { x*(weights[cur_column()] %>% as.vector())  }  )) %>%
     rowwise() %>%
     mutate(score = sum(across(-station))) %>%

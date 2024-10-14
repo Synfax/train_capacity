@@ -4,6 +4,7 @@ author: "Paul S"
 date: "6/6/24"
 params: 
   station: "South Yarra"
+css: run_for_station.css
 format: 
   html: 
     theme: zephyr
@@ -42,7 +43,7 @@ Shown below are density plots of the scores, both raw and after transformation. 
 
 
 #### Transformed scores
-
+::: graph
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -85,7 +86,7 @@ ggplot(transformed_scores, aes(x = value, y  = name, fill = name)) +
 
 
 ```
-
+:::
 
 
 ::: column-margin
@@ -93,7 +94,7 @@ Created with `ggridgeline`.
 :::
 
 #### Raw scores
-
+::: graph
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -114,6 +115,7 @@ ggplot(raw_scores) + geom_density(aes( x = value)) +
   theme(axis.text.y = element_blank()) + xlab("Raw score") + ylab("Density")
 
 ```
+:::
 
 :::{.callout-note}
 The same exclusion restrictions outlined [here](rankings.html "Rankings Page") are applied to the raw score plots.
@@ -132,53 +134,21 @@ n_slice = 25
 
 The chart below breaks down the best `r n_slice` stations into their Local Government Areas. It is clear to see that the highest ranked stations are typically located in the south east of Melbourne or in the inner north.
 
+::: graph
 ```{r warning=FALSE,message=FALSE}
 #| echo: false
 
 
-transformed_scores = readRDS('../r_objects/transformed_scores.Rdata') %>%
-  as.data.frame() %>%
-  rename(Station_Name = "station")
-
-locations = readRDS('../r_objects/locations.Rdata') 
-
-scores_for_lga = transformed_scores %>%
-  left_join(locations, by = 'Station_Name') %>%
-  st_as_sf(coords = c('lng','lat')) %>%
-  arrange(desc(score)) %>%
-  mutate(rank = row_number())
-
-scores_for_lga = slice_head(scores_for_lga, n = n_slice) %>%
-  select(Station_Name) 
-
-scores_for_lga = st_set_crs(scores_for_lga, 'wgs84') %>%
-  st_transform(crs = 7844)
-
-#load geometries 
-
-lga <- read_sf('../shapefiles/lga_boundaries/LGA_2023_AUST_GDA2020.shp')
-
-scores_for_lga = st_join(scores_for_lga, lga) %>%
-  select(Station_Name, LGA_NAME23) %>%
-  count(LGA_NAME23)
-
-ggplot(as.data.frame(scores_for_lga), mapping = aes(x = reorder(LGA_NAME23, -n), y = n)) +
-  geom_col() +
-  xlab('Local Government Area') +
-  ylab('Number of stations')
 
 ```
+:::
 
 ## Top Scores by Line
 
 The below plot shows which train lines how the `r n_slice` top stations are located on. For stations on many lines, each line is counted once.
 
-:::{.margin-content}
 
-aaa
-
-:::
-
+::: graph
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -200,152 +170,40 @@ transformed_scores %>%
   rename(line = 'lines') %>%
   left_join(line_groups, by = 'line') %>%
   ggplot(., mapping = aes(x = reorder(line, -n) , y = n)) +
+  theme_minimal() +
   geom_col(aes(fill = group)) +
   scale_fill_manual(values = setNames(colours$colour, colours$group)) +
   guides(x = guide_axis(angle = 45)) +
   xlab("Train Line") +
-  ylab(paste0("Number of stops in top ", n_slice ))
+  ylab(paste0("Number of stops in top ", n_slice )) 
 
 ```
+:::
 
-
-##
-
-```{r}
-
-
-station_lines = readRDS('../r_objects/stations_with_lines.Rdata') 
-
-station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
-  rename(Station_Name = "station") %>%
-  as.data.frame()
-
-
-(station_rankings %>%
-  filter_stations(., "Station_Name") %>%
-  left_join(station_lines, by = 'Station_Name') %>%
-  select(average_peak_service_cap, lines) %>%
-  unique() %>%
-  rowwise() %>%
-  mutate(lines = lines %>% unlist() %>% as.vector() %>% paste0(.,collapse = ',') ) %>%
-  ggplot(mapping = aes(y = reorder(lines, average_peak_service_cap), x = average_peak_service_cap)) +
-  geom_col() +
-  xlab("Avg number of people on peak train before flinders") +
-  ylab("Lines serving station")) %>%
-  ggplotly()
-
-```
-
-## K-clustering
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
-
-
-
-station_rankings[, 2:ncol(station_rankings) ] = scale(station_rankings[, 2:ncol(station_rankings) ])
-
-
-getSS <- function(n) {
-  km <- kmeans(station_rankings[, 2:ncol(station_rankings) ], n, iter.max = 10, nstart =  25)
-  return(sum(km$withinss))
-}
-
-res.df = data.frame(n = 1:10, ss = map(1:10, getSS) %>% unlist() %>% as.vector() )
-
-#plot(x = res.df$n, y= res.df$ss)
-
-## elbow is around 4
-
-km.res <- kmeans(station_rankings[, 2:ncol(station_rankings) ], 4, iter.max = 10, nstart =  25)
-
-station_rankings = station_rankings %>%
-  mutate(cluster = km.res$cluster) %>%
-  select(Station_Name, cluster)
-
-locations = readRDS('../r_objects/locations.Rdata') %>% left_join(station_rankings, by = 'Station_Name') %>%
-  st_as_sf(coords = c('lng', 'lat'))
-
-fillPal = colorFactor('viridis', domain = locations$cluster)
-
-leaflet(locations) %>%
-  addProviderTiles('CartoDB.Positron') %>%
-  addCircleMarkers(fillColor = ~fillPal(cluster), stroke = NA, fillOpacity = 0.5 ) %>%
-  addLegend(position = 'bottomleft', pal = fillPal, values = ~cluster )
-
-```
-
-
-## PCA
-
-```{r}
-
-
-station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
-  as.data.frame() 
-
-pca_result <- prcomp(station_rankings %>%
-  select(-station), center = TRUE, scale. = TRUE)
-
-# Step 4: View PCA summary
-summary(pca_result)
-
-# Step 5: Visualize results
-pca_data <- as.data.frame(pca_result$x)
-pca_data = pca_data %>% mutate(name = station_rankings$station)
-
-ggplot(pca_data, aes(x = PC1, y = PC2)) +
-  geom_point() +
-  theme_minimal() +
-  ggtitle("PCA: First two principal components")
-
-# Step 6: Analyze loadings
-print(pca_result$rotation)
-
-# Step 7: Calculate variance explained
-var_explained <- pca_result$sdev^2 / sum(pca_result$sdev^2)
-print(var_explained)
-
-# Step 8: Scree plot
-scree_data <- data.frame(PC = 1:length(var_explained), 
-                         VarExplained = var_explained)
-ggplot(scree_data, aes(x = PC, y = VarExplained)) +
-  geom_line() +
-  geom_point() +
-  theme_minimal() +
-  ggtitle("Scree Plot")
-
-```
-
-
-## correlations
-
-```{r}
-
-# means <- patronage_data %>%
-#   group_by(Business_Date, hour_of_day, Station_Name) %>%
-#   summarise(patronage = mean(Passenger_Boardings))
+# 
+# station_lines = readRDS('../r_objects/stations_with_lines.Rdata') 
+# 
+# station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+#   rename(Station_Name = "station") %>%
+#   as.data.frame()
 # 
 # 
-# means_long <- means %>%
-#   pivot_wider(names_from = Station_Name, values_from = patronage)
-# 
-# date_hour <- means_long %>% select(hour_of_day, Business_Date)
-# 
-# means_long <- means_long %>%
-#   ungroup() %>%
-#   select(!c(hour_of_day, Business_Date))
-# 
-# means_long[is.na(means_long)] <- 0
-# 
-# means_long = scale(means_long)
-# 
-# cors <- cor(means_long)
-# 
-# 
-# cors = cors %>%
-#   as.data.frame() %>%
-#   mutate(station_name = rownames(cors))
+# (station_rankings %>%
+#   filter_stations(., "Station_Name") %>%
+#   left_join(station_lines, by = 'Station_Name') %>%
+#   select(average_peak_service_cap, lines) %>%
+#   unique() %>%
+#   rowwise() %>%
+#   mutate(lines = lines %>% unlist() %>% as.vector() %>% paste0(.,collapse = ',') ) %>%
+#   ggplot(mapping = aes(y = reorder(lines, average_peak_service_cap), x = average_peak_service_cap)) +
+#   geom_col() +
+#   theme_minimal() +
+#   xlab("Avg number of people on peak train before flinders") +
+#   ylab("Lines serving station")) %>%
+#   ggplotly()
 
 ```

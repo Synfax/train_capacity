@@ -1,29 +1,61 @@
 @import url('closeread.css');
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+.closeread{
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.graph {
+  border: 2px solid darkgray;
+}
+
+.title {
+  text-align: start !important;
+}
+
 .narrative {
   
  background-color: rgba(0, 0, 0, 0.75); 
  
+ background-color: white !important;
+ 
   padding: 20px !important;
   border: 6px solid black;
-   font-family: 'Helvetica' !important;
+   
 
-    color: rgba(255, 255, 255, 1) !important;
+  color: black !important ;
     
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 900;
+  font-style: normal;
 }
 
 
 .narrative a, .narrative h2 {
-  color: rgba(255, 255, 255, 1) !important;
-  font-family: 'Helvetica' !important;
-  font-weight: 800 !important;
+  
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 900 !important;
   text-decoration: ;
 }
 
-.pageinforeactable {
-  font-weight: 800 !important;
+.pageinforeactable, .rt-table {
+
   opacity: 1 !important;
-  color: rgba(255, 255, 255, 1);
+  background-color: white !important;
+}
+
+.rt-head {
+  background-color: white !important;
 }
 
 #quarto-document-content {
