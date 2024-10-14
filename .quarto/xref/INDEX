@@ -251,5 +251,8 @@
   },
   "quarto/analysis.qmd": {
     "analysis.html": "e2ed9e2d"
+  },
+  "quarto/report.qmd": {
+    "report.html": "7b25c731"
   }
 }

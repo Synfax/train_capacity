@@ -176,15 +176,16 @@ A map below shows the top 10 stations, with their values contained in the 'Chart
 ::: panel-tabset
 ## Map
 
-::: 
+
 ![](index_images/main.png)
-:::
+
 
 ## Chart
 
 ```{r}
  top_10_chart()
 ```
+
 :::
 :::
 
@@ -226,6 +227,7 @@ A table below shows a *rough* guide of how to interpret the transformed scores.
 | 0.8 - 1           | Excellent      |
 
 Use a laptop or desktop for the best viewing experience.
+(keep scrolling!)
 :::
 ::: cr-section
 ::: {focus-on="cr-map1"}
@@ -233,7 +235,7 @@ Use a laptop or desktop for the best viewing experience.
 
 ###### Rank: 1
 
-###### Total Score: `r transformed_scores$score[1]` / 5
+###### Total Score: `r transformed_scores$score[1]` / 7
 
 \
 
@@ -253,7 +255,7 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 
 ###### Rank: 2
 
-###### Total Score: `r transformed_scores$score[2]` / 5
+###### Total Score: `r transformed_scores$score[2]` / 7
 
 \
 
