@@ -3,18 +3,21 @@ title: "Station Information"
 author: "Paul S"
 date: "6/6/24"
 params: 
-  station: "Mentone"
-css: ../../../run_for_station.css
+  station: "Footscray"
+css:
+ - index.css
+ - nav_fixes.css
 format: 
   html: 
-    theme: zephyr
-    fig-width: 6
-    fig-height: 6
+    grid: 
+      body-width: 1000px
+    page-layout: article  
+    theme: zephr
     code-fold: false
     toc: true
-    toc-depth: 4
     toc-location: left
-    page-layout: full
+    toc-expand: true
+    toc-depth: 3
 ---
 
 ```{r warning=FALSE,message=FALSE}
@@ -39,7 +42,7 @@ library(ggridges)
 library(collapse)
 
 source('../r/constants.R')
-
+source('../r/theme.r')
 source('../r/station_functions.R')
 
 near_properties = get_near_properties(station, fromQuarto = T)
@@ -206,7 +209,7 @@ sph_plot <- ggplot() +
   theme(base_size = 13) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(legend.position = "bottom") + 
-  theme_minimal() +
+  theme_report() +
   xlab('Hour of day') + 
   ylab('Services per hour') + 
   coord_cartesian(ylim = c(0, max(for_select_station$sph) + 1 ))
@@ -318,7 +321,7 @@ patronage_plot <- ggplot() +
   labs(title = paste0("Average patronage by time of day at ", station_targets), fill = " Peak Period") +
   theme(base_size = 13) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  theme_minimal() +
+  theme_report() +
   xlab('Hour of day') + 
   ylab('Patronage per train') +
   coord_cartesian(ylim = c(0, max(to_plot$avg_patronage) + 50))
@@ -358,7 +361,7 @@ Suitable properties are either neighbourhood residential or general residential 
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-#| column: page
+
 
 
 # grz_nrz = near_properties %>%
@@ -443,7 +446,7 @@ by_zone_heritage %>%
   mutate(percent = percent * 100) %>%
   relocate(n_total, .after = n_not_heritage) %>%
   reactable(
-    theme = sandstone(),
+    
     pagination = F,
     columns = list(
       zone_short = colDef(name = "Zone"),
@@ -465,7 +468,7 @@ The map below shows tram routes and tram stops in green, as well as bus routes a
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-#| column: page
+
  
 bus_stops = read_sf('../shapefiles/ptv/PTV_METRO_BUS_STOP.shp')
 tram_stops = read_sf('../shapefiles/ptv/PTV_METRO_TRAM_STOP.shp')
@@ -590,7 +593,7 @@ total_score <- merged_f_df %>%
 frequency_chart <- merged_f_df %>%
   mutate(mode = stringr::str_to_title(mode) ) %>%
   mutate(avg_sph = round(avg_sph, 2)) %>%
-  reactable(theme=sandstone(),
+  reactable(
             defaultSorted = 'avg_sph',
             defaultSortOrder = 'desc',
             columns =
@@ -615,7 +618,7 @@ mode_colors <- setNames(c("#FF8200", "#78BE20"), c('bus','tram'))
 col_chart <- ggplot(merged_f_df, mapping = aes(x = reorder(ROUTEUSSP, avg_sph), y = avg_sph, fill = mode), ) + geom_col(width = 0.7 ) +
   scale_fill_manual(values = mode_colors) +
   ylab('Services Per Hour') +
-  theme_minimal() +
+  theme_report() +
   xlab('Route Number') +
    coord_flip()
 
@@ -672,7 +675,7 @@ Some amenities are within the same building, e.g. multiple shops in shopping cen
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-#| column: page
+
 
   walkability_df <- readRDS('../r_objects/station_walkability.Rdata')
 
@@ -749,7 +752,7 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
     ylim(0, ymax) +
   guides(fill = 'none') +
     xlab('Amenity') +
-    theme_minimal() +
+    theme_report() +
     ylab('Number in radius') +
   geom_segment(aes(x = as.numeric(factor(name)) - col_width/2,
                    xend = as.numeric(factor(name)) + col_width/2,
@@ -784,7 +787,7 @@ delta = near_properties %>%
   group_by(zone_short) %>%
   summarise(old_yield = sum(buxton_yeilds_corrected_net, na.rm = T), new_yield = sum(mm_yield_net, na.rm = T))
 
-delta %>% reactable(theme = sandstone(),
+delta %>% reactable(
                     columns = list(
                       zone_short = colDef(name = "Current Zone"),
                       old_yield = colDef(name = "Existing Zoned Capacity"),

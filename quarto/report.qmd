@@ -9,11 +9,15 @@ css:
  - nav_fixes.css
 format: 
   html: 
+    grid: 
+      body-width: 1000px
     page-layout: article  
     theme: zephr
     code-fold: false
     toc: true
     toc-location: left
+    toc-expand: true
+    toc-depth: 3
     
 ---
 
@@ -206,7 +210,7 @@ Instead, it is best to look at the average number of passengers on trains at the
 
 The process described above yields a single score for all stations that share the same lines. These values are shown below to try and describe the process.
 
-::: {.graph .column-body-outset}
+::: {.graph .column-body}
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -464,7 +468,7 @@ transformed_scores %>%
 
 The chart below shows the 10 stations with the highest rankings. 
 
-::: {.graph .column-body-outset}
+::: {.graph .column-body}
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -483,7 +487,7 @@ The below plot shows which train lines how the `r n_slice` top stations are loca
 This is why the number of lines sums to more than `r n_slice`
 :::
 
-::: {.graph .column-body-outset}
+::: {.graph .column-body}
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
@@ -497,7 +501,7 @@ transformed_scores = readRDS('../r_objects/transformed_scores.Rdata') %>%
   arrange(desc(score)) %>%
   mutate(rank = row_number())
 
-transformed_scores %>%
+(transformed_scores %>%
   left_join(station_lines, by = 'Station_Name') %>%
   slice_head(n = n_slice) %>%
   select(Station_Name, rank, lines) %>%
@@ -513,7 +517,8 @@ transformed_scores %>%
   scale_fill_manual(values = setNames(colours$colour, colours$group)) +
   guides(x = guide_axis(angle = 45)) +
   xlab("Train Line") +
-  ylab(paste0("Number of stops in top ", n_slice )) 
+  ylab(paste0("Number of stops in top ", n_slice )) ) %>%
+  ggplotly()
 
 ```
 :::
@@ -528,7 +533,7 @@ Local government areas in the inner south east, such as Stonnington & Boroondara
 
 Hover over the bar chart below for an interactive effect.
 
-::: {.graph .column-body-outset}
+::: {.graph .column-body}
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -618,11 +623,12 @@ Shown below are density plots of the scores, both raw and after transformation. 
 
 #### Transformed scores
 
-::: {.graph .column-body-outset}
+::: {.graph .column-body}
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-#| fig-height: 8
+#| fig-width: 8
+#| fig-height: 7
 
 # translations = c(
 #   'grz_nrz_pc' = 'Zoning suitability',
@@ -675,9 +681,10 @@ Transformed variables that are approximately uniformly distributed are the best 
 Given that many variables are roughly flat and tend not to have large data gaps, xmin-xmax remains a suitable transformation for this project. 
 
 #### Raw scores
-::: {.graph .column-body-outset}
+::: {.graph .column-body}
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
+#| fig-width: 8
 
 n_slice = 25
 
@@ -689,11 +696,11 @@ raw_scores = readRDS('../r_objects/station_rankings.Rdata') %>%
   mutate(name = translations_simple[name])
 
 
-ggplot(raw_scores) + geom_density(aes( x = value)) +
+ ( ggplot(raw_scores) + geom_density(aes( x = value)) +
   facet_wrap(~ name, scales = 'free') +
   theme_bw() +
   theme_report() +
-  theme(axis.text.y = element_blank()) + xlab("Raw score") + ylab("Density")
+  theme(axis.text.y = element_blank()) + xlab("Raw score") + ylab("Density") ) 
 
 ```
 :::

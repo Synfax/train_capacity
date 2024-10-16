@@ -2,18 +2,28 @@
 
 /*
 #TOC {
- position: fixed;
- left: 0;
- top: 60px;
- opacity: 1;
- 
+  opacity: 1 !important;
+  position: fixed;
+  left: 0;
+  top: 60px;
+  background-color: fdffee;
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 700;
   font-style: normal;
   color: var(--green-base);
+  
+  border-right: 1px solid black;
+  height: 100vh;
+}
+
+#quarto-document-content {
+  padding-left: 80px; 
 }
 */
+
+
+
 #quarto-sidebar {
   background-color: transparent;
   z-index: -999;

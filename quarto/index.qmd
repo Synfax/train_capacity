@@ -2,7 +2,7 @@
 format:
   closeread-html:
     theme: zephr
-    page-layout: article
+    page-layout: full
     remove-header-space: false
     css: 
       - index.css

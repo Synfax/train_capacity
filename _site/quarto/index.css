@@ -15,7 +15,13 @@
 }
 
 body {
+  
   overflow-x: hidden !important;
+  
+  font-family: "Lato", sans-serif;
+  color: var(--body-text-color);
+  background-color: var(--background-color);
+  font-size: 16pt;
 }
 
 /*
@@ -30,10 +36,7 @@ body {
 
 
 .closeread{
-  font-family: "Inter", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
+  
 }
 
 .quarto-content, .quarto-light, .nav-tabs, .girafe_container_std {
