@@ -1,2 +1,18 @@
 project:
-  type: default
+  type: website
+  render:
+    - quarto/index.qmd
+    - quarto/report.qmd
+  
+website: 
+  navbar:
+    title: 'Train Station Upzoning Priorities - YIMBY Melbourne'
+    pinned: true
+    search: false
+  sidebar:
+    style: "docked"
+    
+format:
+  html:
+    theme: zephr
+    page-layout: full

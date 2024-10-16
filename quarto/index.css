@@ -1,5 +1,6 @@
 /*@import url('ym.css');*/
 @import url('closeread.css');
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 /* Base colors */
@@ -13,6 +14,16 @@
   --yellow-base: #f6ae00;
 }
 
+/*
+#quarto-sidebar-toc-left {
+  position: fixed;
+  left: 0px;
+  height: 100vh;
+  padding-left: 5px;
+  border: 1px solid black;
+}
+*/
+
 
 .closeread{
   font-family: "Inter", sans-serif;
@@ -21,12 +32,16 @@
   font-style: normal;
 }
 
-.quarto-content {
-  /* background-color:  var(--background-color) !important; */
+.quarto-content, .quarto-light, .nav-tabs, .girafe_container_std {
+  background-color:  var(--background-color) !important;
+}
+
+.table {
+  border: 2px solid darkgray;
 }
 
 .graph {
-  border: 2px solid darkgray;
+  /* border: 2px solid darkgray; */
 }
 
 .title {
@@ -34,11 +49,8 @@
 }
 
 .narrative {
-  
- background-color: rgba(0, 0, 0, 0.75); 
+  background-color: var(--background-color) !important;
  
- /* background-color:var(--background-color) !important; */
- background-color: white !important;
  
   padding: 20px !important;
   border: 6px solid black;
@@ -67,10 +79,11 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: ;
 }
 
-.pageinforeactable, .rt-table {
-
+.pageinforeactable, .rt-table, .reactable {
+`
   opacity: 1 !important;
-  background-color: white !important;
+  /*background-color: white !important; */
+  background-color: var(--background-color) !important;
 }
 
 .rt-head {

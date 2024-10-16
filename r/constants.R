@@ -1,7 +1,5 @@
-radius <- 1000
 
-peak_morning = 7:10
-peak_evening = 16:19
+#set weights manually, default is 1.
 
 weights = c(
   "grz_nrz_pc" = 1,
@@ -13,15 +11,36 @@ weights = c(
   'n_bus_tram' = 1
 )
 
+#variables used in station function creation
+
+radius <- 1000
+
+peak_morning = 7:10
+peak_evening = 16:19
+
+bus_weight = 1
+tram_weight = 2
+
+#palettes
+
+create_green_palette <- function(n) {
+  colorRampPalette(c("#E8F5E9", "#1B5E20"))(n)
+}
+
+#variables where a higher value is worse
 columns_to_negate <- c('average_peak_service_cap', 'distance')
 
+#amenities to pull from OpenStreetMap
 critical_variables = data.frame(val = c('restaurant', 'supermarket', 'cafe', 'bar', 'school', 'childcare', 'park'),
                                 key =  c('amenity', 'shop', 'amenity', 'amenity', 'amenity', 'amenity', 'leisure'))
 
+#Station definitions
 city_loop_stations = c('Flagstaff', 'Flinders Street', 'Melbourne Central', 'Southern Cross', 'Parliament')
 other_important_stations = c('North Melbourne', 'South Yarra', 'Richmond')
 event_stations = c('Showgrounds', 'Flemington Racecourse')
 
+
+#Fixed arrays to translate variable names to normal english
 translations = c(
   'grz_nrz_pc' = 'Zoning suitability (% land area)',
   'capacity_delta' = 'Potential new homes in broad 1000m upzoning',
@@ -32,6 +51,7 @@ translations = c(
   'n_bus_tram' = 'Mode weighted bus and tram frequencies'
 )
 
+# Simple translations
 translations_simple = c(
   'grz_nrz_pc' = 'Zoning suitability',
   'capacity_delta' = 'Potential new homes',
@@ -49,6 +69,7 @@ translations_inverse = c(
   
 )
 
+# Line colours
 colours = tribble(
   ~group, ~ colour,
   'Sandringham' , "#F178AF",
@@ -60,6 +81,7 @@ colours = tribble(
   'event' , "#95979A"
 )
 
+#Line groups
 line_groups = tribble(
   ~line, ~ group,
   "Sandringham", "Sandringham",
@@ -75,11 +97,12 @@ line_groups = tribble(
   "Cranbourne", "Cran/Pak",
   "Pakenham", "Cran/Pak",
   "Frankston", "CrossCity",
-  "Werribee", "CrossCity"
+  "Werribee", "CrossCity",
+  "Williamstown", "CrossCity"
 )
 
-bus_weight = 1
-tram_weight = 2
+
+
 
 inner_lgas <- c("Melbourne",
                 "Yarra",

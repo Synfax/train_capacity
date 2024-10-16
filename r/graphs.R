@@ -1,6 +1,8 @@
 library(ggiraph)
 library(patchwork)
 
+
+
 top_stations_by_lga <- function(fromQuarto = T, n_slice = 25) {
   
   prefix = ifelse(fromQuarto, '../', '')
@@ -43,9 +45,8 @@ top_stations_by_lga <- function(fromQuarto = T, n_slice = 25) {
     scale_fill_gradientn(colors = create_green_palette(11)) +
     ylab('Number of stations in top 25') +
     theme_gray(base_size = 8) +
+    theme_report() +
     theme(legend.position = 'none') +
-    theme(panel.grid = element_blank()) +
-    theme(panel.background = element_blank()) +
     coord_flip() 
   
   lga_chart
@@ -58,6 +59,8 @@ top_stations_by_lga <- function(fromQuarto = T, n_slice = 25) {
       theme(
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
+        panel.background = element_rect(fill = "#fdffee", color = "#fdffee"),
+        plot.background =  element_rect(fill = "#fdffee", color = "#fdffee"),
         legend.position = "none"
       )
     
@@ -81,7 +84,6 @@ top_stations_by_lga <- function(fromQuarto = T, n_slice = 25) {
   
 }
 
-
 top_10_chart <- function(fromQuarto = T) {
   prefix = ifelse(fromQuarto, '../', '')
   
@@ -101,9 +103,9 @@ top_10_chart <- function(fromQuarto = T) {
       'Station_Name' = colDef(name = 'Station'),
       'score' = colDef(name = "Total Score",
                        cell = data_bars(.,
-                                        text_position = 'above',
+                                        text_position = 'inside-end',
                                         fill_color = '#1B5E20',
-                                        text_color = 'black',
+                                        text_color = 'white',
                                         background = 'opaque',
                                         fill_opacity = 1,
                                         bar_height = 24,

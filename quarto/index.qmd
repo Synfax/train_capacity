@@ -1,6 +1,8 @@
 ---
 format:
   closeread-html:
+    page-layout: full  
+    theme: zephr
     remove-header-space: false
     css: index.css
     image: "index_images/main.png"
@@ -37,6 +39,7 @@ library(reactablefmtr)
 locations <- readRDS('../r_objects/locations.Rdata')
 source('../r/constants.r')
 
+source('../r/theme.r')
 source('../r/graphs.r')
 
 transformed_scores <- readRDS('../r_objects/transformed_scores.Rdata')
@@ -160,6 +163,18 @@ This report uses xmin-xmax scaling, which transforms each 'raw' metric into a va
 
 These 'transformed' scores are summed together to produce a final score for each station.
 
+::: callout-note
+
+There are some restrictions placed on final rankings:
+
+-   City loop stations are excluded as they can't be upzoned further.
+
+-   Edge transfer stations (North Melbourne, South Yarra, Richmond) were excluded due to extreme outliers in the data impacting the transformation process.
+
+-   Stations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.
+
+:::
+
 The full methodology is contained in the full report.
 
 ### Key Result: Top 10 Train Stations
@@ -239,8 +254,6 @@ Use a laptop or desktop for the best viewing experience.
 
 \
 
-Distribution of scores:
-
 ```{r}
 
 printScores(1)
@@ -259,7 +272,6 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 
 \
 
-Distribution of scores:
 
 ```{r}
 
@@ -275,11 +287,10 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 
 ###### Rank: 3
 
-###### Total Score: `r transformed_scores$score[3]` / 5
+###### Total Score: `r transformed_scores$score[3]` / 7
 
 \
 
-Distribution of scores:
 
 ```{r}
 
@@ -295,11 +306,10 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 
 ###### Rank: 4
 
-###### Total Score: `r transformed_scores$score[4]` / 5
+###### Total Score: `r transformed_scores$score[4]` / 7
 
 \
 
-Distribution of scores:
 
 ```{r}
 
@@ -315,11 +325,10 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 
 ###### Rank: 5
 
-###### Total Score: `r transformed_scores$score[5]` / 5
+###### Total Score: `r transformed_scores$score[5]` / 7
 
 \
 
-Distribution of scores:
 
 ```{r}
 
@@ -335,11 +344,10 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 
 ###### Rank: 6
 
-###### Total Score: `r transformed_scores$score[6]` / 5
+###### Total Score: `r transformed_scores$score[6]` / 7
 
 \
 
-Distribution of scores:
 
 ```{r}
 
@@ -355,11 +363,10 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 
 ###### Rank: 7
 
-###### Total Score: `r transformed_scores$score[7]` / 5
+###### Total Score: `r transformed_scores$score[7]` / 7
 
 \
 
-Distribution of scores:
 
 ```{r}
 
@@ -375,11 +382,10 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 
 ###### Rank: 8
 
-###### Total Score: `r transformed_scores$score[8]` / 5
+###### Total Score: `r transformed_scores$score[8]` / 7
 
 \
 
-Distribution of scores:
 
 ```{r}
 
@@ -395,11 +401,10 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 
 ###### Rank: 9
 
-###### Total Score: `r transformed_scores$score[9]` / 5
+###### Total Score: `r transformed_scores$score[9]` / 7
 
 \
 
-Distribution of scores:
 
 ```{r}
 
@@ -415,11 +420,10 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 
 ###### Rank: 10
 
-###### Total Score: `r transformed_scores$score[10]` / 5
+###### Total Score: `r transformed_scores$score[10]` / 7
 
 \
 
-Distribution of scores:
 
 ```{r}
 
