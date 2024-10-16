@@ -1,10 +1,12 @@
 ---
 format:
   closeread-html:
-    page-layout: full  
     theme: zephr
+    page-layout: article
     remove-header-space: false
-    css: index.css
+    css: 
+      - index.css
+      - nav_fixes.css
     image: "index_images/main.png"
     cr-section:
       layout: "overlay-left"
@@ -123,15 +125,15 @@ printScores <- function(r) {
 }
 
 ```
-:::{.column-body-outset .title}
+::: column-body
 
 \
 
 \
 
 # Train Station Upzoning Rankings: Executive Summary
-:::
-::: column-body
+
+
 
 \
 

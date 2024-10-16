@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* Base colors */
+:root {
+  --hero-color: #10461b;
+  --body-text-color: #000000;
+  --background-color: #fdffee;
+  --green-base: #10461b;
+  --blue-base: #283696;
+  --red-base: #ba1b21;
+  --yellow-base: #f6ae00;
+}
+
+#quarto-content {
+  display: flex;
+  justify-content: center;
+  width: 100vw !important;
+}
+
+#quarto-document-content {
+  padding-left: 35px;
+}
+
+#quarto-sidebar {
+  position: absolute;
+  left: 0;
+  height: 100vh;
+ background-color: transparent;
+ padding: 0;
+ border: none !important;
+}
+
+#TOC {
+  position: fixed;
+  margin-right: 50px;
+  height: 100vh;
+  border-right: 1px solid black;
+  top: 60px;
+  
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  color: var(--green-base);
+}
+
+.navbar {
+  background-color: #fdffee;
+  border-bottom: 1px solid black;
+}
+
+.navbar-container {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar-brand {
+  width: 100vw;
+}
+
+.navbar-title {
+  text-align: center;
+  color: green;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 900;
+  font-style: normal;
+  color: var(--green-base);
+}

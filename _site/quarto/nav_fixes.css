@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/*
+#TOC {
+ position: fixed;
+ left: 0;
+ top: 60px;
+ opacity: 1;
+ 
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  color: var(--green-base);
+}
+*/
+#quarto-sidebar {
+  background-color: transparent;
+  z-index: -999;
+}
+
+
+.navbar {
+  background-color: #fdffee;
+  border-bottom: 1px solid black;
+}
+
+.navbar-container {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar-brand {
+  width: 100vw;
+}
+
+.navbar-title {
+  text-align: center;
+  color: green;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 900;
+  font-style: normal;
+  color: var(--green-base);
+}

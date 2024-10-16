@@ -1,0 +1,121 @@
+[
+  {
+    "objectID": "quarto/index.html",
+    "href": "quarto/index.html",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "",
+    "text": "Melbourne is going to have to make some choices soon about where to build more housing.\nLocating new dwellings nearby to train stations as a form of Transit Oriented Development has emerged as a favoured solution by policymakers, with recent applications in Sydney.\nHowever, policymakers face difficult choices in choosing which stations to upzone. For example, train stations close to the the city may be ideal for locating people near employment opportunities, although they may already be developed, or, the train line may lack spare passenger capacity. Stations further away may be less developed, although they might have poorer service frequencies or other nearby amenities.\nThe purpose of this report is to tackle these trade-offs by building a robust and data-driven framework to identify the train stations that are best suited for this broad upzoning.\n\n\n\n\nFor each train station, metrics are calculated on:\n\nZoning suitability (% land area)\nPotential number of new homes (# homes)\nTrain service frequency in peak (trains per hour)\nSpare train line capacity in peak (# passengers)\nLocal amenities nearby (composite index)\nProximity to CBD (metres)\nBus and tram frequencies (services per hour)\n\nEach metric calculated uses different units of measurement, and need to be transformed into comparable units so that a single score can be generated for each train station.\nThis report uses xmin-xmax scaling, which transforms each ‘raw’ metric into a value between zero and one. If a station receives a ‘transformed’ score of zero, it corresponds to the lowest value out of all stations. Likewise, a value of one represents the best out of all stations in Melbourne.\nThese ‘transformed’ scores are summed together to produce a final score for each station.\n\n\n\n\n\n\nNote\n\n\n\nThere are some restrictions placed on final rankings:\n\nCity loop stations are excluded as they can’t be upzoned further.\nEdge transfer stations (North Melbourne, South Yarra, Richmond) were excluded due to extreme outliers in the data impacting the transformation process.\nStations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.\n\n\n\nThe full methodology is contained in the full report.\n\n\n\n\n\nHawksburn was the best station out of those considered in this project.\nThere is a searchable table and interactive map at the foot of this document to find your own station and see where it ranks.\nA map below shows the top 10 stations, with their values contained in the ‘Chart’ tab. One thing of note is how close many of the stations are in terms of final score, without a standout jump between the top 10.\n\n\nMapChart\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe best stations for upzoning are not equally distributed across Melbourne.\nLocal government areas in the inner south east, such as Stonnington & Boroondara, have the most stations in the top 25 ranking stations.\nHover over the bar chart below for an interactive effect."
+  },
+  {
+    "objectID": "quarto/index.html#hawksburn",
+    "href": "quarto/index.html#hawksburn",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Hawksburn",
+    "text": "Hawksburn\n\nRank: 1\n\n\nTotal Score: 4.12 / 7\n\n\n\n\n\n\n\n\n\nSee more information here."
+  },
+  {
+    "objectID": "quarto/index.html#armadale",
+    "href": "quarto/index.html#armadale",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Armadale",
+    "text": "Armadale\n\nRank: 2\n\n\nTotal Score: 4 / 7\n\n\n\n\n\n\n\n\n\nSee more information here."
+  },
+  {
+    "objectID": "quarto/index.html#toorak",
+    "href": "quarto/index.html#toorak",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Toorak",
+    "text": "Toorak\n\nRank: 3\n\n\nTotal Score: 3.97 / 7\n\n\n\n\n\n\n\n\n\nSee more information here."
+  },
+  {
+    "objectID": "quarto/index.html#glen-iris",
+    "href": "quarto/index.html#glen-iris",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Glen Iris",
+    "text": "Glen Iris\n\nRank: 4\n\n\nTotal Score: 3.76 / 7\n\n\n\n\n\n\n\n\n\nSee more information here."
+  },
+  {
+    "objectID": "quarto/index.html#croxton",
+    "href": "quarto/index.html#croxton",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Croxton",
+    "text": "Croxton\n\nRank: 5\n\n\nTotal Score: 3.74 / 7\n\n\n\n\n\n\n\n\n\nSee more information here."
+  },
+  {
+    "objectID": "quarto/index.html#hartwell",
+    "href": "quarto/index.html#hartwell",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Hartwell",
+    "text": "Hartwell\n\nRank: 6\n\n\nTotal Score: 3.71 / 7\n\n\n\n\n\n\n\n\n\nSee more information here."
+  },
+  {
+    "objectID": "quarto/index.html#preston",
+    "href": "quarto/index.html#preston",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Preston",
+    "text": "Preston\n\nRank: 7\n\n\nTotal Score: 3.65 / 7\n\n\n\n\n\n\n\n\n\nSee more information here."
+  },
+  {
+    "objectID": "quarto/index.html#gardenvale",
+    "href": "quarto/index.html#gardenvale",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Gardenvale",
+    "text": "Gardenvale\n\nRank: 8\n\n\nTotal Score: 3.65 / 7\n\n\n\n\n\n\n\n\n\nSee more information here."
+  },
+  {
+    "objectID": "quarto/index.html#collingwood",
+    "href": "quarto/index.html#collingwood",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Collingwood",
+    "text": "Collingwood\n\nRank: 9\n\n\nTotal Score: 3.65 / 7\n\n\n\n\n\n\n\n\n\nSee more information here."
+  },
+  {
+    "objectID": "quarto/index.html#moreland",
+    "href": "quarto/index.html#moreland",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Moreland",
+    "text": "Moreland\n\nRank: 10\n\n\nTotal Score: 3.64 / 7\n\n\n\n\n\n\n\n\n\nSee more information here."
+  },
+  {
+    "objectID": "quarto/index.html#clickable-map",
+    "href": "quarto/index.html#clickable-map",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Clickable Map",
+    "text": "Clickable Map\nYou can find more details about your own local station by zooming in on the map and clicking on the label.\nAlternatively, use the searchable table below."
+  },
+  {
+    "objectID": "quarto/index.html#searchable-table",
+    "href": "quarto/index.html#searchable-table",
+    "title": "Train Station Upzoning Rankings: Executive Summary",
+    "section": "Searchable Table",
+    "text": "Searchable Table"
+  },
+  {
+    "objectID": "quarto/report.html",
+    "href": "quarto/report.html",
+    "title": "Train Station Upzoning Rankings",
+    "section": "",
+    "text": "This report is generated by a script.\nUsers can clone the repository here, and follow instructions to run the rankings themselves, with users able to adjust the weights given to each metric.\nIt is intended to be read regardless of the actual rankings of the stations.\n(There is little hardcoded analysis, as the idea is that weights and preferences can be changed)\n(something to say that this report is intended to be read as the rankings change or weights are altered by the user) As such, there is little discussion of the content of the charts themselves, rather this report includes a description of how to interpret them."
+  },
+  {
+    "objectID": "quarto/report.html#final-values",
+    "href": "quarto/report.html#final-values",
+    "title": "Train Station Upzoning Rankings",
+    "section": "Final values",
+    "text": "Final values\nThe table below contains the raw values that have been calculated for each station. The table is also searchable."
+  },
+  {
+    "objectID": "quarto/report.html#transformation-process",
+    "href": "quarto/report.html#transformation-process",
+    "title": "Train Station Upzoning Rankings",
+    "section": "Transformation Process",
+    "text": "Transformation Process\nEach raw score is in different units, so the first task is to transform all the metrics into something that can be summed into one total score.\nThis is achieved by scaling each column (of all the scores) so that each value is relative to the maximum and minimum values from other stations, also known as xmin-xmax scaling. The end result is a value between zero and 1 across all metrics, allowing an easy summation.\n\\[\nx = \\frac{x - \\min{x} }{ \\max{x} - \\min{x} }\n\\]\n\n\n\n\n\n\nNote\n\n\n\nOne downside of the xmin-xmax scaler is its high sensitivity to outliers. Very high or very low values imply that reasonable variance in the original data is flattened to very similar values after scaling.\n\n\n\nSample Transformations\nAn example of a good transformation is shown below. Hover over the data points to see their values.\n\n\n\n\n\n\nThe graph above shows a ‘good’ transformation. There are no notable outliers in the original data, which means the denominator in the transformation is likely small. The key sign of a healthy transformed variable is that transformed values are spread nicely between zero and one, which is the case above.\nAn example of a ‘bad’ transformation is also shown. Hover over the data points to see their values.\n\n\n\n\n\n\nThe graph above demonstrates the issue with xmin-xmax scaling. One large outlier (30 in original data) makes the denominator of the transformation very large. This means that most of the transformed values are very low. For example, the third largest number in the original sample (10.03) is only awarded a score of 0.07, despite being larger than 7 other values.\nThe result of this is the variance in the original data (from ~8 to ~12) is not reflected adequately in the transformation ranks. From the perspective of the ranking mechanism all stations in that range look the same, despite having large real differences.\n\n\nInverting some metrics\nFor some metrics however, a larger value implies a station that is less suited for upzoning. In this report these are:\n\nDistance to CBD: Higher values mean stations are futher away, and less suited for upzoning\nPatronage on train line: Higher values mean the train line(s) are more congested, meaning the station is less suited to upzoning.\n\n\nTo deal with this issue, variables are inverted (\\(x = 1 - x\\)), such that higher values are now beneficial, rather than detrimental.\n\n\nVariable Weighting\nWith each variable bounded between zero and one, and inverted such that higher values are more beneficial for all variables, the ranking mechanism sums the values together to produce a ‘final score’ with a maximum of seven.\nThere is potential, however, for certain variables to be more important than others. For example, train frequency could be worth twice as much as ‘Potential new homes’.\nThe model has weighting built in, although by default everything is set to one, which corresponds to a summation of scores.\n\nWeights can be changed by altering r/constants.R.\n\nThese transformed scores are then summed to produce a final score. With default weights of one, the highest possible score is 7.\n\n\n\n\n\n\nNote\n\n\n\nThere are some restrictions placed on final rankings:\n\nCity loop stations are excluded as they can’t be upzoned further.\nEdge transfer stations (North Melbourne, South Yarra, Richmond) were excluded due to extreme outliers in the data impacting the transformation process.\nStations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone."
+  },
+  {
+    "objectID": "quarto/report.html#transformed-scores",
+    "href": "quarto/report.html#transformed-scores",
+    "title": "Train Station Upzoning Rankings",
+    "section": "Transformed Scores",
+    "text": "Transformed Scores\nThe table below shows the full list of (valid) stations and their transformed values. A rough interpretation of transformed values is below.\n\n\n\nTransformed Value\nInterpretation\n\n\n\n\n0-0.35\nPoor\n\n\n0.35 - 0.6\nLow\n\n\n0.6 - 0.8\nGood\n\n\n0.8 - 1\nExcellent\n\n\n\nThe table is both searchable and able to be ordered. Users can type a station of their desire into the search bar, or click on the table headers to see the ‘best’ and ‘worst’ station for each metric."
+  }
+]
