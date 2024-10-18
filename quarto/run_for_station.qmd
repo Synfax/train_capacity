@@ -1,16 +1,14 @@
 ---
-title: "Station Information"
-author: "Paul S"
-date: "6/6/24"
 params: 
   station: "Footscray"
+title: "`r params$station`"
 css:
- - index.css
- - nav_fixes.css
+ - ../quarto/index.css
+ - ../quarto/nav_fixes.css
 format: 
   html: 
     grid: 
-      body-width: 1000px
+      body-width: 900px
     page-layout: article  
     theme: zephr
     code-fold: false
@@ -44,6 +42,7 @@ library(collapse)
 source('../r/constants.R')
 source('../r/theme.r')
 source('../r/station_functions.R')
+source('../r/transform.r')
 
 near_properties = get_near_properties(station, fromQuarto = T)
 
@@ -108,7 +107,6 @@ total_score <- sum(transformed_rankings$value)
 
 ```
 
-## Overall Scores
 
 `r station` obtained a final score of **`r total_score`**, placing it number `r rank` out of `r nrow`.
 
@@ -117,7 +115,7 @@ The remainder of this page steps through each factor listed below in no particul
 ::: {.callout-note icon="false"}
 ## Full Methodology
 
-The full methodology for how these scores are calculated and why they are important for consideration in upzoning is [here](../../../rankings.html).
+The full methodology for how these scores are calculated and why they are important for consideration in upzoning is [available in the full report](../quarto/report.html).
 :::
 :::{.graph}
 ```{r warning=FALSE,message=FALSE}
@@ -127,8 +125,9 @@ The full methodology for how these scores are calculated and why they are import
 
 rankings %>%
   left_join(transformed_rankings, by = 'name') %>%
-  mutate(name = translations[name]) %>%
-reactable(theme = sandstone(),
+  remove_null_weighted_rows(row_col_name = "name") %>%
+  mutate(name = remove_null_weighted_translations(translations, inv = F)[name]) %>%
+reactable(
             columns = list(
               'name' = colDef(name = 'Metric'),
               'value.x' = colDef(name = "Value"),
@@ -770,35 +769,51 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
 
 \
 
-Calculation of the final score for local services uses an index measure. It is described in more detail [here](../../../rankings.html)..
+Calculation of the final score for local services uses an index measure. It is described in more detail [in the full report](../quarto/report.html)..
 
-## Zoned Capacity
+<!-- ## Zoned Capacity -->
 
-include how many homes currently.
+<!-- include how many homes currently. -->
 
-Zoned Capacity is a measure of the **theoretical** number of dwellings possible under different zoning implementations.
+<!-- Zoned Capacity is a measure of the **theoretical** number of dwellings possible under different zoning implementations. -->
 
 :::{.graph}
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
+# 
+# delta = near_properties %>%
+#   st_drop_geometry() %>%
+#   mutate(missing_middle_yield = round(missing_middle_yield, 0)) %>%
+#   group_by(zone_short) %>%
+#   summarise(
+#     old_yield = sum(buxton_yields_corrected, na.rm = T),
+#     new_yield = sum((missing_middle_yield), na.rm = T)) %>%
+#   mutate(new_yield = ifelse(new_yield < old_yield, old_yield, new_yield)) %>%
+#   mutate(yield_diff = new_yield - old_yield) %>%
+#   mutate(across(where(is.numeric), ~  round(.x, 0)))
+# 
+# 
+# delta %>% reactable(
+#                     columns = list(
+#                       zone_short = colDef(name = "Current Zone"),
+#                       old_yield = colDef(name = "Existing Zoned Capacity"),
+#                       new_yield = colDef(name = "Potential Future Zoned Capacity"),
+#                       yield_diff = colDef(name = "Difference")
+#                     )) 
+# 
+# sum_delta <- sum(delta$yield_diff)
 
-delta = near_properties %>%
-  st_drop_geometry() %>%
-  group_by(zone_short) %>%
-  summarise(old_yield = sum(buxton_yeilds_corrected_net, na.rm = T), new_yield = sum(mm_yield_net, na.rm = T))
+# osa %>%
+#   select(mm_yield_net, missing_middle_yield, buxton_yields_corrected, buxton_yeilds_corrected_net, dwellings_est) %>%
+#   mutate(net_diff = mm_yield_net - buxton_yeilds_corrected_net) %>%
+#   mutate(diff = missing_middle_yield - buxton_yields_corrected) %>% slice_head(n =20) %>%
+#   st_drop_geometry() %>%
+#   view
 
-delta %>% reactable(
-                    columns = list(
-                      zone_short = colDef(name = "Current Zone"),
-                      old_yield = colDef(name = "Existing Zoned Capacity"),
-                      new_yield = colDef(name = "Potential Future Zoned Capacity")
-                    )) 
-
-sum_delta <- sum(delta$new_yield)
+# <!-- Under 'Missing Middle' zoning, `r station` could **theoretically** expand its zoned capacity by `r prettyNum(sum_delta, big.mark = ',')` additional homes. -->
 
 ```
 :::
 
-\
 
-Under 'Missing Middle' zoning, `r station` could **theoretically** host `r prettyNum(sum_delta, big.mark = ',')` homes.
+

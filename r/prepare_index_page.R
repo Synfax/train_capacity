@@ -1,10 +1,12 @@
-prepare_index <- function() {
+prepare_index <- function(returnTopTen = F, fromQuarto = F, font_size_q = '16pt', w = 2560, h = 1440) {
   
-  locations = readRDS(paste0('r_objects/locations.Rdata'))
+  prefix_dir <- ifelse(fromQuarto, '../', '')
+  
+  locations = readRDS(paste0(prefix_dir,'r_objects/locations.Rdata'))
   
   
   
-  data_to_map <- readRDS('r_objects/transformed_scores.Rdata') %>%
+  data_to_map <- readRDS(paste0(prefix_dir,'r_objects/transformed_scores.Rdata')) %>%
     as.data.frame() %>%
     slice_head(n = 10) %>%
     arrange(desc(score)) %>%
@@ -24,7 +26,7 @@ prepare_index <- function() {
   #saveRDS(data_to_map, 'r_objects/index_map/data_to_map.Rdata')
   
   
-  lines_dissolved <- read_sf('shapefiles/qgis/final_map.shp') %>%
+  lines_dissolved <- read_sf(paste0(prefix_dir, 'shapefiles/qgis/final_map.shp')) %>%
     left_join(colours, by = 'group') %>%
     st_transform('wgs84')
   
@@ -56,14 +58,14 @@ prepare_index <- function() {
   
   # had to remove the {r} for some reason?
   
-  map <- leaflet(width = 2560 , height = 1440) %>%
+  map <- leaflet(width = w , height = h) %>%
     addPolylines(data = lines_dissolved, color = ~colour, opacity = 1) %>%
     addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.5)) %>%
     addCircleMarkers(lng = data_to_map$lng, lat=data_to_map$lat, radius = 5, color = 'black', fillColor = 'black', fillOpacity = 1, opacity = 0.7) %>%
     addLabelOnlyMarkers(lng = data_to_map$lng,
                         lat = data_to_map$lat,
                         label = lapply(data_to_map$message, htmltools::HTML),
-                        labelOptions = labelOptions(noHide = T, direction = 'auto', textOnly = T, textsize = '16pt',
+                        labelOptions = labelOptions(noHide = T, direction = 'auto',  textOnly = T, textsize = font_size_q,
                                                     style = list(
                                                       'font-weight' = '800',
                                                       'text-decoration' = 'underline',
@@ -72,6 +74,10 @@ prepare_index <- function() {
                                                       'letter-spacing' = '0.5px'
                                                     ))) %>%
     fitBounds(lng1 = bounds[1], lat1 = bounds[2], lng2 = bounds[3], lat2 = bounds[4])
+  
+  if(returnTopTen) {
+    return(map)
+  }
   
   mapshot(map, file = 'quarto/index_images/main.png')
   

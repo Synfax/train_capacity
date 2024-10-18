@@ -48,8 +48,44 @@ filter_stations <- function(dataframe, name_var = 'station') {
     return()
 }
 
+remove_null_weighted_rows <- function(dataframe, row_col_name = "metric") {
+  
+  null_weights <- weights[weights == 0] %>%
+    names()
+  
+  dataframe %>%
+    filter(!(get(row_col_name) %in% null_weights)) %>%
+    return()
+}
 
-transform_scores_xminxmax <- function(station_rankings) {
+remove_null_weighted_cols <- function(dataframe) {
+  
+  null_weights <- weights[weights == 0] %>%
+    names()
+  
+  dataframe %>%
+    select(!any_of(null_weights) ) %>%
+    return()
+}
+
+remove_null_weighted_translations <- function(ts, inv = T) {
+  
+  null_weights <- weights[weights == 0] %>%
+    names()
+  
+  if(inv) {
+    ts[ !(ts %in% null_weights)] %>%
+      return()
+  } else {
+    ts[ !(names(ts) %in% null_weights) ] %>%
+      return()
+  }
+  
+  
+}
+
+
+transform_scores_xminxmax <- function(station_rankings, weights_ = weights) {
   
   
   xminmaxtransform = station_rankings %>%
@@ -57,7 +93,7 @@ transform_scores_xminxmax <- function(station_rankings) {
     filter_stations(.) %>%
     mutate( across(-station, .fns = function(x) { ( x - min(x, na.rm= T)) / ( max(x, na.rm= T) - min(x, na.rm= T)  ) } )) %>%
     mutate(across(any_of(columns_to_negate), .fns = function(x) {1-x} )) %>%
-    mutate(across(-station, .fns = function(x) { x*(weights[cur_column()] %>% as.vector())  }  )) %>%
+    mutate(across(-station, .fns = function(x) { x*(weights_[cur_column()] %>% as.vector())  }  )) %>%
     rowwise() %>%
     mutate(score = sum(across(-station))) %>%
     arrange(desc(score))

@@ -4,7 +4,7 @@
     "href": "quarto/index.html",
     "title": "Train Station Upzoning Rankings: Executive Summary",
     "section": "",
-    "text": "Melbourne is going to have to make some choices soon about where to build more housing.\nLocating new dwellings nearby to train stations as a form of Transit Oriented Development has emerged as a favoured solution by policymakers, with recent applications in Sydney.\nHowever, policymakers face difficult choices in choosing which stations to upzone. For example, train stations close to the the city may be ideal for locating people near employment opportunities, although they may already be developed, or, the train line may lack spare passenger capacity. Stations further away may be less developed, although they might have poorer service frequencies or other nearby amenities.\nThe purpose of this report is to tackle these trade-offs by building a robust and data-driven framework to identify the train stations that are best suited for this broad upzoning.\n\n\n\n\nFor each train station, metrics are calculated on:\n\nZoning suitability (% land area)\nPotential number of new homes (# homes)\nTrain service frequency in peak (trains per hour)\nSpare train line capacity in peak (# passengers)\nLocal amenities nearby (composite index)\nProximity to CBD (metres)\nBus and tram frequencies (services per hour)\n\nEach metric calculated uses different units of measurement, and need to be transformed into comparable units so that a single score can be generated for each train station.\nThis report uses xmin-xmax scaling, which transforms each ‘raw’ metric into a value between zero and one. If a station receives a ‘transformed’ score of zero, it corresponds to the lowest value out of all stations. Likewise, a value of one represents the best out of all stations in Melbourne.\nThese ‘transformed’ scores are summed together to produce a final score for each station.\n\n\n\n\n\n\nNote\n\n\n\nThere are some restrictions placed on final rankings:\n\nCity loop stations are excluded as they can’t be upzoned further.\nEdge transfer stations (North Melbourne, South Yarra, Richmond) were excluded due to extreme outliers in the data impacting the transformation process.\nStations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.\n\n\n\nThe full methodology is contained in the full report.\n\n\n\n\n\nHawksburn was the best station out of those considered in this project.\nThere is a searchable table and interactive map at the foot of this document to find your own station and see where it ranks.\nA map below shows the top 10 stations, with their values contained in the ‘Chart’ tab. One thing of note is how close many of the stations are in terms of final score, without a standout jump between the top 10.\n\n\nMapChart\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe best stations for upzoning are not equally distributed across Melbourne.\nLocal government areas in the inner south east, such as Stonnington & Boroondara, have the most stations in the top 25 ranking stations.\nHover over the bar chart below for an interactive effect."
+    "text": "Melbourne is going to have to make some choices soon about where to build more housing.\nLocating new dwellings nearby to train stations as a form of Transit Oriented Development has emerged as a favoured solution by policymakers, with recent applications in Sydney.\nHowever, policymakers face difficult choices in choosing which stations to upzone. For example, train stations close to the the city may be ideal for locating people near employment opportunities, although they may already be developed, or, the train line may lack spare passenger capacity. Stations further away may be less developed, although they might have poorer service frequencies or other nearby amenities.\nThe purpose of this report is to tackle these trade-offs by building a robust and data-driven framework to identify the train stations that are best suited for this broad upzoning.\nSee the full report here.\n\n\n\n\nFor each train station, metrics are calculated on:\n\nZoning suitability (% land area)\nPotential number of new homes (# homes)\nTrain service frequency in peak (trains per hour)\nSpare train line capacity in peak (# passengers)\nLocal amenities nearby (composite index)\nProximity to CBD (metres)\nBus and tram frequencies (services per hour)\n\nEach metric calculated uses different units of measurement, and need to be transformed into comparable units so that a single score can be generated for each train station.\nThis report uses xmin-xmax scaling, which transforms each ‘raw’ metric into a value between zero and one. If a station receives a ‘transformed’ score of zero, it corresponds to the lowest value out of all stations. Likewise, a value of one represents the best out of all stations in Melbourne.\nThese ‘transformed’ scores are summed together to produce a final score for each station.\n\n\n\n\n\n\nNote\n\n\n\nThere are some restrictions placed on final rankings:\n\nCity loop stations are excluded as they can’t be upzoned further.\nEdge transfer stations (North Melbourne, South Yarra, Richmond) were excluded due to extreme outliers in the data impacting the transformation process.\nStations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.\n\n\n\nThe full methodology is contained in the full report.\n\n\n\n\n\nHawksburn was the best station out of those considered in this project.\nThere is a searchable table and interactive map at the foot of this document to find your own station and see where it ranks.\nA map below shows the top 10 stations, with their values contained in the ‘Chart’ tab. One thing of note is how close many of the stations are in terms of final score, without a standout jump between the top 10.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe best stations for upzoning are not equally distributed across Melbourne.\nLocal government areas in the inner south east, such as Stonnington & Boroondara, have the most stations in the top 25 ranking stations.\nHover over the bar chart below for an interactive effect."
   },
   {
     "objectID": "quarto/index.html#hawksburn",
@@ -117,5 +117,117 @@
     "title": "Train Station Upzoning Rankings",
     "section": "Transformed Scores",
     "text": "Transformed Scores\nThe table below shows the full list of (valid) stations and their transformed values. A rough interpretation of transformed values is below.\n\n\n\nTransformed Value\nInterpretation\n\n\n\n\n0-0.35\nPoor\n\n\n0.35 - 0.6\nLow\n\n\n0.6 - 0.8\nGood\n\n\n0.8 - 1\nExcellent\n\n\n\nThe table is both searchable and able to be ordered. Users can type a station of their desire into the search bar, or click on the table headers to see the ‘best’ and ‘worst’ station for each metric."
+  },
+  {
+    "objectID": "Brunswick.html",
+    "href": "Brunswick.html",
+    "title": "Station Information",
+    "section": "",
+    "text": "Brunswick obtained a final score of 3.4, placing it number 42 out of 166.\nThe remainder of this page steps through each factor listed below in no particular order.\n\n\n\n\n\n\nFull Methodology\n\n\n\nThe full methodology for how these scores are calculated and why they are important for consideration in upzoning is here."
+  },
+  {
+    "objectID": "Brunswick.html#overall-scores",
+    "href": "Brunswick.html#overall-scores",
+    "title": "Station Information",
+    "section": "",
+    "text": "Brunswick obtained a final score of 3.4, placing it number 42 out of 166.\nThe remainder of this page steps through each factor listed below in no particular order.\n\n\n\n\n\n\nFull Methodology\n\n\n\nThe full methodology for how these scores are calculated and why they are important for consideration in upzoning is here."
+  },
+  {
+    "objectID": "Brunswick.html#service-frequency",
+    "href": "Brunswick.html#service-frequency",
+    "title": "Station Information",
+    "section": "Service Frequency",
+    "text": "Service Frequency\nService frequency is calculated as the mean number of services per hour in two time periods:\n\nBetween 7 and 10am towards Flinders Street, shown in blue.\nBetween 4 and 7pm away from Flinders Street, shown in green.\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe chart is also split by direction of travel, which in Melbourne’s radial network is either towards or away from Flinders street.\n\n\nThe mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.\n\n\nThe morning average freqency is 3.7, the average evening frequency is 3.2, which forms a mean score of 3.45."
+  },
+  {
+    "objectID": "Brunswick.html#available-line-capacity",
+    "href": "Brunswick.html#available-line-capacity",
+    "title": "Station Information",
+    "section": "Available Line Capacity",
+    "text": "Available Line Capacity\n\nThe chart below shows the average patronage on the Upfield line(s) at the last stop before the CBD (North Melbourne). It is calculated for two times:\n\nBetween 7 and 10am towards Flinders Street, denoted as blue.\nBetween 4 and 7pm away from Flinders street, shown as green.\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe chart is also split by direction of travel, which in Melbourne’s radial network is either towards or away from Flinders street.\n\n\nThe mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.\n\n\nThe morning average patronage is 261.8, the average evening patronage is 270.97, which forms a mean score of 266.38."
+  },
+  {
+    "objectID": "Brunswick.html#zoning-suitability",
+    "href": "Brunswick.html#zoning-suitability",
+    "title": "Station Information",
+    "section": "Zoning Suitability",
+    "text": "Zoning Suitability\nThe map below shows the properties within 1km of Brunswick that are suitable for upzoning in orange, with unsuitable properties in black.\n\n\nSuitable properties are either neighbourhood residential or general residential and not under heritage restrictions.\n\n\n\n\n\n\n\n\n\nOut of 5349 lots within 1000m radius of Brunswick, 2404 are suitable for upzoning.\nIn terms of area, the most suitable properties cover 28% of the total area.\nFor more information, see the table below."
+  },
+  {
+    "objectID": "Brunswick.html#existing-transport-infrastructure",
+    "href": "Brunswick.html#existing-transport-infrastructure",
+    "title": "Station Information",
+    "section": "Existing Transport Infrastructure",
+    "text": "Existing Transport Infrastructure\nThe map below shows tram routes and tram stops in green, as well as bus routes and bus stops in orange.\n\n\n\n\n\n\n\n\nThere are 16 tram stops in a 1km radius, with route(s) 19, 58 servicing the area.\nFor buses, there are 55, with route(s) 509, 506, 508, 503.\nThe data below shows the frequencies per route in both table and bar chart form.\n\nDataChart\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe final score for ‘existing transport infrastructure’ is computed by summing the average frequencies of each route and applying a weight to each mode.\nThe current weights are intended to reflect the throughput each mode is capable of. At a minimum, trams can move twice as many people as buses at the same frequency, so trams are weighted twice as much as buses.\nThe final score is 46.28."
+  },
+  {
+    "objectID": "Brunswick.html#local-amenities",
+    "href": "Brunswick.html#local-amenities",
+    "title": "Station Information",
+    "section": "Local Amenities",
+    "text": "Local Amenities\nThe map below shows the local amenities near Brunswick within a 1000m radius.\n\n\n\n\n\n\nNotes on Data Visualisation\n\n\n\n\n\nOpenStreetMap point locations were joined to polygon dwelling data for this visualisation. Some points could not be joined and are displayed as circles on the map.\nSome amenities are within the same building, e.g. multiple shops in shopping centres. In these cases, the building is assigned a colour corresponding to the most common amenity within it.\n\n\n\n\n\n\n\n\n\n\n\nThe plot below shows the number of local services within a 1000m radius. Data is drawn from OpenStreetMaps classifications. Black dotted lines represent the means across all stations that meet the criteria for ranking.\n\n\n\n\n\n\n\n\n\n\nCalculation of the final score for local services uses an index measure. It is described in more detail here.."
+  },
+  {
+    "objectID": "Brunswick.html#zoned-capacity",
+    "href": "Brunswick.html#zoned-capacity",
+    "title": "Station Information",
+    "section": "Zoned Capacity",
+    "text": "Zoned Capacity\ninclude how many homes currently.\nZoned Capacity is a measure of the theoretical number of dwellings possible under different zoning implementations.\n\n\n\n\n\n\n\n\n\n\n\nUnder ‘Missing Middle’ zoning, Brunswick could theoretically expand its zoned_capacity by 34,006 additional homes."
+  },
+  {
+    "objectID": "quarto/run_for_station.html",
+    "href": "quarto/run_for_station.html",
+    "title": "Footscray",
+    "section": "",
+    "text": "Footscray obtained a final score of 3.59, placing it number 18 out of 166.\nThe remainder of this page steps through each factor listed below in no particular order."
+  },
+  {
+    "objectID": "quarto/run_for_station.html#overall-scores",
+    "href": "quarto/run_for_station.html#overall-scores",
+    "title": "Footscray",
+    "section": "",
+    "text": "Footscray obtained a final score of 3.59, placing it number 18 out of 166.\nThe remainder of this page steps through each factor listed below in no particular order.\n\n\n\n\n\n\nFull Methodology\n\n\n\nThe full methodology for how these scores are calculated and why they are important for consideration in upzoning is available in the full report."
+  },
+  {
+    "objectID": "quarto/run_for_station.html#service-frequency",
+    "href": "quarto/run_for_station.html#service-frequency",
+    "title": "Footscray",
+    "section": "Service Frequency",
+    "text": "Service Frequency\nService frequency is calculated as the mean number of services per hour in two time periods:\n\nBetween 7 and 10am towards Flinders Street, shown in blue.\nBetween 4 and 7pm away from Flinders Street, shown in green.\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe chart is also split by direction of travel, which in Melbourne’s radial network is either towards or away from Flinders street.\n\n\nThe mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.\n\n\nThe morning average freqency is 17.95, the average evening frequency is 16.67, which forms a mean score of 17.31."
+  },
+  {
+    "objectID": "quarto/run_for_station.html#available-line-capacity",
+    "href": "quarto/run_for_station.html#available-line-capacity",
+    "title": "Footscray",
+    "section": "Available Line Capacity",
+    "text": "Available Line Capacity\n\nThe chart below shows the average patronage on the Sunbury, Werribee, Williamstown line(s) at the last stop before the CBD (North Melbourne). It is calculated for two times:\n\nBetween 7 and 10am towards Flinders Street, denoted as blue.\nBetween 4 and 7pm away from Flinders street, shown as green.\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe chart is also split by direction of travel, which in Melbourne’s radial network is either towards or away from Flinders street.\n\n\nThe mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.\n\n\nThe morning average patronage is 344.29, the average evening patronage is 331.71, which forms a mean score of 338."
+  },
+  {
+    "objectID": "quarto/run_for_station.html#zoning-suitability",
+    "href": "quarto/run_for_station.html#zoning-suitability",
+    "title": "Footscray",
+    "section": "Zoning Suitability",
+    "text": "Zoning Suitability\nThe map below shows the properties within 1km of Footscray that are suitable for upzoning in orange, with unsuitable properties in black.\n\n\nSuitable properties are either neighbourhood residential or general residential and not under heritage restrictions.\n\n\n\n\n\n\n\n\n\nOut of 2682 lots within 1000m radius of Footscray, 770 are suitable for upzoning.\nIn terms of area, the most suitable properties cover 13% of the total area.\nFor more information, see the table below."
+  },
+  {
+    "objectID": "quarto/run_for_station.html#existing-transport-infrastructure",
+    "href": "quarto/run_for_station.html#existing-transport-infrastructure",
+    "title": "Footscray",
+    "section": "Existing Transport Infrastructure",
+    "text": "Existing Transport Infrastructure\nThe map below shows tram routes and tram stops in green, as well as bus routes and bus stops in orange.\n\n\n\n\n\n\n\n\nThere are 9 tram stops in a 1km radius, with route(s) 82 servicing the area.\nFor buses, there are 63, with route(s) 216, 220, 223, 409, 403, 402, 404, 406, 410, 414, 472.\nThe data below shows the frequencies per route in both table and bar chart form.\n\nDataChart\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe final score for ‘existing transport infrastructure’ is computed by summing the average frequencies of each route and applying a weight to each mode.\nThe current weights are intended to reflect the throughput each mode is capable of. At a minimum, trams can move twice as many people as buses at the same frequency, so trams are weighted twice as much as buses.\nThe final score is 64.95."
+  },
+  {
+    "objectID": "quarto/run_for_station.html#local-amenities",
+    "href": "quarto/run_for_station.html#local-amenities",
+    "title": "Footscray",
+    "section": "Local Amenities",
+    "text": "Local Amenities\nThe map below shows the local amenities near Footscray within a 1000m radius.\n\n\n\n\n\n\nNotes on Data Visualisation\n\n\n\n\n\nOpenStreetMap point locations were joined to polygon dwelling data for this visualisation. Some points could not be joined and are displayed as circles on the map.\nSome amenities are within the same building, e.g. multiple shops in shopping centres. In these cases, the building is assigned a colour corresponding to the most common amenity within it.\n\n\n\n\n\n\n\n\n\n\n\nThe plot below shows the number of local services within a 1000m radius. Data is drawn from OpenStreetMaps classifications. Black dotted lines represent the means across all stations that meet the criteria for ranking.\n\n\n\n\n\n\n\n\n\n\nCalculation of the final score for local services uses an index measure. It is described in more detail in the full report.."
+  },
+  {
+    "objectID": "quarto/run_for_station.html#zoned-capacity",
+    "href": "quarto/run_for_station.html#zoned-capacity",
+    "title": "Footscray",
+    "section": "Zoned Capacity",
+    "text": "Zoned Capacity\ninclude how many homes currently.\nZoned Capacity is a measure of the theoretical number of dwellings possible under different zoning implementations.\n\n\n\n\n\n\n\n\n\n\n\nUnder ‘Missing Middle’ zoning, Footscray could theoretically expand its zoned capacity by 12,041 additional homes."
   }
 ]

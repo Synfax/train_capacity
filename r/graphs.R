@@ -47,6 +47,7 @@ top_stations_by_lga <- function(fromQuarto = T, n_slice = 25) {
     theme_gray(base_size = 8) +
     theme_report() +
     theme(legend.position = 'none') +
+    theme(axis.title.y = element_blank()) +
     coord_flip() 
   
   lga_chart

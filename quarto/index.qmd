@@ -1,8 +1,10 @@
 ---
 format:
   closeread-html:
+    grid: 
+      body-width: 900px
     theme: zephr
-    page-layout: full
+    page-layout: article
     remove-header-space: false
     css: 
       - index.css
@@ -43,10 +45,11 @@ source('../r/constants.r')
 
 source('../r/theme.r')
 source('../r/graphs.r')
+source('../r/prepare_index_page.r')
+source('../r/transform.r')
 
 transformed_scores <- readRDS('../r_objects/transformed_scores.Rdata')
 original_values <- readRDS('../r_objects/station_rankings.Rdata')
-
 
 # combined_scores <- original_values %>%
 #   left_join(transformed_scores, by = 'station') %>%
@@ -57,10 +60,11 @@ original_values <- readRDS('../r_objects/station_rankings.Rdata')
 
 
 transformed_scores <- readRDS('../r_objects/transformed_scores.Rdata') %>%
+  remove_null_weighted_cols() %>%
   as.data.frame() %>%
   slice_head(n = 10) %>%
   mutate(across(where(is.numeric), .fns = function(x) round(x, 2) )) %>%
-  mutate(rank = row_number())
+  mutate(rank = row_number()) 
 
 san_station <- function(x) {
   return( str_replace(x, ' ', '_') )
@@ -125,15 +129,12 @@ printScores <- function(r) {
 }
 
 ```
+
 ::: column-body
 
 \
 
-\
-
 # Train Station Upzoning Rankings: Executive Summary
-
-
 
 \
 
@@ -145,6 +146,8 @@ However, policymakers face difficult choices in choosing which stations to upzon
 
 The purpose of this report is to tackle these trade-offs by building a robust and data-driven framework to identify the train stations that are best suited for this broad upzoning.
 
+*See the full report [here](report.html "Full Report").*
+
 ### Methodology
 
 \
@@ -152,7 +155,7 @@ The purpose of this report is to tackle these trade-offs by building a robust an
 For each train station, metrics are calculated on:
 
 -   Zoning suitability (% land area)
--   Potential number of new homes (# homes)
+<!-- -   Potential number of new homes (# homes) -->
 -   Train service frequency in peak (trains per hour)
 -   Spare train line capacity in peak (# passengers)
 -   Local amenities nearby (composite index)
@@ -166,7 +169,6 @@ This report uses xmin-xmax scaling, which transforms each 'raw' metric into a va
 These 'transformed' scores are summed together to produce a final score for each station.
 
 ::: callout-note
-
 There are some restrictions placed on final rankings:
 
 -   City loop stations are excluded as they can't be upzoned further.
@@ -174,7 +176,6 @@ There are some restrictions placed on final rankings:
 -   Edge transfer stations (North Melbourne, South Yarra, Richmond) were excluded due to extreme outliers in the data impacting the transformation process.
 
 -   Stations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone.
-
 :::
 
 The full methodology is contained in the full report.
@@ -187,15 +188,9 @@ The full methodology is contained in the full report.
 
 There is a searchable table and interactive map at the foot of this document to find your own station and see where it ranks.
 
-A map below shows the top 10 stations, with their values contained in the 'Chart' tab. One thing of note is how close many of the stations are in terms of final score, without a standout jump between the top 10.
+A chart below shows the scores of the 10 highest ranked stations, with an interactive map underneath to show the spatial distribution.
 
-::: column-page
-::: panel-tabset
-## Map
-
-
-![](index_images/main.png)
-
+::: column-body
 
 ## Chart
 
@@ -203,7 +198,18 @@ A map below shows the top 10 stations, with their values contained in the 'Chart
  top_10_chart()
 ```
 
+
+## Map
+::: {.interactive-map}
+```{r}
+#| fig-height: 6
+
+prepare_index(returnTopTen = T, fromQuarto = T, font_size_q = '8pt', h = NULL, w = NULL)
+
+```
 :::
+
+
 :::
 
 ### Key result: Distribution by LGA
@@ -215,21 +221,17 @@ The best stations for upzoning are not equally distributed across Melbourne.
 Local government areas in the inner south east, such as Stonnington & Boroondara, have the most stations in the top 25 ranking stations.
 
 Hover over the bar chart below for an interactive effect.
-
 :::
 
-::: column-page
-
+::: column-body
 ```{r}
 
 top_stations_by_lga() 
 
 ```
-
 :::
 
 ::: column-body
-
 # In-Depth Analysis of Top 10 Stations
 
 This next section will step through each 10 highest ranked stations. It will include a breakdown of how its score was formed, which uses the transformed scores discussed in the methodology section. These scores are bounded between zero and one.
@@ -243,16 +245,16 @@ A table below shows a *rough* guide of how to interpret the transformed scores.
 | 0.6 - 0.8         | Good           |
 | 0.8 - 1           | Excellent      |
 
-Use a laptop or desktop for the best viewing experience.
-(keep scrolling!)
+Use a laptop or desktop for the best viewing experience. (keep scrolling!)
 :::
+
 ::: cr-section
 ::: {focus-on="cr-map1"}
-## [`r transformed_scores$station[1]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B1%5D),'/quarto/',san_station(transformed_scores$station%5B1%5D),'.html')%20%60)
+## [`r transformed_scores$station[1]`](`r paste0('../',"stations/",san_station(transformed_scores$station[1]), '.html')`)
 
 ###### Rank: 1
 
-###### Total Score: `r transformed_scores$score[1]` / 7
+###### Total Score: `r transformed_scores$score[1]` / `r sum(weights)`
 
 \
 
@@ -262,18 +264,17 @@ printScores(1)
 
 ```
 
-See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B1%5D),'/quarto/',san_station(transformed_scores$station%5B1%5D),'.html')%20%60).
+See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[1]), '.html')`).
 :::
 
 ::: {focus-on="cr-map2"}
-## [`r transformed_scores$station[2]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B2%5D),'/quarto/',san_station(transformed_scores$station%5B2%5D),'.html')%20%60)
+## [`r transformed_scores$station[2]`](`r paste0('../',"stations/",san_station(transformed_scores$station[2]), '.html')`)
 
 ###### Rank: 2
 
-###### Total Score: `r transformed_scores$score[2]` / 7
+###### Total Score: `r transformed_scores$score[2]` / `r sum(weights)`
 
 \
-
 
 ```{r}
 
@@ -281,18 +282,17 @@ printScores(2)
 
 ```
 
-See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B2%5D),'/quarto/',san_station(transformed_scores$station%5B2%5D),'.html')%20%60).
+See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[2]), '.html')`).
 :::
 
 ::: {focus-on="cr-map3"}
-## [`r transformed_scores$station[3]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B3%5D),'/quarto/',san_station(transformed_scores$station%5B3%5D),'.html')%20%60)
+## [`r transformed_scores$station[3]`](`r paste0('../',"stations/",san_station(transformed_scores$station[3]), '.html')`)
 
 ###### Rank: 3
 
-###### Total Score: `r transformed_scores$score[3]` / 7
+###### Total Score: `r transformed_scores$score[3]` / `r sum(weights)`
 
 \
-
 
 ```{r}
 
@@ -300,18 +300,17 @@ printScores(3)
 
 ```
 
-See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B3%5D),'/quarto/',san_station(transformed_scores$station%5B3%5D),'.html')%20%60).
+See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[3]), '.html')`).
 :::
 
 ::: {focus-on="cr-map4"}
-## [`r transformed_scores$station[4]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B4%5D),'/quarto/',san_station(transformed_scores$station%5B4%5D),'.html')%20%60)
+## [`r transformed_scores$station[4]`](`r paste0('../',"stations/",san_station(transformed_scores$station[4]), '.html')`)
 
 ###### Rank: 4
 
-###### Total Score: `r transformed_scores$score[4]` / 7
+###### Total Score: `r transformed_scores$score[4]` / `r sum(weights)`
 
 \
-
 
 ```{r}
 
@@ -319,18 +318,17 @@ printScores(4)
 
 ```
 
-See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B4%5D),'/quarto/',san_station(transformed_scores$station%5B4%5D),'.html')%20%60).
+See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[4]), '.html')`).
 :::
 
 ::: {focus-on="cr-map5"}
-## [`r transformed_scores$station[5]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B5%5D),'/quarto/',san_station(transformed_scores$station%5B5%5D),'.html')%20%60)
+## [`r transformed_scores$station[5]`](`r paste0('../',"stations/",san_station(transformed_scores$station[5]), '.html')`)
 
 ###### Rank: 5
 
-###### Total Score: `r transformed_scores$score[5]` / 7
+###### Total Score: `r transformed_scores$score[5]` / `r sum(weights)`
 
 \
-
 
 ```{r}
 
@@ -338,18 +336,17 @@ printScores(5)
 
 ```
 
-See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B5%5D),'/quarto/',san_station(transformed_scores$station%5B5%5D),'.html')%20%60).
+See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[5]), '.html')`).
 :::
 
 ::: {focus-on="cr-map6"}
-## [`r transformed_scores$station[6]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B6%5D),'/quarto/',san_station(transformed_scores$station%5B6%5D),'.html')%20%60)
+## [`r transformed_scores$station[6]`](`r paste0('../',"stations/",san_station(transformed_scores$station[6]), '.html')`)
 
 ###### Rank: 6
 
-###### Total Score: `r transformed_scores$score[6]` / 7
+###### Total Score: `r transformed_scores$score[6]` / `r sum(weights)`
 
 \
-
 
 ```{r}
 
@@ -357,18 +354,17 @@ printScores(6)
 
 ```
 
-See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B6%5D),'/quarto/',san_station(transformed_scores$station%5B6%5D),'.html')%20%60).
+See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[6]), '.html')`).
 :::
 
 ::: {focus-on="cr-map7"}
-## [`r transformed_scores$station[7]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B7%5D),'/quarto/',san_station(transformed_scores$station%5B7%5D),'.html')%20%60)
+## [`r transformed_scores$station[7]`](`r paste0('../',"stations/",san_station(transformed_scores$station[7]), '.html')`)
 
 ###### Rank: 7
 
-###### Total Score: `r transformed_scores$score[7]` / 7
+###### Total Score: `r transformed_scores$score[7]` / `r sum(weights)`
 
 \
-
 
 ```{r}
 
@@ -376,18 +372,17 @@ printScores(7)
 
 ```
 
-See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B7%5D),'/quarto/',san_station(transformed_scores$station%5B7%5D),'.html')%20%60).
+See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[7]), '.html')`).
 :::
 
 ::: {focus-on="cr-map8"}
-## [`r transformed_scores$station[8]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B8%5D),'/quarto/',san_station(transformed_scores$station%5B8%5D),'.html')%20%60)
+## [`r transformed_scores$station[8]`](`r paste0('../',"stations/",san_station(transformed_scores$station[8]), '.html')`)
 
 ###### Rank: 8
 
-###### Total Score: `r transformed_scores$score[8]` / 7
+###### Total Score: `r transformed_scores$score[8]` / `r sum(weights)`
 
 \
-
 
 ```{r}
 
@@ -399,14 +394,13 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 :::
 
 ::: {focus-on="cr-map9"}
-## [`r transformed_scores$station[9]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B9%5D),'/quarto/',san_station(transformed_scores$station%5B9%5D),'.html')%20%60)
+## [`r transformed_scores$station[9]`](`r paste0('../',"stations/",san_station(transformed_scores$station[9]), '.html')`)
 
 ###### Rank: 9
 
-###### Total Score: `r transformed_scores$score[9]` / 7
+###### Total Score: `r transformed_scores$score[9]` / `r sum(weights)`
 
 \
-
 
 ```{r}
 
@@ -414,18 +408,17 @@ printScores(9)
 
 ```
 
-See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B9%5D),'/quarto/',san_station(transformed_scores$station%5B9%5D),'.html')%20%60).
+See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[9]), '.html')`).
 :::
 
 ::: {focus-on="cr-map10"}
-## [`r transformed_scores$station[10]`](%60r%20paste0('stations/',san_station(transformed_scores$station%5B10%5D),'/quarto/',san_station(transformed_scores$station%5B10%5D),'.html')%20%60)
+## [`r transformed_scores$station[10]`](`r paste0('../',"stations/",san_station(transformed_scores$station[10]), '.html')`)
 
 ###### Rank: 10
 
-###### Total Score: `r transformed_scores$score[10]` / 7
+###### Total Score: `r transformed_scores$score[10]` / `r sum(weights)`
 
 \
-
 
 ```{r}
 
@@ -433,7 +426,7 @@ printScores(10)
 
 ```
 
-See more information [here](%60r%20paste0('stations/',san_station(transformed_scores$station%5B10%5D),'/quarto/',san_station(transformed_scores$station%5B10%5D),'.html')%20%60).
+See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[10]), '.html')`).
 :::
 
 ::: {focus-on="cr-click"}
@@ -469,11 +462,12 @@ Alternatively, use the searchable table below.
 #   rename(!!!translations) %>%
 #   reactable(theme = sandstone(),searchable = T, defaultSorted = "Total Score", defaultSortOrder = "desc", defaultPageSize = 10)
 
+
  df_with_links = readRDS('../r_objects/transformed_scores.Rdata')  %>%
   as.data.frame() %>%
   select(station) %>%
   mutate(safe_name = gsub("[^a-zA-Z0-9]", "_", station)) %>%
-  mutate(win_url = paste0('stations/', safe_name, '/quarto/', safe_name, '.html')) %>%
+  mutate(win_url = paste0('../stations/', safe_name, '.html')) %>%
   select(-safe_name)
 
 reactable(df_with_links,
@@ -543,8 +537,11 @@ colours = tribble(
 lines_dissolved <- read_sf('../shapefiles/qgis/final_map.shp') %>%
   left_join(colours, by = 'group') 
 
+valid_stations <-  readRDS('../r_objects/transformed_scores.Rdata') %>%
+  pull(station)
 
 locations = locations %>%
+  filter(Station_Name %in% valid_stations) %>%
   mutate(safe_name = gsub("[^a-zA-Z0-9]", "_", Station_Name)) %>%
   mutate(message = 
            paste0(
@@ -554,7 +551,7 @@ locations = locations %>%
              
            )
   ) %>%
-  mutate(win_url = paste0('stations/', safe_name, '/quarto/', safe_name, '.html'))
+  mutate(win_url = paste0('../stations/', safe_name, '.html'))
 
 
 
@@ -623,7 +620,7 @@ map.on('mouseleave', function() {
    
     var showLabelsZoomLevel = 13;
 
-    var labels = document.getElementsByClassName('leaflet-tooltip');
+    var labels = document.getElementsByClassName('my-labels');
    
     for (var i = 0; i < labels.length; i++) {
       if (currentZoom >= showLabelsZoomLevel) {

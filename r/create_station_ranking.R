@@ -51,12 +51,43 @@ station_rankings_ = station_rankings %>%
 
 saveRDS(station_rankings_, 'r_objects/station_rankings.Rdata')
 
-#station_rankings = readRDS('r_objects/station_rankings.Rdata') 
+#station_rankings_ = readRDS('r_objects/station_rankings.Rdata') 
 
 transformed_scores = transform_scores_xminxmax(station_rankings_)
 
 saveRDS(transformed_scores, 'r_objects/transformed_scores.Rdata')
 
+
+randomise_weights <- function() {
+  
+  n = 1000
+  
+  res_df <- data.frame()
+  
+  for(i in 1:n) {
+    weights_random = c(
+      "grz_nrz_pc" = runif(1,0,1),
+      "capacity_delta" = 0,
+      'average_peak_service_freq' = runif(1,0,1),
+      'average_peak_service_cap' = runif(1,0,1),
+      'walkability_score' = runif(1,0,1),
+      'distance' = runif(1,0,1), 
+      'n_bus_tram' = runif(1,0,1)
+    )
+    
+    max_score <- sum(weights_random)
+    
+    wide_results <- transform_scores_xminxmax(station_rankings_, weights_random) %>%
+      as.data.frame() %>%
+      mutate(pc_score = score/max_score) %>%
+      select(station, pc_score) %>%
+      pivot_wider(values_from = 'pc_score', names_from = 'station')
+    
+    res_df = bind_rows(res_df, wide_results)
+  }
+  
+  
+}
 
 #~~~~~~~~~~~~~~~~~~~~~~~
 # 
