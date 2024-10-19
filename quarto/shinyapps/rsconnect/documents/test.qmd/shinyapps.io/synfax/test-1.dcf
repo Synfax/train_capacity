@@ -1,0 +1,10 @@
+name: test-1
+title:
+username: synfax
+account: synfax
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13064728
+bundleId: 9242490
+url: https://synfax.shinyapps.io/test-1/
+version: 1
