@@ -85,7 +85,7 @@ remove_null_weighted_translations <- function(ts, inv = T) {
 }
 
 
-transform_scores_xminxmax <- function(station_rankings, weights_ = weights) {
+transform_scores_xminxmax <- function(station_rankings, weights_ = weights, print_ = F) {
   
   
   xminmaxtransform = station_rankings %>%
@@ -98,9 +98,11 @@ transform_scores_xminxmax <- function(station_rankings, weights_ = weights) {
     mutate(score = sum(across(-station))) %>%
     arrange(desc(score))
   
-  print(xminmaxtransform %>%
-          select(station, score) %>%
-          tibble())
+  if(print_) {
+    print(xminmaxtransform %>%
+            select(station, score) %>%
+            tibble())
+  }
   
   return(xminmaxtransform)
 }

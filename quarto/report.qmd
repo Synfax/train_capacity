@@ -845,3 +845,5 @@ station_walkability %>%
 Collingwood leads the pack and is top of the class in bars, cafes, restaurants and supermarkets. 
 
 For lowest values, there is more variance, with only Glen Iris being the lowest for two amenity types: bars and supermarkets.
+
+# Sensitivity Testing

@@ -4,6 +4,7 @@ project:
     - quarto/index.qmd
     - quarto/report.qmd
     - quarto/run_for_station.qmd
+    - quarto.test.qmd
   output-dir: ../rankings_website/
   
 website: 

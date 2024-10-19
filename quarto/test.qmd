@@ -1,0 +1,145 @@
+---
+title: "Train Station Upzoning Rankings"
+author: "Paul Spasojevic"
+server: shiny
+date: "10/17/24"
+params: 
+  station: "Brunswick"
+css:
+ - index.css
+ - nav_fixes.css
+format: 
+  html: 
+    grid: 
+      body-width: 900px
+    page-layout: article  
+    theme: zephr
+    code-fold: false
+    toc: true
+    toc-location: left
+    toc-expand: true
+    toc-depth: 3
+    
+---
+
+## Introduction
+
+This is regular Quarto markdown text. You can include any normal content here.
+
+```{r setup}
+#| context: setup
+library(shiny)
+library(ggplot2)
+library(dplyr)
+library(reactablefmtr)
+
+# Your normal data loading and preprocessing here
+
+source('../r/constants.R')
+source('../r/transform.r')
+
+df <- readRDS('../r_objects/station_rankings.Rdata')
+
+
+
+```
+
+## Static Analysis Section
+
+You can include regular, non-interactive R chunks as usual:
+
+```{r}
+
+```
+
+## Interactive Weight Adjustment Section
+
+```{r}
+#| panel: sidebar
+sliderInput("grz_nrz_pc", "grz_nrz_pc", 
+            min = 0, max = 10, value = 1, step = 0.1)
+sliderInput("average_peak_service_cap", "average_peak_service_cap", 
+            min = 0, max = 10, value = 1, step = 0.1)
+sliderInput("average_peak_service_freq", "average_peak_service_freq", 
+            min = 0, max = 10, value = 1, step = 0.1)
+sliderInput("distance", "distance", 
+            min = 0, max = 10, value = 1, step = 0.1)
+sliderInput("n_bus_tram", "n_bus_tram", 
+            min = 0, max = 10, value = 1, step = 0.1)
+sliderInput("walkability_score", "walkability_score", 
+            min = 0, max = 10, value = 1, step = 0.1)
+
+```
+
+## Approach 1: Using Reactive Expression (Recommended)
+
+```{r}
+#| context: server
+# Define reactive expression that computes weighted_df once
+weighted_df <- reactive({
+  
+  shiny_weights = c(
+  "grz_nrz_pc" = input$grz_nrz_pc,
+  "capacity_delta" = 0,
+  'average_peak_service_freq' = input$average_peak_service_freq,
+  'average_peak_service_cap' = input$average_peak_service_cap,
+  'walkability_score' = input$walkability_score,
+  'distance' = input$distance,
+  'n_bus_tram' = input$n_bus_tram
+  )
+  
+  transform_scores_xminxmax(df, shiny_weights)
+  
+})
+
+# Use the reactive data in multiple plots
+output$histogram <- renderReactable({
+  
+
+  weighted_df() %>% 
+    select(station, score) %>%
+    mutate(score = round(score, 2)) %>%
+  reactable(
+    class = "pageinforeactable",
+    columns = list(
+      'station' = colDef(name = 'Station'),
+      'score' = colDef(name = "Total Score",
+                       cell = data_bars(.,
+                                        text_position = 'inside-end',
+                                        fill_color = '#1B5E20',
+                                        text_color = 'white',
+                                        background = 'opaque', 
+                                        fill_opacity = 1,
+                                        bar_height = 24,
+                                        bold_text = T))
+    )
+    
+  )
+  
+})
+
+# output$scatter <- renderPlot({
+#   ggplot(weighted_df(), aes(x = weighted_var1, y = weighted_var2)) +
+#     geom_point(alpha = 0.6) +
+#     theme_minimal() +
+#     labs(title = "Weighted Variables Relationship")
+# })
+# 
+# output$summary_stats <- renderTable({
+#   data <- weighted_df()
+#   data.frame(
+#     Statistic = c("Mean", "Median", "SD"),
+#     Value = c(
+#       mean(data$weighted_sum),
+#       median(data$weighted_sum),
+#       sd(data$weighted_sum)
+#     )
+#   )
+# })
+```
+
+```{r}
+#| panel: fill
+reactableOutput("histogram")
+
+```

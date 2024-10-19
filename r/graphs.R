@@ -70,7 +70,10 @@ top_stations_by_lga <- function(fromQuarto = T, n_slice = 25) {
 
   lga_map  
   
-  combined_plot <-   lga_chart + (lga_map) + plot_layout(widths = c(2.5, 1.5))
+  combined_plot <-   lga_chart + (lga_map) + plot_layout(widths = c(2.5, 1.5)) &
+    theme(plot.margin = unit(c(0,0,0,0), "cm"),
+          plot.background = element_rect(fill = "#fdffee", color = "#fdffee"),
+          panel.spacing = unit(0, "cm"))
   
   # Create the interactive plot
   interactive_plot <- girafe(ggobj = combined_plot)
