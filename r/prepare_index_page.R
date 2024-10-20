@@ -1,4 +1,4 @@
-prepare_index <- function(returnTopTen = F, topN = 25, fromQuarto = F, font_size_q = '16pt', w = 2560, h = 1440, fillC = "black") {
+prepare_index <- function(returnTopTen = F, topN = 25, fromQuarto = F, font_size_q = '16pt', w = 2560, h = 1440, fillC = "black", ringC = "white") {
   
   prefix_dir <- ifelse(fromQuarto, '../', '')
   
@@ -59,7 +59,7 @@ prepare_index <- function(returnTopTen = F, topN = 25, fromQuarto = F, font_size
   map <- leaflet(width = w , height = h) %>%
     addPolylines(data = lines_dissolved, color = ~colour, opacity = 1) %>%
     addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.5)) %>%
-    addCircleMarkers(lng = data_to_map$lng, lat=data_to_map$lat, radius = 5, weight = 3.5, color = 'black', fillColor = fillC, fillOpacity = 1, opacity = 0.7, ) %>%
+    addCircleMarkers(lng = data_to_map$lng, lat=data_to_map$lat, radius = 5, weight = 3.5, color = ringC, fillColor = fillC, fillOpacity = 1, opacity = 1, ) %>%
     addLabelOnlyMarkers(lng = data_to_map$lng,
                         lat = data_to_map$lat,
                         label = lapply(data_to_map$message, htmltools::HTML),
