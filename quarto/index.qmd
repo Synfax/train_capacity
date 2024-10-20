@@ -38,6 +38,7 @@ library(sf)
 library(leaflet)
 library(shiny)
 library(htmlwidgets)
+library(plotly)
 library(reactablefmtr)
 
 locations <- readRDS('../r_objects/locations.Rdata')
@@ -180,7 +181,7 @@ There are some restrictions placed on final rankings:
 
 The full methodology is contained in the full report.
 
-### Key Result: Top 10 Train Stations
+### Key Result: The Next 25
 
 \
 
@@ -192,22 +193,80 @@ A chart below shows the scores of the 10 highest ranked stations, with an intera
 
 ::: column-body
 
-## Chart
-
-```{r}
- top_10_chart()
-```
-
-
 ## Map
 ::: {.interactive-map}
 ```{r}
-#| fig-height: 6
+#| fig-height: 4
+js_code <- "
+function(el, x, data) {
 
-prepare_index(returnTopTen = T, fromQuarto = T, font_size_q = '8pt', h = NULL, w = NULL)
+  var map = this;
+
+  function updateLabelVisibility() {
+   
+    var currentZoom = map.getZoom();
+   
+    var showLabelsZoomLevel = 13;
+
+    var labels = document.getElementsByClassName('top-25-labels');
+   
+    for (var i = 0; i < labels.length; i++) {
+      if (currentZoom >= showLabelsZoomLevel) {
+        labels[i].style.display = 'block';
+      } else {
+        labels[i].style.display = 'none';
+      }
+    }
+  }
+  
+
+
+  // Ensure the map is fully loaded before adding the event listener
+  map.whenReady(function() {
+  
+
+    map.on('zoomend', function() {
+  
+      updateLabelVisibility();
+    });
+    
+    // Initial call to set correct visibility
+    updateLabelVisibility();
+  });
+}
+
+"
+
+
+m <- prepare_index(returnTopTen = T, topN = 25, fromQuarto = T, font_size_q = '8pt', h = '600px', w = '100%', fillC = "#fdffee") %>%
+  htmlwidgets::onRender(js_code)
+
+m
 
 ```
 :::
+
+## Chart
+
+```{r}
+#| fig-height: 6
+
+temp_graph <- readRDS('../r_objects/transformed_scores.Rdata') %>% 
+    as.data.frame() %>%
+    select(station, score) %>%
+    arrange(desc(score)) %>%
+    mutate(score = round(score, 2)) %>%
+    slice_head(n = 25) %>%
+    ggplot(mapping = aes(y = reorder(station, score), x = score, fill = score )) +
+    scale_fill_gradientn(colors = create_green_palette(11)) +
+    geom_col() +
+    ylab("Station") +
+    theme_report() + 
+  theme(legend.position = "none")
+  
+  ggplotly(temp_graph) %>% plotly::layout(showlegend = F)
+
+```
 
 
 :::
@@ -227,6 +286,179 @@ Hover over the bar chart below for an interactive effect.
 ```{r}
 
 top_stations_by_lga() 
+
+```
+:::
+
+### Searchable Map
+
+\
+
+Pages for each individual train station have also been produced to detail how each performed in the metrics.
+
+The map below is interactive and clickable. Scroll and find any train station and click the label for further information.
+
+::: {.column-body}
+
+```{r}
+
+
+js_code <- "
+function(el, x, data) {
+
+    var marker = document.getElementsByClassName('my-labels');
+  for(var i=0; i < marker.length; i++){
+    (function(){
+      console.log('hello');
+      var v = data.win_url[i];
+      marker[i].addEventListener('click', function() { window.open(v);}, false);
+  }()); 
+  }
+
+  var map = this;
+  
+  
+  
+  
+
+  function updateLabelVisibility() {
+   
+    var currentZoom = map.getZoom();
+   
+    var showLabelsZoomLevel = 13;
+
+    var labels = document.getElementsByClassName('my-labels');
+   
+    for (var i = 0; i < labels.length; i++) {
+      if (currentZoom >= showLabelsZoomLevel) {
+        labels[i].style.display = 'block';
+      } else {
+        labels[i].style.display = 'none';
+      }
+    }
+  }
+  
+
+
+  // Ensure the map is fully loaded before adding the event listener
+  map.whenReady(function() {
+  
+  
+ 
+    map.on('zoomend', function() {
+  
+      updateLabelVisibility();
+    });
+    
+    // Initial call to set correct visibility
+    updateLabelVisibility();
+  });
+}
+
+"
+
+colours = tribble(
+  ~group, ~ colour,
+  'Sandringham' , "#F178AF",
+  'CrossCity' , "#028430",
+  'Cran/Pak' , "#279FD5",
+  "Burnley" , "#152C6B",
+  "Northern" , "#FFBE00",
+  "Eastern" , "#BE1014",
+  'event' , "#95979A"
+)
+
+lines_dissolved <- read_sf('../shapefiles/qgis/final_map.shp') %>%
+  left_join(colours, by = 'group') 
+
+valid_stations <-  readRDS('../r_objects/transformed_scores.Rdata') %>%
+  pull(station)
+
+locations = locations %>%
+  filter(Station_Name %in% valid_stations) %>%
+  mutate(safe_name = gsub("[^a-zA-Z0-9]", "_", Station_Name)) %>%
+  mutate(message = 
+           paste0(
+             '<div style = \" background-color: black; \">',
+             "<p style = \" color: white; text-align:center ; padding: 5px; \" >", Station_Name, '</p>',
+             '</div>'
+             
+           )
+  ) %>%
+  mutate(win_url = paste0('../stations/', safe_name, '.html'))
+
+m <- leaflet(width = '100%', height = '600px') %>%
+  leaflet::setView(lng = 144.9668, lat = -37.8181, zoom = 12) %>%
+  addPolylines(data = lines_dissolved, color = ~colour, opacity = 1) %>%
+  addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.5)) %>%
+  addCircleMarkers(lng = locations$lng, lat=locations$lat, radius = 5, color = 'black', fillColor = 'black', fillOpacity = 1, opacity = 0.7) %>%
+  addLabelOnlyMarkers(lng = locations$lng,
+                      lat = locations$lat,
+                      label = lapply(locations$message, htmltools::HTML),
+                      labelOptions = labelOptions(noHide = T, clickable = T,  className = 'my-labels', direction = 'auto', textOnly = T, textsize = '10pt',
+                                                  style = list(
+                                                    'font-weight' = '800',
+                                                    'text-decoration' = 'underline',
+                                                    'text-decoration-color' = 'white',
+                                                    'margin' = '5px',
+                                                    'letter-spacing' = '0.5px'
+                                                  ))) %>%
+  htmlwidgets::onRender(js_code, data = locations)
+
+m
+
+```
+
+:::
+
+### Searchable Table
+
+:::{.column-body}
+```{r}
+
+# transformed_scores %>%
+#   select(station, score) %>%
+#   reactable(theme = cyborg(),
+#             class = "pageinforeactable",
+#             columns = list(
+#               'station' = colDef(name = 'station'),
+#               'score' = colDef(name = "Score",
+#                              cell = data_bars(.,
+#                                               fill_color = 'white',
+#                                               background = 'opaque'))
+#             )
+#             
+#             )
+
+
+
+# readRDS('../r_objects/transformed_scores.Rdata') %>%
+#   as.data.frame() %>%
+#   mutate(across(where(is.numeric), ~round(.x, 2))) %>%
+#   rename(!!!translations) %>%
+#   reactable(theme = sandstone(),searchable = T, defaultSorted = "Total Score", defaultSortOrder = "desc", defaultPageSize = 10)
+
+
+ df_with_links = readRDS('../r_objects/transformed_scores.Rdata')  %>%
+  as.data.frame() %>%
+  select(station) %>%
+  mutate(safe_name = gsub("[^a-zA-Z0-9]", "_", station)) %>%
+  mutate(win_url = paste0('../stations/', safe_name, '.html')) %>%
+  select(-safe_name)
+
+reactable(df_with_links,
+          filterable = T,
+  columns = list(
+    station = colDef(
+      name = "Station",
+      cell = function(value, index) {
+        url <- df_with_links$win_url[index]
+        htmltools::a(href = url, value, target = "_blank")
+      }
+    ),
+    win_url = colDef(show = FALSE)  # Hide the URL column
+  )
+)
 
 ```
 :::
@@ -429,63 +661,6 @@ printScores(10)
 See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[10]), '.html')`).
 :::
 
-::: {focus-on="cr-click"}
-## Clickable Map
-
-You can find more details about your own local station by zooming in on the map and clicking on the label.
-
-Alternatively, use the searchable table below.
-
-## Searchable Table
-
-```{r}
-
-# transformed_scores %>%
-#   select(station, score) %>%
-#   reactable(theme = cyborg(),
-#             class = "pageinforeactable",
-#             columns = list(
-#               'station' = colDef(name = 'station'),
-#               'score' = colDef(name = "Score",
-#                              cell = data_bars(.,
-#                                               fill_color = 'white',
-#                                               background = 'opaque'))
-#             )
-#             
-#             )
-
-
-
-# readRDS('../r_objects/transformed_scores.Rdata') %>%
-#   as.data.frame() %>%
-#   mutate(across(where(is.numeric), ~round(.x, 2))) %>%
-#   rename(!!!translations) %>%
-#   reactable(theme = sandstone(),searchable = T, defaultSorted = "Total Score", defaultSortOrder = "desc", defaultPageSize = 10)
-
-
- df_with_links = readRDS('../r_objects/transformed_scores.Rdata')  %>%
-  as.data.frame() %>%
-  select(station) %>%
-  mutate(safe_name = gsub("[^a-zA-Z0-9]", "_", station)) %>%
-  mutate(win_url = paste0('../stations/', safe_name, '.html')) %>%
-  select(-safe_name)
-
-reactable(df_with_links,
-          filterable = T,
-  columns = list(
-    station = colDef(
-      name = "Station",
-      cell = function(value, index) {
-        url <- df_with_links$win_url[index]
-        htmltools::a(href = url, value, target = "_blank")
-      }
-    ),
-    win_url = colDef(show = FALSE)  # Hide the URL column
-  )
-)
-
-```
-:::
 
 ::: {#cr-main}
 :::
@@ -520,175 +695,4 @@ reactable(df_with_links,
 ::: {#cr-map10}
 :::
 
-::: {#cr-click}
-```{r}
-
-colours = tribble(
-  ~group, ~ colour,
-  'Sandringham' , "#F178AF",
-  'CrossCity' , "#028430",
-  'Cran/Pak' , "#279FD5",
-  "Burnley" , "#152C6B",
-  "Northern" , "#FFBE00",
-  "Eastern" , "#BE1014",
-  'event' , "#95979A"
-)
-
-lines_dissolved <- read_sf('../shapefiles/qgis/final_map.shp') %>%
-  left_join(colours, by = 'group') 
-
-valid_stations <-  readRDS('../r_objects/transformed_scores.Rdata') %>%
-  pull(station)
-
-locations = locations %>%
-  filter(Station_Name %in% valid_stations) %>%
-  mutate(safe_name = gsub("[^a-zA-Z0-9]", "_", Station_Name)) %>%
-  mutate(message = 
-           paste0(
-             '<div style = \" background-color: black; \">',
-             "<p style = \" color: white; text-align:center ; padding: 5px; \" >", Station_Name, '</p>',
-             '</div>'
-             
-           )
-  ) %>%
-  mutate(win_url = paste0('../stations/', safe_name, '.html'))
-
-
-
-js_code <- "
-function(el, x, data) {
-
-    var marker = document.getElementsByClassName('my-labels');
-  for(var i=0; i < marker.length; i++){
-    (function(){
-      console.log('hello');
-      var v = data.win_url[i];
-      marker[i].addEventListener('click', function() { window.open(v);}, false);
-  }()); 
-  }
-
-  var map = this;
-  
-  
-// Optional: Re-enable scrolling when mouse enters the map
-map.on('mouseenter', function() {
-    if (!document.getElementById('cr-click').classList.contains('cr-active')) {
-        map.scrollWheelZoom.enable();
-        console.log('a');
-    }
-});
-
-// Optional: Disable scrolling again when mouse leaves the map
-map.on('mouseleave', function() {
-    if (!document.getElementById('cr-click').classList.contains('cr-active')) {
-        map.scrollWheelZoom.disable();
-        console.log('b');
-    }
-});
-  
-  function updateMapScrolling() {
-     var crClickDiv = document.getElementById('cr-click');
-    var mapContainer = map.getContainer();
-    
-    if (crClickDiv.classList.contains('cr-active')) {
-        // Enable map interaction
-        map.scrollWheelZoom.enable();
-        map.dragging.enable();
-        map.touchZoom.enable();
-        map.doubleClickZoom.enable();
-        map.boxZoom.enable();
-        map.keyboard.enable();
-        if (map.tap) map.tap.enable();
-        mapContainer.style.pointerEvents = 'auto';
-    } else {
-        // Disable all map interaction
-        map.scrollWheelZoom.disable();
-        map.dragging.disable();
-        map.touchZoom.disable();
-        map.doubleClickZoom.disable();
-        map.boxZoom.disable();
-        map.keyboard.disable();
-        if (map.tap) map.tap.disable();
-        mapContainer.style.pointerEvents = 'none';
-    }
-  }
-  
-
-  function updateLabelVisibility() {
-   
-    var currentZoom = map.getZoom();
-   
-    var showLabelsZoomLevel = 13;
-
-    var labels = document.getElementsByClassName('my-labels');
-   
-    for (var i = 0; i < labels.length; i++) {
-      if (currentZoom >= showLabelsZoomLevel) {
-        labels[i].style.display = 'block';
-      } else {
-        labels[i].style.display = 'none';
-      }
-    }
-  }
-  
-  // Initial setup
-updateMapScrolling();
-
-// Add event listener to check for class changes
-var observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            updateMapScrolling();
-            console.log('cr click updated status');
-        }
-    });
-});
-
-var crClickDiv = document.getElementById('cr-click');
-observer.observe(crClickDiv, { attributes: true });
-
-  // Ensure the map is fully loaded before adding the event listener
-  map.whenReady(function() {
-  
-  
- 
-    map.on('zoomend', function() {
-  
-      updateLabelVisibility();
-    });
-    
-    // Initial call to set correct visibility
-    updateLabelVisibility();
-  });
-}
-
-
-
-
-
-
-"
-
-m <- leaflet(width = '100%', height = '100vh') %>%
-  leaflet::setView(lng = 144.9668, lat = -37.8181, zoom = 12) %>%
-  addPolylines(data = lines_dissolved, color = ~colour, opacity = 1) %>%
-  addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.5)) %>%
-  addCircleMarkers(lng = locations$lng, lat=locations$lat, radius = 5, color = 'black', fillColor = 'black', fillOpacity = 1, opacity = 0.7) %>%
-  addLabelOnlyMarkers(lng = locations$lng,
-                      lat = locations$lat,
-                      label = lapply(locations$message, htmltools::HTML),
-                      labelOptions = labelOptions(noHide = T, clickable = T,  className = 'my-labels', direction = 'auto', textOnly = T, textsize = '10pt',
-                                                  style = list(
-                                                    'font-weight' = '800',
-                                                    'text-decoration' = 'underline',
-                                                    'text-decoration-color' = 'white',
-                                                    'margin' = '5px',
-                                                    'letter-spacing' = '0.5px'
-                                                  ))) %>%
-  htmlwidgets::onRender(js_code, data = locations) 
-
-m
-
-```
-:::
 :::

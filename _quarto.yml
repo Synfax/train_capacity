@@ -2,14 +2,11 @@ project:
   type: website
   render:
     - quarto/index.qmd
-    - quarto/report.qmd
-    - quarto/run_for_station.qmd
-    - quarto.test.qmd
   output-dir: ../rankings_website/
   
 website: 
   navbar:
-    title: 'Train Station Upzoning Priorities - YIMBY Melbourne'
+    title: 'The Next 25 - YIMBY Melbourne'
     pinned: true
     search: false
     

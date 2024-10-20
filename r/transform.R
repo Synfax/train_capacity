@@ -1,5 +1,3 @@
-
-
 # transform_scores <- function(station_rankings) {
 #   
 #   bad_columns = c('heritage_pc', 'average_peak_service_cap', 'distance')
@@ -48,9 +46,15 @@ filter_stations <- function(dataframe, name_var = 'station') {
     return()
 }
 
-remove_null_weighted_rows <- function(dataframe, row_col_name = "metric") {
+remove_existing_stations <- function(dataframe, name_var = 'station') {
+  dataframe %>%
+    filter( !(get(name_var) %in% c(existing_upzoned_stations, other_existing_precincts)) ) %>%
+    return()
+}
+
+remove_null_weighted_rows <- function(dataframe, row_col_name = "metric", w_ = weights) {
   
-  null_weights <- weights[weights == 0] %>%
+  null_weights <- w_[w_ == 0] %>%
     names()
   
   dataframe %>%
@@ -58,9 +62,9 @@ remove_null_weighted_rows <- function(dataframe, row_col_name = "metric") {
     return()
 }
 
-remove_null_weighted_cols <- function(dataframe) {
+remove_null_weighted_cols <- function(dataframe, w_ = weights) {
   
-  null_weights <- weights[weights == 0] %>%
+  null_weights <- w_[w_ == 0] %>%
     names()
   
   dataframe %>%
@@ -68,9 +72,9 @@ remove_null_weighted_cols <- function(dataframe) {
     return()
 }
 
-remove_null_weighted_translations <- function(ts, inv = T) {
+remove_null_weighted_translations <- function(ts, inv = T, w_ = weights) {
   
-  null_weights <- weights[weights == 0] %>%
+  null_weights <- w_[w_ == 0] %>%
     names()
   
   if(inv) {
@@ -91,6 +95,7 @@ transform_scores_xminxmax <- function(station_rankings, weights_ = weights, prin
   xminmaxtransform = station_rankings %>%
     mutate( across(-station, ~ as.numeric(.) )) %>%
     filter_stations(.) %>%
+    remove_existing_stations() %>%
     mutate( across(-station, .fns = function(x) { ( x - min(x, na.rm= T)) / ( max(x, na.rm= T) - min(x, na.rm= T)  ) } )) %>%
     mutate(across(any_of(columns_to_negate), .fns = function(x) {1-x} )) %>%
     mutate(across(-station, .fns = function(x) { x*(weights_[cur_column()] %>% as.vector())  }  )) %>%
@@ -214,9 +219,6 @@ make_map <- function() {
   #       'symbol-sort-key' = c('get', 'rank')
   #     ),
   #     paint = list( 'text-color' = "#000" ))
-    
+  
   
 }
-
-
-

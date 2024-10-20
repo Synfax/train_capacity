@@ -1,14 +1,12 @@
-prepare_index <- function(returnTopTen = F, fromQuarto = F, font_size_q = '16pt', w = 2560, h = 1440) {
+prepare_index <- function(returnTopTen = F, topN = 25, fromQuarto = F, font_size_q = '16pt', w = 2560, h = 1440, fillC = "black") {
   
   prefix_dir <- ifelse(fromQuarto, '../', '')
   
   locations = readRDS(paste0(prefix_dir,'r_objects/locations.Rdata'))
   
-  
-  
   data_to_map <- readRDS(paste0(prefix_dir,'r_objects/transformed_scores.Rdata')) %>%
     as.data.frame() %>%
-    slice_head(n = 10) %>%
+    slice_head(n = topN) %>%
     arrange(desc(score)) %>%
     mutate(rank = row_number(), label = paste0(station, ": ", rank )) %>%
     select(station, score, rank, label) %>%
@@ -61,11 +59,11 @@ prepare_index <- function(returnTopTen = F, fromQuarto = F, font_size_q = '16pt'
   map <- leaflet(width = w , height = h) %>%
     addPolylines(data = lines_dissolved, color = ~colour, opacity = 1) %>%
     addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.5)) %>%
-    addCircleMarkers(lng = data_to_map$lng, lat=data_to_map$lat, radius = 5, color = 'black', fillColor = 'black', fillOpacity = 1, opacity = 0.7) %>%
+    addCircleMarkers(lng = data_to_map$lng, lat=data_to_map$lat, radius = 5, weight = 3.5, color = 'black', fillColor = fillC, fillOpacity = 1, opacity = 0.7, ) %>%
     addLabelOnlyMarkers(lng = data_to_map$lng,
                         lat = data_to_map$lat,
                         label = lapply(data_to_map$message, htmltools::HTML),
-                        labelOptions = labelOptions(noHide = T, direction = 'auto',  textOnly = T, textsize = font_size_q,
+                        labelOptions = labelOptions(noHide = T, className = "top-25-labels", direction = 'auto',  textOnly = T, textsize = font_size_q,
                                                     style = list(
                                                       'font-weight' = '800',
                                                       'text-decoration' = 'underline',
@@ -81,7 +79,6 @@ prepare_index <- function(returnTopTen = F, fromQuarto = F, font_size_q = '16pt'
   
   mapshot(map, file = 'quarto/index_images/main.png')
   
-  
   writeStationMaps <- function(rank, zm = 17) {
     
     station_map = map %>%
@@ -90,6 +87,6 @@ prepare_index <- function(returnTopTen = F, fromQuarto = F, font_size_q = '16pt'
     mapshot(station_map, file = paste0('quarto/index_images/',as.numeric(rank),'.png'))
   }   
   
-  walk(1:10, .f = writeStationMaps)
+  walk(1:topN, .f = writeStationMaps)
   
 }
