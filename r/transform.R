@@ -1,3 +1,5 @@
+
+
 # transform_scores <- function(station_rankings) {
 #   
 #   bad_columns = c('heritage_pc', 'average_peak_service_cap', 'distance')
@@ -222,3 +224,6 @@ make_map <- function() {
   
   
 }
+
+
+

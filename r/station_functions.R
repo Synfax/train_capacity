@@ -547,6 +547,8 @@ get_distance_to_flinders <- function(station, fromQuarto = F) {
 
 get_bus_and_tram_stops <- function(station, fromQuarto = F) {
   
+  station = "Brighton Beach"
+  fromQuarto = F
   
   prefix_dir = ifelse(fromQuarto, '../', '')
  
@@ -556,9 +558,9 @@ get_bus_and_tram_stops <- function(station, fromQuarto = F) {
   bus_frequencies = readRDS(paste0(prefix_dir, 'r_objects/bus_stop_frequencies.Rdata')) %>%
     rename(STOP_ID = "stop_id") %>%
     mutate(STOP_ID = as.character(STOP_ID)) %>%
-    select(peak_type, n, STOP_ID) %>%
-    group_by(STOP_ID) %>%
-    summarise(avg_sph = mean(n))
+    select(peak_type, sph, STOP_ID, route_short_name) %>%
+    group_by(STOP_ID, route_short_name) %>%
+    summarise(avg_sph = mean(sph))
   
   tram_frequencies = readRDS(paste0(prefix_dir, 'r_objects/tram_stop_frequencies.Rdata')) %>%
     rename(STOP_ID = "stop_id") %>%
@@ -585,13 +587,14 @@ get_bus_and_tram_stops <- function(station, fromQuarto = F) {
   #   pull(avg_sph) %>%
   #   sum(., na.rm = T)
   
-  bus_stops_near_station = bus_stops %>%
+  bus_stops_near_station <- bus_stops %>%
     filter(near_bus_vector) %>%
-    left_join(bus_frequencies, by = 'STOP_ID') %>%
-    group_by(ROUTEUSSP) %>%
+    mutate(exp = str_split(ROUTEUSSP, ',')) %>%
+    unnest(exp) %>%
+    rename(route_short_name = 'exp') %>%
+    left_join(bus_frequencies, by = c('STOP_ID', 'route_short_name') ) %>%
+    group_by(route_short_name) %>%
     summarise(avg_sph = mean(avg_sph, na.rm=T)) %>%
-    filter(!str_detect(ROUTEUSSP, ',')) %>%
-    st_drop_geometry() %>%
     pull(avg_sph) %>%
     sum(., na.rm = T)
   

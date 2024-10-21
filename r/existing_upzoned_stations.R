@@ -6,6 +6,7 @@ existing_upzoned_stations <- c(
   'Nunawading',
   'Mitcham',
   'Hawthorn',
+  'Gardiner',
   'Glenferrie',
   'Auburn',
   'Tooronga',

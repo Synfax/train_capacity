@@ -4,7 +4,9 @@ bus_trips <- read_csv('data/gtfs/4/google_transit/trips.txt')
 bus_stops <- read_csv('data/gtfs/4/google_transit/stops.txt')
 bus_calendar_dates <- read_csv('data/gtfs/4/google_transit/calendar_dates.txt')
 
-current_date <- as.Date(Sys.Date(), format = "%Y%m%d")
+#current_date <- as.Date(Sys.Date(), format = "%Y%m%d")
+
+current_date <- '2024-09-10'
 
 #find type 2 exemptions in service_id from calendar_dates
 type_2_exemptions = bus_calendar_dates %>%
@@ -39,10 +41,27 @@ bus_nt <- bus_gtfs %>%
   mutate(peak_type = ifelse(hour_of_day %in% peak_morning, 'm', NA),
          peak_type = ifelse(hour_of_day %in% peak_evening, 'e', peak_type)) %>%
   filter(!is.na(peak_type)) %>%
-  group_by(stop_id, peak_type) %>%
+  group_by(stop_id, peak_type, route_short_name) %>%
   summarise(n = n()) %>%
-  left_join(bus_stops, by = 'stop_id') %>%
-  mutate(n = case_when( peak_type == 'e' ~ n / length(peak_evening) , peak_type == 'm' ~ n / length(peak_morning) ) )
+  mutate(sph = case_when( peak_type == 'e' ~ n / length(peak_evening) , peak_type == 'm' ~ n / length(peak_morning) ) )
+
+# ttx <- bus_nt %>% 
+#   rename(Num_Departures = 'n') %>%
+#   mutate(sph = case_when( peak_type == 'e' ~ Num_Departures / length(peak_evening) , peak_type == 'm' ~ Num_Departures / length(peak_morning) ) )
+# 
+# txx <- bus_gtfs %>%
+#   filter(service_id %in% ok_services) %>%
+#   filter(!service_id %in% type_2_exemptions) %>%
+#   rowwise() %>%
+#   mutate(hour_of_day = hour(departure_time) ) %>%
+#   mutate(peak_type = ifelse(hour_of_day %in% peak_morning, 'm', NA),
+#          peak_type = ifelse(hour_of_day %in% peak_evening, 'e', peak_type)) %>%
+#   filter(!is.na(peak_type)) %>%
+#   filter(stop_id == 1406)
+# 
+# txx  %>% filter(peak_type == 'e', route_short_name == 603) %>% v
+
+
 
 saveRDS(bus_nt, 'r_objects/bus_stop_frequencies.Rdata')
 

@@ -1,6 +1,6 @@
 ---
 params: 
-  station: "Footscray"
+  station: "Brighton Beach"
 title: "`r params$station`"
 css:
  - ../quarto/index.css
@@ -16,6 +16,8 @@ format:
     toc-location: left
     toc-expand: true
     toc-depth: 3
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r warning=FALSE,message=FALSE}
@@ -29,8 +31,6 @@ library(knitr)
 library(tidyverse)
 library(sf)
 library(leaflet)
-devtools::install_github("walkerke/mapgl")
-library(mapgl)
 library(htmltools)
 library(htmlwidgets)
 library(reactablefmtr)
@@ -90,7 +90,8 @@ transformed_rankings = readRDS('../r_objects/transformed_scores.Rdata') %>%
   as.data.frame() %>%
   mutate(rank = row_number())
 
-nrow <- nrow(transformed_rankings)  
+nrow <- nrow(transformed_rankings)
+
 rank <- transformed_rankings %>%
     filter(Station_Name == station) %>%
   pull(rank)
@@ -107,15 +108,25 @@ total_score <- sum(transformed_rankings$value)
 
 ```
 
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
 
-`r station` obtained a final score of **`r total_score`**, placing it number `r rank` out of `r nrow`.
+if(!is_empty(rank)) {
+  str <- paste0(station, ' obtained a final score of ', total_score, ' placing it number ', rank, ' out of ', nrow, '.')
+} else {
+  str<- paste(station, 'did not obtain a rank due to either being too far from the CBD, an "Edge Station", already being designated an activity centre.', '\n', 'Regardless, this page still contains information for each of the metrics.')
+}
+
+```
+
+`r str`
 
 The remainder of this page steps through each factor listed below in no particular order.
 
 ::: {.callout-note icon="false"}
 ## Full Methodology
 
-The full methodology for how these scores are calculated and why they are important for consideration in upzoning is [available in the full report](../quarto/report.html).
+The full methodology for how these scores are calculated and why they are important for consideration in upzoning is [available in the full report](../quarto/report_shiny.html).
 :::
 :::{.graph}
 ```{r warning=FALSE,message=FALSE}
@@ -360,7 +371,7 @@ Suitable properties are either neighbourhood residential or general residential 
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-
+#| fig-height: 6
 
 
 # grz_nrz = near_properties %>%
@@ -467,7 +478,7 @@ The map below shows tram routes and tram stops in green, as well as bus routes a
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-
+#| fig-height: 6
  
 bus_stops = read_sf('../shapefiles/ptv/PTV_METRO_BUS_STOP.shp')
 tram_stops = read_sf('../shapefiles/ptv/PTV_METRO_TRAM_STOP.shp')
@@ -477,8 +488,8 @@ bus_routes = read_sf('../shapefiles/Order_JRGGG7/ll_gda2020/esrishape/whole_of_d
 bus_frequencies = readRDS(paste0('../r_objects/bus_stop_frequencies.Rdata')) %>%
     rename(STOP_ID = "stop_id") %>%
     mutate(STOP_ID = as.character(STOP_ID)) %>%
-    select(peak_type, n, STOP_ID) %>%
-    group_by(STOP_ID) %>%
+    select(peak_type, n, STOP_ID, route_short_name) %>%
+    group_by(STOP_ID, route_short_name) %>%
     summarise(avg_sph = mean(n))
   
 tram_frequencies = readRDS(paste0('../r_objects/tram_stop_frequencies.Rdata')) %>%
@@ -502,8 +513,16 @@ near_bus_vector <- st_within(bus_stops, buffer, sparse = F)
 bus_stops_near_station = bus_stops %>%
     filter(near_bus_vector) 
 
+unique_bus_routes <- bus_stops_near_station %>%
+    select(ROUTEUSSP) %>%
+    mutate(expanded = str_split(ROUTEUSSP, ',')) %>%
+    unnest(expanded) %>%
+    select(expanded) %>%
+    distinct() %>%
+    pull(expanded)
+
 bus_routes_near_station = bus_routes %>%
-  filter(ROUTESHTNM %in% bus_stops_near_station$ROUTEUSSP) %>%
+  filter(ROUTESHTNM %in% unique_bus_routes) %>%
   st_intersection(buffer)
   
 near_tram_vector <- st_within(tram_stops, buffer, sparse = F)
@@ -511,17 +530,22 @@ near_tram_vector <- st_within(tram_stops, buffer, sparse = F)
 tram_stops_near_station = tram_stops %>%
     filter(near_tram_vector) 
 
+unique_tram_routes <- tram_stops_near_station %>%
+    st_drop_geometry() %>%
+    select(ROUTEUSSP) %>%
+    mutate(expanded = str_split(ROUTEUSSP, ',')) %>%
+    unnest(expanded) %>%
+    select(expanded) %>%
+    distinct() %>%
+    pull(expanded)
+
 tram_routes_near_station = tram_routes %>%
-  filter(ROUTESHTNM %in% tram_stops_near_station$ROUTEUSSP) %>%
+  filter(ROUTESHTNM %in% unique_tram_routes) %>%
   st_intersection(buffer)
 
-tram_route_list <- tram_routes_near_station %>%
-  st_drop_geometry() %>%
-  pull(ROUTESHTNM) %>% unique()
+tram_route_list <- unique_tram_routes
 
-bus_route_list <- bus_routes_near_station %>%
-  st_drop_geometry() %>%
-  pull(ROUTESHTNM) %>% unique()
+bus_route_list <- unique_bus_routes
 
 leaflet() %>%
   fitBounds(bounds[1], bounds[2], bounds[3], bounds[4]) %>%
@@ -538,10 +562,12 @@ leaflet() %>%
   addPolygons(data = buffer, color = 'black', fillColor = 'grey', fillOpacity = 0.3, options = pathOptions(pane = 'polygons'))
 
 bus_f_df <- bus_stops_near_station %>%
+  mutate(exp = str_split(ROUTEUSSP, ',')) %>%
+  unnest(exp) %>%
+  select(-ROUTEUSSP) %>%
    left_join(bus_frequencies, by = 'STOP_ID') %>%
-    group_by(ROUTEUSSP) %>%
-    summarise(avg_sph = mean(avg_sph, na.rm=T)) %>%
-    filter(!str_detect(ROUTEUSSP, ',')) %>%
+    group_by(exp) %>%
+    summarise(avg_sph = mean(avg_sph, na.rm=T))
     st_drop_geometry() %>%
   mutate(mode = 'bus')
 
@@ -674,7 +700,7 @@ Some amenities are within the same building, e.g. multiple shops in shopping cen
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-
+#| fig-height: 6
 
   walkability_df <- readRDS('../r_objects/station_walkability.Rdata')
 
@@ -769,7 +795,7 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
 
 \
 
-Calculation of the final score for local services uses an index measure. It is described in more detail [in the full report](../quarto/report.html)..
+Calculation of the final score for local services uses an index measure. It is described in more detail [in the full report](../quarto/report_shiny.html)..
 
 <!-- ## Zoned Capacity -->
 
