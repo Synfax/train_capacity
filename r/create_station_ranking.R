@@ -12,9 +12,8 @@ if(!dir.exists('station_walkability_info')) {
 
 #or
 
-walk(stations, .f = function(x) { map_amenities( get_near_osm(x, fromQuarto = F), x, fromQuarto = F) })
+#walk(stations, .f = function(x) { map_amenities( get_near_osm(x, fromQuarto = F), x, fromQuarto = F) })
 
-map_amenities(get_near_osm('Hawthorn', fromQuarto = F), 'Hawthorn', fromQuarto = F)
 
 #set globals
 

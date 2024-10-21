@@ -23,8 +23,24 @@ tram_weight = 2
 
 #palettes
 
+
+yimby_colours <- list(
+  hero = "#10461B",
+  body = "#000000",
+  background  = "#FDFFEE",
+  green_base  = "#10461B",
+  blue_base   = "#283696",
+  red_base    = "#BA1B21",
+  yellow_base = "#F6AE00",
+  green_palette  = c("#10461B", "#2C6F3A", "#579A64", "#8FC49A", "#D6EFDB"),
+  blue_palette   = c("#1A235F", "#283696", "#9EA7E2", "#D0D6FF", "#E8ECFF"),
+  red_palette    = c("#D92127", "#BA1B21", "#8E3437", "#C6A2A3", "#E3BABB"),
+  yellow_palette = c("#F6AE00", "#DE9B00", "#C79E3E", "#F2DCA5", "#FFF7E3")
+)
+
+
 create_green_palette <- function(n) {
-  colorRampPalette(c("#E8F5E9", "#1B5E20"))(n)
+  colorRampPalette(c("#579A64", "#10461B"))(n)
 }
 
 #variables where a higher value is worse

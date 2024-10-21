@@ -63,7 +63,6 @@ original_values <- readRDS('../r_objects/station_rankings.Rdata')
 transformed_scores <- readRDS('../r_objects/transformed_scores.Rdata') %>%
   remove_null_weighted_cols() %>%
   as.data.frame() %>%
-  slice_head(n = 25) %>%
   mutate(across(where(is.numeric), .fns = function(x) round(x, 2) )) %>%
   mutate(rank = row_number()) 
 
@@ -419,6 +418,33 @@ m
 ```
 
 :::
+
+## something to show how close the score are
+
+``` {r}
+
+
+total_stations <- nrow(transformed_scores)
+tick_positions <- seq(25, total_stations, by = 25)
+
+p <- ggplot() +
+  annotate("rect", xmin = 0, xmax = 25, ymin = -0.5, ymax = max(transformed_scores$score) + 0.5,
+              fill = "#8FC49A",  alpha = 0.34) +
+  geom_vline(xintercept = 25, linetype = "dashed") + 
+  geom_point(data = transformed_scores, mapping = aes(y = score, x = rank), fill = "#283696", size = 0.9  ) +
+  xlab("Station Rank") +
+  ylab("Scores ordered descending") +
+  scale_x_continuous(
+    breaks = tick_positions,
+    labels = tick_positions,
+    expand = c(0.01, 0)
+  ) +
+  theme_report() +
+  coord_cartesian(ylim = c(0, max(transformed_scores$score)))
+
+ggplotly(p)
+
+```
 
 ### Searchable Table
 

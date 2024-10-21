@@ -33,13 +33,22 @@ nt <- gtfs %>%
   mutate(peak_type = ifelse(hour_of_day %in% peak_morning, 'm', NA),
          peak_type = ifelse(hour_of_day %in% peak_evening, 'e', peak_type)) %>%
   filter(!is.na(peak_type)) %>%
-  group_by(stop_id, peak_type, route_short_name) %>%
+  group_by(stop_id, peak_type, direction_id, route_short_name) %>%
   summarise(n = n()) %>%
-  mutate(sph = case_when( peak_type == 'e' ~ n / length(peak_evening) , peak_type == 'm' ~ n / length(peak_morning) ) )
+  mutate(sph = case_when( peak_type == 'e' ~ n / length(peak_evening) , peak_type == 'm' ~ n / length(peak_morning) ) ) %>%
+  filter( !(peak_type == 'e' & direction_id == 1) ) %>%
+  filter( !(peak_type == 'm' & direction_id == 0) ) %>%
+  as.data.frame()
 
-nt %>% left_join(tram_stops, by = 'stop_id') %>% filter(route_short_name == 11) %>% v
+# gtfs %>%
+#   filter(service_id %in% ok_services) %>%
+#   filter(route_short_name == 19) %>% 
+#   mutate(stop_direction = paste(stop_id, direction_id)) %>%
+#   group_by(stop_direction) %>% summarise(n = n()) %>%
+#   mutate(stop_id = as.factor(stop_direction)) %>%
+#   ggplot(mapping = aes(y = stop_direction, x = n)) + geom_col() 
 
-#saveRDS(nt, 'r_objects/tram_stop_frequencies.Rdata')  
+saveRDS(nt, 'r_objects/tram_stop_frequencies.Rdata')  
 
 # nt = nt %>%
 #   filter(service_id == temp) %>%
@@ -54,37 +63,37 @@ nt %>% left_join(tram_stops, by = 'stop_id') %>% filter(route_short_name == 11) 
 # 
 
 #~~~~~~~~~~~~~~ SHAPES ~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-tram_shapes <- read_csv('data/gtfs/3/google_transit/shapes.txt')
-
-tram_shapes = tram_shapes %>%
-  filter( str_detect(shape_id, '3-19')) %>%
-  as.data.frame()
-
-shapes_and_lengths <- tram_shapes %>%
-  group_by(shape_id) %>%
-  summarise(max_dist = max(shape_dist_traveled), n_stops = max(shape_pt_sequence)) %>%
-  as.data.frame()
-
-uniques <- tram_shapes %>%
-  pull(shape_id) %>%
-  unique()
-
-walk(uniques, drawShape)
-
-drawShape <- function(shape) {
-  
-  sf <- tram_shapes %>%
-    filter(shape_id == shape) %>%
-    st_as_sf(coords = c('shape_pt_lon', 'shape_pt_lat')) %>%
-    group_by(shape_id) %>%
-    dplyr::summarise(do_union = F) %>%
-    st_cast('LINESTRING')
-  
-  shape_map <- leaflet(sf) %>%
-    addProviderTiles('CartoDB.Positron') %>%
-    addPolylines() %>%
-    addLegend(position = 'topright', values = NA, colors = NA, labels = NA, title = shape)
-    
-  print(shape_map)
-}
+# 
+# tram_shapes <- read_csv('data/gtfs/3/google_transit/shapes.txt')
+# 
+# tram_shapes = tram_shapes %>%
+#   filter( str_detect(shape_id, '3-19')) %>%
+#   as.data.frame()
+# 
+# shapes_and_lengths <- tram_shapes %>%
+#   group_by(shape_id) %>%
+#   summarise(max_dist = max(shape_dist_traveled), n_stops = max(shape_pt_sequence)) %>%
+#   as.data.frame()
+# 
+# uniques <- tram_shapes %>%
+#   pull(shape_id) %>%
+#   unique()
+# 
+# walk(uniques, drawShape)
+# 
+# drawShape <- function(shape) {
+#   
+#   sf <- tram_shapes %>%
+#     filter(shape_id == shape) %>%
+#     st_as_sf(coords = c('shape_pt_lon', 'shape_pt_lat')) %>%
+#     group_by(shape_id) %>%
+#     dplyr::summarise(do_union = F) %>%
+#     st_cast('LINESTRING')
+#   
+#   shape_map <- leaflet(sf) %>%
+#     addProviderTiles('CartoDB.Positron') %>%
+#     addPolylines() %>%
+#     addLegend(position = 'topright', values = NA, colors = NA, labels = NA, title = shape)
+#     
+#   print(shape_map)
+# }

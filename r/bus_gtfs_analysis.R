@@ -41,9 +41,12 @@ bus_nt <- bus_gtfs %>%
   mutate(peak_type = ifelse(hour_of_day %in% peak_morning, 'm', NA),
          peak_type = ifelse(hour_of_day %in% peak_evening, 'e', peak_type)) %>%
   filter(!is.na(peak_type)) %>%
-  group_by(stop_id, peak_type, route_short_name) %>%
+  group_by(stop_id, peak_type, route_short_name, direction_id) %>%
   summarise(n = n()) %>%
-  mutate(sph = case_when( peak_type == 'e' ~ n / length(peak_evening) , peak_type == 'm' ~ n / length(peak_morning) ) )
+  mutate(sph = case_when( peak_type == 'e' ~ n / length(peak_evening) , peak_type == 'm' ~ n / length(peak_morning) ) ) %>%
+  filter( !(peak_type == 'e' & direction_id == 1) ) %>%
+  filter( !(peak_type == 'm' & direction_id == 0) ) %>%
+  as.data.frame()
 
 # ttx <- bus_nt %>% 
 #   rename(Num_Departures = 'n') %>%
@@ -66,12 +69,12 @@ bus_nt <- bus_gtfs %>%
 saveRDS(bus_nt, 'r_objects/bus_stop_frequencies.Rdata')
 
 #test to make sure it aligns with the timetable
-ntt = bus_gtfs %>%
-    filter(route_short_name == '508') %>%
-    filter(service_id %in% ok_services) %>%
-    group_by(trip_id, shape_id, service_id) %>%
-    summarise(fir = first(arrival_time), headsign = first(trip_headsign)) %>%
-    arrange(fir) %>%
-    filter(headsign == 'Alphington') %>%
-    filter(!(service_id %in% type_2_exemptions)) %>%
-    as.data.frame()
+# ntt = bus_gtfs %>%
+#     filter(route_short_name == '508') %>%
+#     filter(service_id %in% ok_services) %>%
+#     group_by(trip_id, shape_id, service_id) %>%
+#     summarise(fir = first(arrival_time), headsign = first(trip_headsign)) %>%
+#     arrange(fir) %>%
+#     filter(headsign == 'Alphington') %>%
+#     filter(!(service_id %in% type_2_exemptions)) %>%
+#     as.data.frame()

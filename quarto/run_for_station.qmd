@@ -1,6 +1,6 @@
 ---
 params: 
-  station: "Brighton Beach"
+  station: "Jolimont"
 title: "`r params$station`"
 css:
  - ../quarto/index.css
@@ -479,27 +479,29 @@ The map below shows tram routes and tram stops in green, as well as bus routes a
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 #| fig-height: 6
+
+prefix_dir = "../"
  
-bus_stops = read_sf('../shapefiles/ptv/PTV_METRO_BUS_STOP.shp')
-tram_stops = read_sf('../shapefiles/ptv/PTV_METRO_TRAM_STOP.shp')
-tram_routes = read_sf('../shapefiles/Order_JRGGG7/ll_gda2020/esrishape/whole_of_dataset/victoria/PTV/PTV_METRO_TRAM_ROUTE.shp')
-bus_routes = read_sf('../shapefiles/Order_JRGGG7/ll_gda2020/esrishape/whole_of_dataset/victoria/PTV/PTV_METRO_BUS_ROUTE.SHP')
+bus_stops = read_sf(paste0(prefix_dir, 'shapefiles/ptv/PTV_METRO_BUS_STOP.shp'))
+tram_stops = read_sf(paste0(prefix_dir, 'shapefiles/ptv/PTV_METRO_TRAM_STOP.shp'))
+tram_routes = read_sf(paste0(prefix_dir, 'shapefiles/Order_JRGGG7/ll_gda2020/esrishape/whole_of_dataset/victoria/PTV/PTV_METRO_TRAM_ROUTE.shp'))
+bus_routes = read_sf(paste0(prefix_dir, 'shapefiles/Order_JRGGG7/ll_gda2020/esrishape/whole_of_dataset/victoria/PTV/PTV_METRO_BUS_ROUTE.SHP'))
 
-bus_frequencies = readRDS(paste0('../r_objects/bus_stop_frequencies.Rdata')) %>%
+bus_frequencies = readRDS(paste0(prefix_dir, 'r_objects/bus_stop_frequencies.Rdata')) %>%
     rename(STOP_ID = "stop_id") %>%
     mutate(STOP_ID = as.character(STOP_ID)) %>%
-    select(peak_type, n, STOP_ID, route_short_name) %>%
+    select(peak_type, sph, STOP_ID, route_short_name) %>%
     group_by(STOP_ID, route_short_name) %>%
-    summarise(avg_sph = mean(n))
+    summarise(avg_sph = mean(sph))
   
-tram_frequencies = readRDS(paste0('../r_objects/tram_stop_frequencies.Rdata')) %>%
+  tram_frequencies = readRDS(paste0(prefix_dir, 'r_objects/tram_stop_frequencies.Rdata')) %>%
     rename(STOP_ID = "stop_id") %>%
     mutate(STOP_ID = as.character(STOP_ID)) %>%
-    select(peak_type, n, STOP_ID) %>%
-    group_by(STOP_ID) %>%
-    summarise(avg_sph = mean(n))
+    select(peak_type, sph, STOP_ID, route_short_name) %>%
+    group_by(STOP_ID, route_short_name) %>%
+    summarise(avg_sph = mean(sph))
 
-locations = readRDS(paste0('../r_objects/locations.Rdata'))
+locations = readRDS(paste0(prefix_dir, 'r_objects/locations.Rdata'))
   
 station_location = locations %>%
     filter(Station_Name == station) %>%
@@ -518,7 +520,7 @@ unique_bus_routes <- bus_stops_near_station %>%
     mutate(expanded = str_split(ROUTEUSSP, ',')) %>%
     unnest(expanded) %>%
     select(expanded) %>%
-    distinct() %>%
+    distinct(expanded) %>%
     pull(expanded)
 
 bus_routes_near_station = bus_routes %>%
@@ -536,7 +538,7 @@ unique_tram_routes <- tram_stops_near_station %>%
     mutate(expanded = str_split(ROUTEUSSP, ',')) %>%
     unnest(expanded) %>%
     select(expanded) %>%
-    distinct() %>%
+    distinct(expanded) %>%
     pull(expanded)
 
 tram_routes_near_station = tram_routes %>%
@@ -562,21 +564,24 @@ leaflet() %>%
   addPolygons(data = buffer, color = 'black', fillColor = 'grey', fillOpacity = 0.3, options = pathOptions(pane = 'polygons'))
 
 bus_f_df <- bus_stops_near_station %>%
+  st_drop_geometry() %>%
   mutate(exp = str_split(ROUTEUSSP, ',')) %>%
-  unnest(exp) %>%
-  select(-ROUTEUSSP) %>%
-   left_join(bus_frequencies, by = 'STOP_ID') %>%
-    group_by(exp) %>%
-    summarise(avg_sph = mean(avg_sph, na.rm=T))
-    st_drop_geometry() %>%
+    unnest(exp) %>%
+    rename(route_short_name = 'exp') %>%
+    left_join(bus_frequencies, by = c('STOP_ID', 'route_short_name') ) %>%
+    group_by(route_short_name) %>%
+    summarise(avg_sph = mean(avg_sph, na.rm=T)) %>%
   mutate(mode = 'bus')
 
 tram_f_df <- tram_stops_near_station %>%
-    left_join(tram_frequencies, by = 'STOP_ID')  %>%
-    group_by(ROUTEUSSP) %>%
-    summarise(avg_sph = mean(avg_sph, na.rm=T)) %>%
-    filter(!str_detect(ROUTEUSSP, ',')) %>%
     st_drop_geometry() %>%
+    mutate(exp = str_split(ROUTEUSSP, ',')) %>%
+    unnest(exp) %>%
+    rename(route_short_name = 'exp') %>%
+    mutate(route_short_name = as.double(route_short_name)) %>%
+    left_join(tram_frequencies, by = c('STOP_ID', 'route_short_name'))  %>%
+    group_by(route_short_name) %>%
+    summarise(avg_sph = mean(avg_sph, na.rm=T)) %>%
   mutate(mode = 'tram')
 
 
@@ -592,14 +597,12 @@ tram_f_df <- tram_stops_near_station %>%
 
 \
 
-There are `r tram_stops_near_station %>% nrow()` tram stops in a 1km radius, with route(s) `r tram_route_list` servicing the area.
+There are `r tram_stops_near_station %>% nrow()` tram stops in a 1km radius, with route(s) `r unique_tram_routes` servicing the area.
 
-For buses, there are `r bus_stops_near_station %>% nrow()`, with route(s) `r bus_route_list`.
+For buses, there are `r bus_stops_near_station %>% nrow()`, with route(s) `r unique_bus_routes`.
 
-The data below shows the frequencies per route in both table and bar chart form.
+The data below shows the frequencies per route, split by mode.
 
-::: panel-tabset
-## Data
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -615,40 +618,50 @@ total_score <- merged_f_df %>%
   pull(weighted) %>%
   sum(na.rm=T)
 
-frequency_chart <- merged_f_df %>%
-  mutate(mode = stringr::str_to_title(mode) ) %>%
+ mode_colors <- setNames(c("#FF8200", "#78BE20"), c('Bus','Tram'))
+
+merged_f_df %>%
+  mutate(mode = stringr::str_to_title(mode)) %>%
   mutate(avg_sph = round(avg_sph, 2)) %>%
-  reactable(
+  mutate(color_pal = case_when(
+    mode == "Bus" ~ "#FF8200",
+    mode == "Tram" ~ "#78BE20",
+    TRUE ~ "darkgrey"
+  )) %>%
+  relocate(mode, .after = route_short_name) %>%
+ reactable(
             defaultSorted = 'avg_sph',
             defaultSortOrder = 'desc',
             columns =
-              list(ROUTEUSSP = colDef(name = "Route"),
-                   avg_sph = colDef(name = "Service Frequency"),
-                   mode = colDef(name = "Mode")))
+              list(route_short_name = colDef(name = "Route", maxWidth = 110),
+                    mode = colDef(name = "Mode", maxWidth = 110),
+                   avg_sph = colDef(name = "Services Per Hour",
+                                      cell = data_bars(., bold_text = T, fill_color_ref = "color_pal", text_position = "above", bar_height = 25)), color_pal = colDef(show = F)))
 
-frequency_chart
+
+
+
 ```
 
-## Chart
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
 
 
 
-mode_colors <- setNames(c("#FF8200", "#78BE20"), c('bus','tram'))
-
-
-
-col_chart <- ggplot(merged_f_df, mapping = aes(x = reorder(ROUTEUSSP, avg_sph), y = avg_sph, fill = mode), ) + geom_col(width = 0.7 ) +
-  scale_fill_manual(values = mode_colors) +
-  ylab('Services Per Hour') +
-  theme_report() +
-  xlab('Route Number') +
-   coord_flip()
-
-
-freq_bar_chart <- ggplotly(col_chart, height = 350)
+# mode_colors <- setNames(c("#FF8200", "#78BE20"), c('bus','tram'))
+# 
+# 
+# 
+# col_chart <- ggplot(merged_f_df, mapping = aes(x = reorder(route_short_name, avg_sph), y = avg_sph, fill = mode), ) + geom_col(width = 0.7 ) +
+#   scale_fill_manual(values = mode_colors) +
+#   ylab('Services Per Hour') +
+#   theme_report() +
+#   xlab('Route Number') +
+#    coord_flip()
+# 
+# 
+# freq_bar_chart <- ggplotly(col_chart, height = 350)
 # 
 # # ggplot(tram_f_df, mapping = aes(x = sph, y = mode, fill = mode)) +
 # #   geom_density_ridges(alpha = 0.5,bins = 15, stat = 'binline') +
@@ -668,10 +681,10 @@ freq_bar_chart <- ggplotly(col_chart, height = 350)
 #   theme_bw() +
 #   theme(legend.position = 'none') + xlab('Services Per Hour') + ylab('Transport Mode')
 
-freq_bar_chart
+# freq_bar_chart
 
 ```
-:::
+
 
 ```{r}
 #| column: page
@@ -795,7 +808,7 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
 
 \
 
-Calculation of the final score for local services uses an index measure. It is described in more detail [in the full report](../quarto/report_shiny.html)..
+Calculation of the final score for local services uses an index measure. It is described in more detail [in the full report](../quarto/report_shiny.html).
 
 <!-- ## Zoned Capacity -->
 
