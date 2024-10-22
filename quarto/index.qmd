@@ -1,6 +1,11 @@
 ---
 format:
   closeread-html:
+    code-fold: false
+    toc: true
+    toc-location: left
+    toc-expand: true
+    toc-depth: 4
     grid: 
       body-width: 900px
     theme: zephr
@@ -48,6 +53,7 @@ source('../r/theme.r')
 source('../r/graphs.r')
 source('../r/prepare_index_page.r')
 source('../r/transform.r')
+source('../r/existing_upzoned_stations.r')
 
 transformed_scores <- readRDS('../r_objects/transformed_scores.Rdata')
 original_values <- readRDS('../r_objects/station_rankings.Rdata')
@@ -130,18 +136,16 @@ printScores <- function(r) {
 
 ```
 
-# The Next 25
+# The Next 25: Executive Summary
 
 ::: column-body
+As part of Plan for Victoria, the Government has elected to upzone dozens of train stations as part of the Activity Centres Program. This is a sound policy. Melbourne has bountiful infrastructure and the ability to accommodate many more Melburnians in the places where they want to live. We have outlined the impetus for transit-oriented planning reform in our previous reports including [Melbourne's Missing Middle](https://www.yimby.melbourne/missing-middle) and [Missing Middle Housing Targets](https://targets.yimby.melbourne/).
 
-As part of Plan for Victoria, the Government has elected to upzone an additional 50 stations as part of the Activity Centres Program. They have announced and named the first 25, in addition to the 7 included in the initial pilot of the Program.
+::: {.column-margin}
+Sidenote: A total of 60 Activity Centres have been announced. Of the initial 10, seven are focused around train stations. Of the 25 announced in October 2024, one tram stop (Toorak Village) was included. The total number of train stations confirmed for upzoning to date, therefore, is 31. Should the yet-to-be-announced Activity Centres all be train stations, as this report assumes, that would bring the total up to 56.
+:::
 
-
-This is a sound policy. Melbourne has bountiful infrastructure and the ability to accommodate many more Melburnians in the places where they want to live. We have outlined the impetus for transit-oriented planning reform in our previous reports including Melbourne's Missing Middle and Missing Middle Housing Targets. 
-
-
-Here, we build upon previous work to answer a simple question: which additional 25 stations should be prioritised for inclusion in the Program? 
-
+Here, we build upon previous work to answer a simple question: across Melbourne's transport network, which additional 25 train stations should be prioritised for inclusion in the Activity Centre Program?
 
 *See the full report [here](report.html "Full Report").*
 
@@ -152,11 +156,17 @@ Here, we build upon previous work to answer a simple question: which additional 
 <!-- For each train station, metrics are calculated on: -->
 
 <!-- -   Zoning suitability (% land area) -->
-<!-- -   Potential number of new homes (# homes) --> 
+
+<!-- -   Potential number of new homes (# homes) -->
+
 <!-- -   Train service frequency in peak (trains per hour) -->
+
 <!-- -   Spare train line capacity in peak (# passengers) -->
+
 <!-- -   Local amenities nearby (composite index) -->
+
 <!-- -   Proximity to CBD (metres) -->
+
 <!-- -   Bus and tram frequencies (services per hour) -->
 
 <!-- Each metric calculated uses different units of measurement, and need to be transformed into comparable units so that a single score can be generated for each train station. -->
@@ -166,6 +176,7 @@ Here, we build upon previous work to answer a simple question: which additional 
 <!-- These 'transformed' scores are summed together to produce a final score for each station. -->
 
 <!-- ::: callout-note -->
+
 <!-- There are some restrictions placed on final rankings: -->
 
 <!-- -   City loop stations are excluded as they can't be upzoned further. -->
@@ -177,7 +188,6 @@ Here, we build upon previous work to answer a simple question: which additional 
 
 <!-- The full methodology is contained in the full report. -->
 
-
 <!-- \ -->
 
 <!-- **`r transformed_scores %>% filter(rank == 1) %>% pull(station)`** was the best station out of those considered in this project. -->
@@ -187,9 +197,9 @@ Here, we build upon previous work to answer a simple question: which additional 
 <!-- A chart below shows the scores of the 10 highest ranked stations, with an interactive map underneath to show the spatial distribution. -->
 
 ::: column-body
-
 ## Map
-::: {.interactive-map}
+
+::: interactive-map
 ```{r}
 
 
@@ -265,29 +275,47 @@ temp_graph <- readRDS('../r_objects/transformed_scores.Rdata') %>%
 
 ```
 
-## Brief Methodology
+Of the `r nrow(transformed_scores)` Melbourne stations within 25 kilometres of the CBD and not yet included within the Activity Centre Program, these 25 are the most suitable for upzoning.
 
-Of all Melbourne's stations, these 25 are the most viable for upzoning. 
+Each station in the network has been given a score based on a set of parameters. The higher a station's score, the greater reason there is to upzone around it. Scores range between `r transformed_scores$score[1]` for `r transformed_scores$station[1]` and `r transformed_scores$score[nrow(transformed_scores)]` for `r transformed_scores$station[nrow(transformed_scores)]`.
 
-For each of Melbourne's train station, metrics are calculated on:
+For each station, and all land within one kilometre of that station, we measure:
 
- - The proportion of residential land zoned NRZ and GRZ, excluding heritage overlays
-  - The number of trains per hour during peak travel times
-  - The amount of spare train capacity during peak travel times
-  - The diversity of nearby local amenities such as parks and schools
-  - The distance from the CBD (stations beyond 25km are excluded)
-  - The frequency of nearby bus and tram services
-  
-  
-A comprehensive explanation of the report's methodology is available [here].
+-   The number of trains per hour during peak travel times
+-   The amount of spare train capacity during peak travel times
+-   The frequency of nearby bus and tram services
+-   The proportion of residential land with low-density zoning, excluding heritage overlays
+-   The prevalence and diversity of local amenities such as parks and schools
+-   The station's distance from the CBD
 
+A comprehensive explanation of the report's methodology is available [here](report_shiny.html).
 
+<!-- Note: our rankings exclude SRL Precincts and stations located within the CBD such as List -->
 
-## Distribution by LGA
+::: {.callout-caution collapse="true"}
+## Excluded Stations and SRL Precincts
 
-The best stations for upzoning are not equally distributed across Melbourne.
+We also exclude SRL precincts and stations in the CBD.
 
-Hover over the bar chart below for an interactive effect.
+These are: `r c(other_existing_precincts, city_loop_stations) `
+
+:::
+
+### Melbourne's three outlier 'Edge Stations'
+
+Three outlier stations---North Melbourne, Richmond, and South Yarra---are excluded from our main rankings. These Edge Stations are outliers due to their extremely high rail service frequency, which dwarfs the rest of the dataset.
+
+As such, we consider these three stations separately. By nature of their serviceability and location, these three inner-city stations are ripe for upzoning.
+
+If the Government is only going to upzone 50 more stations in total---though we see no reason to stop at 50---we suggest prioritising the Edge Stations and then 22 of the 25 listed above. A full ranking of Melbourne's entire rail network is provided later on this page for reference.
+
+## Results by LGA
+
+The stations best-suited for upzoning are not equally distributed across Melbourne's local councils. This makes sense: land and infrastructure is also not equally distributed across councils. The model in this report reflects Melbourne as it is: a dynamic, vibrant city, in which some geographic areas are more suitable for upzoning than others.
+
+Valuable inner-city land close to services, jobs, and amenities will always score higher when measuring the city as a whole rather than within the arbitrary segments of local government areas. For more on the importance of measuring the entirety of Melbourne, you can read our submission to the Inquiry into Local Government funding and services, and the Abundant Housing Network Australia's submission to the National Urban Policy.
+
+Below, we chart the distribution of our 25 additional stations suitable for upzoning.
 :::
 
 ::: column-body
@@ -298,16 +326,66 @@ top_stations_by_lga()
 ```
 :::
 
-### Searchable Map
+Next, we take into account the current confirmed stations---those included in the Activity Centre Program pilot and the announced 25---alongside the top 25 additional stations returned by our model.
 
-\
+::: column-body
+```{r}
+
+top_stations_by_lga() 
+
+```
+:::
+
+The 56 train stations selected for upzoning represent areas with strong housing targets as calculated through econometric modelling within our Housing Targets report, released earlier this year.
+
+\[housing targets picture\]
+
+What these models together make clear is that the 56 selected stations are not just in areas suitable for people to live---they are in areas where people want to live. We know this because apartments in many of these areas trade at a premium---indicating a shortfall of supply relative to demand.
+
+## Results by train line
+
+## Upzoning into Melbourne's vibrant future
+
+```{r}
+
+
+total_stations <- nrow(transformed_scores)
+tick_positions <- seq(25, total_stations, by = 25)
+
+p <- ggplot() +
+  annotate("rect", xmin = 0, xmax = 25, ymin = -0.5, ymax = max(transformed_scores$score) + 0.5,
+              fill = "#8FC49A",  alpha = 0.34) +
+  geom_vline(xintercept = 25, linetype = "dashed") + 
+  geom_point(data = transformed_scores, mapping = aes(y = score, x = rank), fill = "#283696", size = 0.9  ) +
+  xlab("Station Rank") +
+  ylab("Scores ordered descending") +
+  scale_x_continuous(
+    breaks = tick_positions,
+    labels = tick_positions,
+    expand = c(0.01, 0)
+  ) +
+  theme_report() +
+  coord_cartesian(ylim = c(0, max(transformed_scores$score)))
+
+ggplotly(p)
+
+```
+
+A final point we wish to highlight in this report is that the 56 stations above are by no means an exhaustive list of upzoning options. Our model indicates no significant difference between the upzoning capacities of stations number 25 and 75. Indeed, there is no reason the Activity Centre Program could not be doubled in scope---from 50 to 100 stations---in the near future.
+
+This report provides the evidence base required for the Government to confidently scale their planning reform policy ambitions as we move our state forward.
+
+The great strength of upzoning is that it is low-cost and future-focused. It enables our city to remain dynamic and open. It lets communities grow and change over time, and it breathes life into our streets and the buildings that line them. It champions small business, vibrancy, and dynamism---it reminds us that our city is not a dusty museum, but a place where people come and choose to live.
+
+You can explore the full network and see how your station scores via the map and table below.
+
+### Searchable Map
 
 Pages for each individual train station have also been produced to detail how each performed in the metrics.
 
 The map below is interactive and clickable. Scroll and find any train station and click the label for further information.
 
-::: {.column-body}
-
+::: column-body
 ```{r}
 
 
@@ -416,41 +494,13 @@ m <- leaflet(width = '100%', height = '600px') %>%
 m
 
 ```
-
 :::
-
-## something to show how close the score are
-
-``` {r}
-
-
-total_stations <- nrow(transformed_scores)
-tick_positions <- seq(25, total_stations, by = 25)
-
-p <- ggplot() +
-  annotate("rect", xmin = 0, xmax = 25, ymin = -0.5, ymax = max(transformed_scores$score) + 0.5,
-              fill = "#8FC49A",  alpha = 0.34) +
-  geom_vline(xintercept = 25, linetype = "dashed") + 
-  geom_point(data = transformed_scores, mapping = aes(y = score, x = rank), fill = "#283696", size = 0.9  ) +
-  xlab("Station Rank") +
-  ylab("Scores ordered descending") +
-  scale_x_continuous(
-    breaks = tick_positions,
-    labels = tick_positions,
-    expand = c(0.01, 0)
-  ) +
-  theme_report() +
-  coord_cartesian(ylim = c(0, max(transformed_scores$score)))
-
-ggplotly(p)
-
-```
 
 ### Searchable Table
 
 The table below contains links to each individual station page.
 
-:::{.column-body}
+::: column-body
 ```{r}
 
 # transformed_scores %>%
@@ -503,7 +553,7 @@ reactable(df_with_links,
 ::: column-body
 # In-Depth Analysis of Top 10 Stations
 
-This next section will step through the next 25 recommended stations. 
+This next section will step through the next 25 recommended stations.
 
 It will include a breakdown of how its score was formed, which uses the transformed scores discussed in the methodology section. These scores are bounded between zero and one.
 
@@ -521,7 +571,7 @@ Use a laptop or desktop for the best viewing experience. (keep scrolling!)
 
 ::: cr-section
 ::: {focus-on="cr-map1"}
-## [`r transformed_scores$station[1]`](`r paste0('../',"stations/",san_station(transformed_scores$station[1]), '.html')`)
+## [`r transformed_scores$station[1]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B1%5D),%20'.html')%60)
 
 ###### Rank: 1
 
@@ -535,11 +585,11 @@ printScores(1)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[1]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B1%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map2"}
-## [`r transformed_scores$station[2]`](`r paste0('../',"stations/",san_station(transformed_scores$station[2]), '.html')`)
+## [`r transformed_scores$station[2]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B2%5D),%20'.html')%60)
 
 ###### Rank: 2
 
@@ -553,11 +603,11 @@ printScores(2)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[2]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B2%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map3"}
-## [`r transformed_scores$station[3]`](`r paste0('../',"stations/",san_station(transformed_scores$station[3]), '.html')`)
+## [`r transformed_scores$station[3]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B3%5D),%20'.html')%60)
 
 ###### Rank: 3
 
@@ -571,11 +621,11 @@ printScores(3)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[3]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B3%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map4"}
-## [`r transformed_scores$station[4]`](`r paste0('../',"stations/",san_station(transformed_scores$station[4]), '.html')`)
+## [`r transformed_scores$station[4]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B4%5D),%20'.html')%60)
 
 ###### Rank: 4
 
@@ -589,11 +639,11 @@ printScores(4)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[4]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B4%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map5"}
-## [`r transformed_scores$station[5]`](`r paste0('../',"stations/",san_station(transformed_scores$station[5]), '.html')`)
+## [`r transformed_scores$station[5]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B5%5D),%20'.html')%60)
 
 ###### Rank: 5
 
@@ -607,11 +657,11 @@ printScores(5)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[5]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B5%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map6"}
-## [`r transformed_scores$station[6]`](`r paste0('../',"stations/",san_station(transformed_scores$station[6]), '.html')`)
+## [`r transformed_scores$station[6]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B6%5D),%20'.html')%60)
 
 ###### Rank: 6
 
@@ -625,11 +675,11 @@ printScores(6)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[6]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B6%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map7"}
-## [`r transformed_scores$station[7]`](`r paste0('../',"stations/",san_station(transformed_scores$station[7]), '.html')`)
+## [`r transformed_scores$station[7]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B7%5D),%20'.html')%60)
 
 ###### Rank: 7
 
@@ -643,11 +693,11 @@ printScores(7)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[7]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B7%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map8"}
-## [`r transformed_scores$station[8]`](`r paste0('../',"stations/",san_station(transformed_scores$station[8]), '.html')`)
+## [`r transformed_scores$station[8]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B8%5D),%20'.html')%60)
 
 ###### Rank: 8
 
@@ -665,7 +715,7 @@ See more information [here](%60r%20paste0('stations/',san_station(transformed_sc
 :::
 
 ::: {focus-on="cr-map9"}
-## [`r transformed_scores$station[9]`](`r paste0('../',"stations/",san_station(transformed_scores$station[9]), '.html')`)
+## [`r transformed_scores$station[9]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B9%5D),%20'.html')%60)
 
 ###### Rank: 9
 
@@ -679,11 +729,11 @@ printScores(9)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[9]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B9%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map10"}
-## [`r transformed_scores$station[10]`](`r paste0('../',"stations/",san_station(transformed_scores$station[10]), '.html')`)
+## [`r transformed_scores$station[10]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B10%5D),%20'.html')%60)
 
 ###### Rank: 10
 
@@ -697,11 +747,11 @@ printScores(10)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[10]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B10%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map11"}
-## [`r transformed_scores$station[11]`](`r paste0('../',"stations/",san_station(transformed_scores$station[11]), '.html')`)
+## [`r transformed_scores$station[11]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B11%5D),%20'.html')%60)
 
 ###### Rank: 11
 
@@ -715,11 +765,11 @@ printScores(11)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[11]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B11%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map12"}
-## [`r transformed_scores$station[12]`](`r paste0('../',"stations/",san_station(transformed_scores$station[12]), '.html')`)
+## [`r transformed_scores$station[12]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B12%5D),%20'.html')%60)
 
 ###### Rank: 12
 
@@ -733,11 +783,11 @@ printScores(12)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[12]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B12%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map13"}
-## [`r transformed_scores$station[13]`](`r paste0('../',"stations/",san_station(transformed_scores$station[13]), '.html')`)
+## [`r transformed_scores$station[13]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B13%5D),%20'.html')%60)
 
 ###### Rank: 13
 
@@ -751,11 +801,11 @@ printScores(13)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[13]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B13%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map14"}
-## [`r transformed_scores$station[14]`](`r paste0('../',"stations/",san_station(transformed_scores$station[14]), '.html')`)
+## [`r transformed_scores$station[14]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B14%5D),%20'.html')%60)
 
 ###### Rank: 14
 
@@ -769,11 +819,11 @@ printScores(14)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[14]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B14%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map15"}
-## [`r transformed_scores$station[15]`](`r paste0('../',"stations/",san_station(transformed_scores$station[15]), '.html')`)
+## [`r transformed_scores$station[15]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B15%5D),%20'.html')%60)
 
 ###### Rank: 15
 
@@ -787,11 +837,11 @@ printScores(15)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[15]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B15%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map16"}
-## [`r transformed_scores$station[16]`](`r paste0('../',"stations/",san_station(transformed_scores$station[16]), '.html')`)
+## [`r transformed_scores$station[16]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B16%5D),%20'.html')%60)
 
 ###### Rank: 16
 
@@ -805,11 +855,11 @@ printScores(16)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[16]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B16%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map17"}
-## [`r transformed_scores$station[17]`](`r paste0('../',"stations/",san_station(transformed_scores$station[17]), '.html')`)
+## [`r transformed_scores$station[17]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B17%5D),%20'.html')%60)
 
 ###### Rank: 17
 
@@ -823,11 +873,11 @@ printScores(17)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[17]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B17%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map18"}
-## [`r transformed_scores$station[18]`](`r paste0('../',"stations/",san_station(transformed_scores$station[18]), '.html')`)
+## [`r transformed_scores$station[18]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B18%5D),%20'.html')%60)
 
 ###### Rank: 18
 
@@ -841,11 +891,11 @@ printScores(18)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[18]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B18%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map19"}
-## [`r transformed_scores$station[19]`](`r paste0('../',"stations/",san_station(transformed_scores$station[19]), '.html')`)
+## [`r transformed_scores$station[19]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B19%5D),%20'.html')%60)
 
 ###### Rank: 19
 
@@ -859,11 +909,11 @@ printScores(19)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[19]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B19%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map20"}
-## [`r transformed_scores$station[20]`](`r paste0('../',"stations/",san_station(transformed_scores$station[20]), '.html')`)
+## [`r transformed_scores$station[20]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B20%5D),%20'.html')%60)
 
 ###### Rank: 20
 
@@ -877,11 +927,11 @@ printScores(20)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[20]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B20%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map21"}
-## [`r transformed_scores$station[21]`](`r paste0('../',"stations/",san_station(transformed_scores$station[21]), '.html')`)
+## [`r transformed_scores$station[21]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B21%5D),%20'.html')%60)
 
 ###### Rank: 21
 
@@ -895,11 +945,11 @@ printScores(21)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[21]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B21%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map22"}
-## [`r transformed_scores$station[22]`](`r paste0('../',"stations/",san_station(transformed_scores$station[22]), '.html')`)
+## [`r transformed_scores$station[22]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B22%5D),%20'.html')%60)
 
 ###### Rank: 22
 
@@ -913,11 +963,11 @@ printScores(22)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[22]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B22%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map23"}
-## [`r transformed_scores$station[23]`](`r paste0('../',"stations/",san_station(transformed_scores$station[23]), '.html')`)
+## [`r transformed_scores$station[23]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B23%5D),%20'.html')%60)
 
 ###### Rank: 23
 
@@ -931,11 +981,11 @@ printScores(23)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[23]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B23%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map24"}
-## [`r transformed_scores$station[24]`](`r paste0('../',"stations/",san_station(transformed_scores$station[24]), '.html')`)
+## [`r transformed_scores$station[24]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B24%5D),%20'.html')%60)
 
 ###### Rank: 24
 
@@ -949,11 +999,11 @@ printScores(24)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[24]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B24%5D),%20'.html')%60).
 :::
 
 ::: {focus-on="cr-map25"}
-## [`r transformed_scores$station[25]`](`r paste0('../',"stations/",san_station(transformed_scores$station[25]), '.html')`)
+## [`r transformed_scores$station[25]`](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B25%5D),%20'.html')%60)
 
 ###### Rank: 25
 
@@ -967,7 +1017,7 @@ printScores(25)
 
 ```
 
-See more information [here](`r paste0('../',"stations/",san_station(transformed_scores$station[25]), '.html')`).
+See more information [here](%60r%20paste0('../',%22stations/%22,san_station(transformed_scores$station%5B25%5D),%20'.html')%60).
 :::
 
 ::: {#cr-main}
@@ -1047,5 +1097,4 @@ See more information [here](`r paste0('../',"stations/",san_station(transformed_
 
 ::: {#cr-map25}
 :::
-
 :::

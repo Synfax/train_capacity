@@ -3,28 +3,35 @@ library(patchwork)
 
 
 
-top_stations_by_lga <- function(fromQuarto = T, n_slice = 25) {
+top_stations_by_lga <- function(fromQuarto = T, n_slice = 25, include_existing_25 = F) {
   
   prefix = ifelse(fromQuarto, '../', '')
   
-  transformed_scores = readRDS(paste0(prefix, 'r_objects/transformed_scores.Rdata')) %>%
+  stations_to_include = readRDS(paste0(prefix, 'r_objects/transformed_scores.Rdata')) %>%
     as.data.frame() %>%
-    rename(Station_Name = "station")
+    rename(Station_Name = "station") %>%
+    slice_head(n = n_slice) %>%
+    select(Station_Name)
   
-  locations = readRDS(paste0(prefix, 'r_objects/locations.Rdata')) 
+  if(include_existing_25) {
+    
+    existing <- data.frame(Station_Name = existing_upzoned_stations) %>%
+      filter(Station_Name != "Toorak Village")
+    
+    stations_to_include = bind_rows(stations_to_include, existing )
+  }
   
-  scores_for_lga = transformed_scores %>%
-    left_join(locations, by = 'Station_Name') %>%
-    st_as_sf(coords = c('lng','lat')) %>%
-    arrange(desc(score)) %>%
-    mutate(rank = row_number())
+  #locations = readRDS(paste0(prefix, 'r_objects/locations.Rdata')) 
   
-  scores_for_lga = slice_head(scores_for_lga, n = n_slice) %>%
-    select(Station_Name) 
-  
-  scores_for_lga = st_set_crs(scores_for_lga, 'wgs84') %>%
-    st_transform(crs = 7844)
-  
+  # scores_for_lga = stations_to_include %>%
+  #   left_join(locations, by = 'Station_Name') %>%
+  #   st_as_sf(coords = c('lng','lat')) 
+  # 
+  # scores_for_lga = scores_for_lga  %>%
+  #   select(Station_Name) 
+  # 
+  # scores_for_lga = st_set_crs(scores_for_lga, 'wgs84') %>%
+  #   st_transform(crs = 7844)
   
   
   create_green_palette <- function(n) {
@@ -33,10 +40,21 @@ top_stations_by_lga <- function(fromQuarto = T, n_slice = 25) {
   
   #load geometries 
   
+  stations_in_lga <- readRDS(paste0(prefix, 'r_objects/stations_in_lga.Rdata'))
+  
   lga <- read_sf(paste0(prefix, 'shapefiles/lga_boundaries/LGA_2023_AUST_GDA2020.shp'))
   
-  lga_with_n_sf <- st_join(lga, scores_for_lga) %>%
-    filter(!is.na(Station_Name)) %>% 
+  # lga_with_n_sf <- st_join(lga, scores_for_lga) %>%
+  #   filter(!is.na(Station_Name)) %>%
+  #   group_by(LGA_NAME23) %>%
+  #   summarise(n = n())
+  
+  lgas_to_map <- c(inner_lgas, middle_lgas)
+  
+  stations_to_include <- stations_to_include %>% as.data.frame() %>% pull(Station_Name)
+  
+  lga_with_n_sf <- stations_in_lga %>%
+    filter(Station_Name %in% stations_to_include ) %>%
     group_by(LGA_NAME23) %>%
     summarise(n = n())
   
