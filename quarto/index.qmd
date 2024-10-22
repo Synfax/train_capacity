@@ -5,7 +5,7 @@ format:
     toc: true
     toc-location: left
     toc-expand: true
-    toc-depth: 4
+    toc-depth: 3
     grid: 
       body-width: 900px
     theme: zephr
@@ -105,9 +105,15 @@ san_station <- function(x) {
 
 translations <- translations <- gsub("\\s*\\([^)]+\\)", "", translations)
 
+  transformed_scores = readRDS('../r_objects/transformed_scores.Rdata') %>%
+    as.data.frame() %>%
+    mutate(rank = row_number()) %>%
+    remove_null_weighted_cols() %>%
+    mutate(across(where(is.numeric), ~ round(.x, 2)))
 
 printScores <- function(r) {
   
+
   transformed_scores %>% 
   filter(rank == r) %>%
   pivot_longer(-station) %>%
@@ -141,13 +147,14 @@ printScores <- function(r) {
 ::: column-body
 As part of Plan for Victoria, the Government has elected to upzone dozens of train stations as part of the Activity Centres Program. This is a sound policy. Melbourne has bountiful infrastructure and the ability to accommodate many more Melburnians in the places where they want to live. We have outlined the impetus for transit-oriented planning reform in our previous reports including [Melbourne's Missing Middle](https://www.yimby.melbourne/missing-middle) and [Missing Middle Housing Targets](https://targets.yimby.melbourne/).
 
-::: {.column-margin}
+::: column-margin
 Sidenote: A total of 60 Activity Centres have been announced. Of the initial 10, seven are focused around train stations. Of the 25 announced in October 2024, one tram stop (Toorak Village) was included. The total number of train stations confirmed for upzoning to date, therefore, is 31. Should the yet-to-be-announced Activity Centres all be train stations, as this report assumes, that would bring the total up to 56.
 :::
 
 Here, we build upon previous work to answer a simple question: across Melbourne's transport network, which additional 25 train stations should be prioritised for inclusion in the Activity Centre Program?
 
 *See the full report [here](report.html "Full Report").*
+:::
 
 <!-- ### Methodology -->
 
@@ -184,7 +191,6 @@ Here, we build upon previous work to answer a simple question: across Melbourne'
 <!-- -   Edge transfer stations (North Melbourne, South Yarra, Richmond) were excluded due to extreme outliers in the data impacting the transformation process. -->
 
 <!-- -   Stations further than 25km of Flinders Street are excluded as they are generally economically unfeasible to upzone. -->
-:::
 
 <!-- The full methodology is contained in the full report. -->
 
@@ -197,7 +203,7 @@ Here, we build upon previous work to answer a simple question: across Melbourne'
 <!-- A chart below shows the scores of the 10 highest ranked stations, with an interactive map underneath to show the spatial distribution. -->
 
 ::: column-body
-## Map
+<!-- ## Map -->
 
 ::: interactive-map
 ```{r}
@@ -253,7 +259,7 @@ m
 ```
 :::
 
-## Chart
+<!-- ## Chart -->
 
 ```{r}
 #| fig-height: 8
@@ -297,11 +303,13 @@ A comprehensive explanation of the report's methodology is available [here](repo
 
 We also exclude SRL precincts and stations in the CBD.
 
-These are: `r c(other_existing_precincts, city_loop_stations) `
-
+These are: `r c(other_existing_precincts, city_loop_stations)`
 :::
 
-### Melbourne's three outlier 'Edge Stations'
+::: {.column-body}
+
+## Melbourne's three outlier 'Edge Stations'
+ 
 
 Three outlier stations---North Melbourne, Richmond, and South Yarra---are excluded from our main rankings. These Edge Stations are outliers due to their extremely high rail service frequency, which dwarfs the rest of the dataset.
 
@@ -321,7 +329,7 @@ Below, we chart the distribution of our 25 additional stations suitable for upzo
 ::: column-body
 ```{r}
 
-top_stations_by_lga() 
+top_stations_by_lga(debug =  F) 
 
 ```
 :::
@@ -331,20 +339,113 @@ Next, we take into account the current confirmed stations---those included in th
 ::: column-body
 ```{r}
 
-top_stations_by_lga() 
+top_stations_by_lga(include_existing_25 = T) 
 
 ```
 :::
 
-The 56 train stations selected for upzoning represent areas with strong housing targets as calculated through econometric modelling within our Housing Targets report, released earlier this year.
+The 56 train stations selected for upzoning represent areas with strong housing targets as calculated through econometric modelling within our [Housing Targets](https://targets.yimby.melbourne/) report, released earlier this year.
 
-\[housing targets picture\]
+![](index_images/targets.png.png)
 
 What these models together make clear is that the 56 selected stations are not just in areas suitable for people to live---they are in areas where people want to live. We know this because apartments in many of these areas trade at a premium---indicating a shortfall of supply relative to demand.
 
 ## Results by train line
 
+Below, we once again chart the distribution of the top 25 additional stations suitable for upzoning, followed by the distribution of all 56 stations.
+
+```{r}
+
+
+  station_lines = readRDS('../r_objects/stations_with_lines.Rdata') 
+  
+  transformed_scores_ = readRDS('../r_objects/transformed_scores.Rdata') %>%
+    as.data.frame() %>%
+    rename(Station_Name = "station") %>%
+    arrange(desc(score)) %>%
+    mutate(rank = row_number())
+  
+  score_by_line <- (transformed_scores_ %>%
+    left_join(station_lines, by = 'Station_Name') %>%
+    slice_head(n = 25) %>%
+    select(Station_Name, rank, lines) %>%
+    unnest(lines) %>%
+    count(lines, sort = T) %>%
+    filter(lines != "Richmond and City Loop") %>%
+    rename(line = 'lines') %>%
+    left_join(line_groups, by = 'line') %>%
+    ggplot(., mapping = aes(x = reorder(line, -n) , y = n)) +
+    theme_report() +
+    theme(legend.position = 'top') +
+    geom_col(aes(fill = group)) +
+    scale_fill_manual(values = setNames(colours$colour, colours$group)) +
+    guides(x = guide_axis(angle = 45)) +
+    xlab("Train Line") +
+    ylab(paste0("Number of stops in top ", 25 )) ) %>%
+    ggplotly() %>%
+    layout(xaxis = list(tickangle = -45)) %>%
+    layout(legend = list(
+      orientation = "h",    # horizontal orientation
+      y = 1.1,             # position above plot
+      x = 0.5,             # centered
+      xanchor = "center"   # anchor point for centering
+    ))
+  
+  
+  score_by_line
+
+```
+
+```{r}
+
+station_lines = readRDS('../r_objects/stations_with_lines.Rdata') 
+
+  already_upzoned_stations = data.frame(Station_Name = existing_upzoned_stations) %>%
+    filter(Station_Name != "Toorak Village")
+  
+  stations_for_lines = readRDS('../r_objects/transformed_scores.Rdata') %>%
+    as.data.frame() %>%
+    rename(Station_Name = "station") %>%
+    arrange(desc(score)) %>%
+    slice_head(n = 25) %>%
+    select(Station_Name) %>%
+    bind_rows(., already_upzoned_stations)
+    
+  score_by_line <- (stations_for_lines %>%
+    left_join(station_lines, by = 'Station_Name') %>%
+    select(Station_Name, lines) %>%
+    unnest(lines) %>%
+    count(lines, sort = T) %>%
+    filter(lines != "Richmond and City Loop") %>%
+    rename(line = 'lines') %>%
+    left_join(line_groups, by = 'line') %>%
+    ggplot(., mapping = aes(x = reorder(line, -n) , y = n)) +
+    theme_report() +
+    theme(legend.position = 'top') +
+    geom_col(aes(fill = group)) +
+    scale_fill_manual(values = setNames(colours$colour, colours$group)) +
+    guides(x = guide_axis(angle = 45)) +
+    xlab("Train Line") +
+    ylab(paste0("Number of stops in top 25 + Already Upzoned")) ) %>%
+    ggplotly() %>%
+    layout(xaxis = list(tickangle = -45)) %>%
+    layout(legend = list(
+      orientation = "h",    # horizontal orientation
+      y = 1.1,             # position above plot
+      x = 0.5,             # centered
+      xanchor = "center"   # anchor point for centering
+    ))
+  
+  
+  score_by_line
+
+```
+
 ## Upzoning into Melbourne's vibrant future
+
+A final point we wish to highlight in this report is that the 56 stations above are by no means an exhaustive list of upzoning options.
+
+Our model indicates no significant difference between the upzoning capacities of stations number 25 and 75. Indeed, there is no reason the Activity Centre Program could not be doubled in scope---from 50 to 100 stations---in the near future.
 
 ```{r}
 
@@ -371,7 +472,7 @@ ggplotly(p)
 
 ```
 
-A final point we wish to highlight in this report is that the 56 stations above are by no means an exhaustive list of upzoning options. Our model indicates no significant difference between the upzoning capacities of stations number 25 and 75. Indeed, there is no reason the Activity Centre Program could not be doubled in scope---from 50 to 100 stations---in the near future.
+
 
 This report provides the evidence base required for the Government to confidently scale their planning reform policy ambitions as we move our state forward.
 
@@ -379,7 +480,7 @@ The great strength of upzoning is that it is low-cost and future-focused. It ena
 
 You can explore the full network and see how your station scores via the map and table below.
 
-### Searchable Map
+## Searchable Map
 
 Pages for each individual train station have also been produced to detail how each performed in the metrics.
 
@@ -475,7 +576,7 @@ locations = locations %>%
 
 m <- leaflet(width = '100%', height = '600px') %>%
   leaflet::setView(lng = 144.9668, lat = -37.8181, zoom = 12) %>%
-  addPolylines(data = lines_dissolved, color = ~colour, opacity = 0.5) %>%
+  addPolylines(data = lines_dissolved, color = ~colour, opacity = 0.8) %>%
   addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.3)) %>%
   addCircleMarkers(lng = locations$lng, lat=locations$lat, radius = 5, color = 'black', fillColor = 'black', fillOpacity = 1, opacity = 0.7) %>%
   addLabelOnlyMarkers(lng = locations$lng,
@@ -496,7 +597,7 @@ m
 ```
 :::
 
-### Searchable Table
+## Searchable Table
 
 The table below contains links to each individual station page.
 
@@ -551,11 +652,10 @@ reactable(df_with_links,
 :::
 
 ::: column-body
-# In-Depth Analysis of Top 10 Stations
+## Exploring The Next 25
+Scroll down to explore The Next 25 stations in-depth.
 
-This next section will step through the next 25 recommended stations.
-
-It will include a breakdown of how its score was formed, which uses the transformed scores discussed in the methodology section. These scores are bounded between zero and one.
+It will include a breakdown of how its score was formed, which uses the transformed scores discussed in the full report. These scores are bounded between zero and one.
 
 A table below shows a *rough* guide of how to interpret the transformed scores.
 
