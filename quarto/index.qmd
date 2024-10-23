@@ -221,20 +221,43 @@ function(el, x, data) {
   var map = this;
 
   function updateLabelVisibility() {
-   
-    var currentZoom = map.getZoom();
-   
-    var showLabelsZoomLevel = 13;
-
-    var labels = document.getElementsByClassName('top-25-labels');
-   
-    for (var i = 0; i < labels.length; i++) {
-      if (currentZoom >= showLabelsZoomLevel) {
-        labels[i].style.display = 'block';
-      } else {
-        labels[i].style.display = 'none';
-      }
+    const currentZoom = map.getZoom();
+  const labels = document.getElementsByClassName('top-25-labels');
+  
+  // Configure zoom levels and corresponding font sizes
+  const minZoom = 8;  // Minimum zoom level where labels start appearing
+  const maxZoom = 18; // Maximum zoom level for font scaling
+  const minFontSize = 0;  // Smallest font size in pixels
+  const maxFontSize = 20; // Largest font size in pixels
+  
+  // Calculate font size based on current zoom level
+  for (let i = 0; i < labels.length; i++) {
+  
+    if (currentZoom < 13) {
+      console.log('abc');
+      // Optional: hide labels completely at very low zoom levels
+      
+      labels[i].getElementsByTagName('p')[0].classList.add('label-zoomed-in');
+      labels[i].getElementsByTagName('p')[0].classList.remove('label-zoomed-out');
+      
+    } else {
+      labels[i].style.display = 'block';
+      labels[i].getElementsByTagName('p')[0].classList.remove('label-zoomed-in');
+      labels[i].getElementsByTagName('p')[0].classList.add('label-zoomed-out');
+      
+      
+      
+      // Calculate font size using linear interpolation
+      const zoomRatio = (currentZoom - minZoom) / (maxZoom - minZoom);
+      const fontSize = minFontSize + (maxFontSize - minFontSize) * Math.min(Math.max(zoomRatio, 0), 1);
+      
+      labels[i].style.fontSize = `${fontSize}px`;
+      
+      // Optional: adjust opacity for smoother transitions
+      const opacity = Math.min(Math.max(zoomRatio * 1.5, 0.3), 1);
+      // labels[i].style.opacity = opacity;
     }
+  }
   }
   
 
@@ -256,7 +279,7 @@ function(el, x, data) {
 "
 
 
-m <- prepare_index(returnTopTen = T, topN = 25, fromQuarto = T, font_size_q = '8pt', h = '600px', w = '100%', fillC = "white", ringC = "#283696") %>%
+m <- prepare_index(returnTopTen = T, topN = 25, fromQuarto = T, font_size_q = '8pt', h = '600px', w = '100%', fillC = "white", ringC = "#D92127", bcC = "transparent", noDiv = T, includeRank = F) %>%
   htmlwidgets::onRender(js_code)
 
 m
@@ -541,23 +564,41 @@ function(el, x, data) {
   
   
   
-  
-
   function updateLabelVisibility() {
-   
-    var currentZoom = map.getZoom();
-   
-    var showLabelsZoomLevel = 13;
-
-    var labels = document.getElementsByClassName('my-labels');
-   
-    for (var i = 0; i < labels.length; i++) {
-      if (currentZoom >= showLabelsZoomLevel) {
-        labels[i].style.display = 'block';
-      } else {
-        labels[i].style.display = 'none';
-      }
+    const currentZoom = map.getZoom();
+  const labels = document.getElementsByClassName('my-labels');
+  
+  // Configure zoom levels and corresponding font sizes
+  const minZoom = 8;  // Minimum zoom level where labels start appearing
+  const maxZoom = 18; // Maximum zoom level for font scaling
+  const minFontSize = 0;  // Smallest font size in pixels
+  const maxFontSize = 20; // Largest font size in pixels
+  
+  // Calculate font size based on current zoom level
+  for (let i = 0; i < labels.length; i++) {
+  
+  labels[i].classList.add('label-zoomed-out');
+  
+    if (currentZoom < 13) {
+      console.log('abc');
+      // Optional: hide labels completely at very low zoom levels
+      labels[i].style.display = 'none';
+      
+    } else {
+      labels[i].style.display = 'block';
+      
+      
+      // Calculate font size using linear interpolation
+      const zoomRatio = (currentZoom - minZoom) / (maxZoom - minZoom);
+      const fontSize = minFontSize + (maxFontSize - minFontSize) * Math.min(Math.max(zoomRatio, 0), 1);
+      
+      labels[i].style.fontSize = `${fontSize}px`;
+      
+      // Optional: adjust opacity for smoother transitions
+      const opacity = Math.min(Math.max(zoomRatio * 1.5, 0.3), 1);
+      // labels[i].style.opacity = opacity;
     }
+  }
   }
   
 
@@ -601,17 +642,14 @@ locations = locations %>%
   mutate(safe_name = gsub("[^a-zA-Z0-9]", "_", Station_Name)) %>%
   mutate(message = 
            paste0(
-             '<div style = \" background-color: black; \">',
-             "<p style = \" color: white; text-align:center ; padding: 5px; \" >", Station_Name, '</p>',
-             '</div>'
-             
+             "<p>", Station_Name, '</p>'
            )
   ) %>%
   mutate(win_url = paste0('../stations/', safe_name, '.html'))
 
 m <- leaflet(width = '100%', height = '600px') %>%
   leaflet::setView(lng = 144.9668, lat = -37.8181, zoom = 12) %>%
-  addPolylines(data = lines_dissolved, color = ~colour, opacity = 0.8) %>%
+  addPolylines(data = lines_dissolved, color = ~colour, opacity = 1) %>%
   addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.3)) %>%
   addCircleMarkers(lng = locations$lng, lat=locations$lat, radius = 5, weight = 3.5, fillColor = "white", color = "#283696", fillOpacity = 1, opacity = 0.7) %>%
   addLabelOnlyMarkers(lng = locations$lng,
@@ -622,7 +660,6 @@ m <- leaflet(width = '100%', height = '600px') %>%
                                                     'font-weight' = '800',
                                                     'text-decoration' = 'underline',
                                                     'text-decoration-color' = 'white',
-                                                    'margin' = '5px',
                                                     'letter-spacing' = '0.5px'
                                                   ))) %>%
   htmlwidgets::onRender(js_code, data = locations)
@@ -687,7 +724,7 @@ reactable(df_with_links,
         htmltools::a(href = url, value, target = "_blank")
       }
     ),
-    rank = colDef(name = "Rank"),
+    rank = colDef(name = "Rank",maxWidth = 110 ),
     win_url = colDef(show = FALSE)  # Hide the URL column
   )
 )

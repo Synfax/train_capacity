@@ -14,6 +14,28 @@
   --yellow-base: #f6ae00;
 }
 
+.label-zoomed-out {
+  background-color: white !important;
+  border: 3px solid #1A235F !important;
+  color: #283696 !important;
+  text-align: center;
+  padding: 5px;
+  margin: 5px;
+}
+
+.label-zoomed-out p{
+   margin: 0 !important;
+}
+
+.label-zoomed-in {
+  background-color: transparent !important;
+  color: #283696 !important;
+  text-align: center;
+  background: rgba(255,255,255,0.8) !important;
+  padding: 0 !important;
+  margin: 0px !important;
+}
+
 #TOC {
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
@@ -49,8 +71,8 @@ body {
 }
 
 .column-body p {
-  margin-top: 15px;
-  margin-bottom: 15px;
+  /*margin-top: 15px;
+  margin-bottom: 15px;*/
 }
 
 .table {

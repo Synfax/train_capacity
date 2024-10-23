@@ -163,7 +163,7 @@ station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
   geom_col() +
   theme_report() +
   theme(legend.position = 'none') +
-  xlab("Mean number of people on peak train before flinders") +
+  xlab("Average number of people on peak train before flinders") +
   ylab("Lines serving station")) %>%
   ggplotly()
 

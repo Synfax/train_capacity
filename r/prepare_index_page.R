@@ -1,8 +1,10 @@
-prepare_index <- function(returnTopTen = F, topN = 25, fromQuarto = F, font_size_q = '16pt', w = 2560, h = 1440, fillC = "black", ringC = "white") {
+prepare_index <- function(returnTopTen = F, topN = 25, fromQuarto = F, font_size_q = '16pt', w = 2560, h = 1440, fillC = "black", ringC = "white", includeRank = T, bcC = "transparent", noDiv = F ) {
   
   prefix_dir <- ifelse(fromQuarto, '../', '')
   
   locations = readRDS(paste0(prefix_dir,'r_objects/locations.Rdata'))
+  
+  
   
   data_to_map <- readRDS(paste0(prefix_dir,'r_objects/transformed_scores.Rdata')) %>%
     as.data.frame() %>%
@@ -12,13 +14,14 @@ prepare_index <- function(returnTopTen = F, topN = 25, fromQuarto = F, font_size
     select(station, score, rank, label) %>%
     rename(Station_Name = 'station') %>%
     dplyr::left_join(locations, by = 'Station_Name') %>%
-    mutate(message = 
-             paste0(
-               '<div style = \" background-color: black; \">',
-               "<p style = \" color: white; text-align:center ; padding: 5px; \" >", rank, '. ' , Station_Name, '</p>',
-               '</div>'
-               
-             )
+    rowwise() %>%
+    mutate(message = ifelse(!noDiv,paste0(
+      '<div style = \" background-color: black; \">',
+      "<p style = \" color: white; text-align:center ; padding: 5px; \" >", ifelse(includeRank, paste0(rank, '. ') , ''), Station_Name, '</p>',
+      '</div>'
+      
+    ), paste0("<p style = \" color: white; text-align:center ; padding: 5px; \" >", ifelse(includeRank, paste0(rank, '. ') , ''), Station_Name, '</p>') )
+             
     ) 
   
   #saveRDS(data_to_map, 'r_objects/index_map/data_to_map.Rdata')
@@ -63,12 +66,13 @@ prepare_index <- function(returnTopTen = F, topN = 25, fromQuarto = F, font_size
     addLabelOnlyMarkers(lng = data_to_map$lng,
                         lat = data_to_map$lat,
                         label = lapply(data_to_map$message, htmltools::HTML),
-                        labelOptions = labelOptions(noHide = T, className = "top-25-labels", direction = 'auto',  textOnly = T, textsize = font_size_q,
+                        labelOptions = labelOptions(noHide = T,  className = "top-25-labels", direction = 'auto',  textOnly = T, textsize = font_size_q,
                                                     style = list(
+                                                      'background-color' = bcC,
                                                       'font-weight' = '800',
                                                       'text-decoration' = 'underline',
                                                       'text-decoration-color' = 'white',
-                                                      'margin' = '5px',
+                                                      #'margin' = '5px',
                                                       'letter-spacing' = '0.5px'
                                                     ))) %>%
     fitBounds(lng1 = bounds[1], lat1 = bounds[2], lng2 = bounds[3], lat2 = bounds[4])
