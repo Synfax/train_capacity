@@ -202,10 +202,12 @@ Here, we build upon previous work to answer a simple question: across Melbourne'
 
 <!-- A chart below shows the scores of the 10 highest ranked stations, with an interactive map underneath to show the spatial distribution. -->
 
-::: column-body
 <!-- ## Map -->
 
-::: interactive-map
+### The Next 25: Interactive Map
+
+Zoom in for further information and station labels.
+
 ```{r}
 
 
@@ -257,9 +259,10 @@ m <- prepare_index(returnTopTen = T, topN = 25, fromQuarto = T, font_size_q = '8
 m
 
 ```
-:::
 
 <!-- ## Chart -->
+
+### The Next 25: Chart
 
 ```{r}
 #| fig-height: 8
@@ -306,10 +309,7 @@ We also exclude SRL precincts and stations in the CBD.
 These are: `r c(other_existing_precincts, city_loop_stations)`
 :::
 
-::: {.column-body}
-
 ## Melbourne's three outlier 'Edge Stations'
- 
 
 Three outlier stations---North Melbourne, Richmond, and South Yarra---are excluded from our main rankings. These Edge Stations are outliers due to their extremely high rail service frequency, which dwarfs the rest of the dataset.
 
@@ -321,34 +321,66 @@ If the Government is only going to upzone 50 more stations in total---though we 
 
 The stations best-suited for upzoning are not equally distributed across Melbourne's local councils. This makes sense: land and infrastructure is also not equally distributed across councils. The model in this report reflects Melbourne as it is: a dynamic, vibrant city, in which some geographic areas are more suitable for upzoning than others.
 
-Valuable inner-city land close to services, jobs, and amenities will always score higher when measuring the city as a whole rather than within the arbitrary segments of local government areas. For more on the importance of measuring the entirety of Melbourne, you can read our submission to the Inquiry into Local Government funding and services, and the Abundant Housing Network Australia's submission to the National Urban Policy.
+Valuable inner-city land close to services, jobs, and amenities will always score higher when measuring the city as a whole rather than within the arbitrary segments of local government areas. For more on the importance of measuring the entirety of Melbourne, you can read our [submission to the Inquiry into Local Government funding and services](https://www.yimby.melbourne/post/submission-to-the-inquiry-into-local-government-funding-and-services), and the Abundant Housing Network Australia's [submission to the National Urban Policy](https://abundanthousing.org.au/docs/2407-NUP.pdf).
 
 Below, we chart the distribution of our 25 additional stations suitable for upzoning.
-:::
 
-::: column-body
 ```{r}
 
 top_stations_by_lga(debug =  F) 
 
 ```
-:::
 
 Next, we take into account the current confirmed stations---those included in the Activity Centre Program pilot and the announced 25---alongside the top 25 additional stations returned by our model.
 
-::: column-body
 ```{r}
 
 top_stations_by_lga(include_existing_25 = T) 
 
 ```
-:::
 
 The 56 train stations selected for upzoning represent areas with strong housing targets as calculated through econometric modelling within our [Housing Targets](https://targets.yimby.melbourne/) report, released earlier this year.
 
 ![](index_images/targets.png.png)
 
 What these models together make clear is that the 56 selected stations are not just in areas suitable for people to live---they are in areas where people want to live. We know this because apartments in many of these areas trade at a premium---indicating a shortfall of supply relative to demand.
+
+```{r}
+targets_df <- data.frame(
+  Council = c("Boroondara", "Glen Eira", "Bayside", "Hobsons Bay", "Banyule",
+              "Kingston", "Maroondah", "Monash", "Whitehorse", "Moonee Valley",
+              "Merri-bek", "Darebin", "Stonnington", "Brimbank", "Manningham",
+              "Maribyrnong", "Port Phillip", "Yarra", "Melbourne", "Total"),
+  Current_zoned_capacity = c(57000, 50000, 38000, 35000, 78000,
+                           99000, 79000, 109000, 97000, 81000,
+                           87000, 104000, 79000, 106000, 94000,
+                           71000, 64000, 60000, 84000, 1472000),
+  New_zoned_capacity = c(923000, 560000, 387000, 338000, 745000,
+                        871000, 655000, 875000, 775000, 630000,
+                        675000, 765000, 537000, 663000, 574000,
+                        416000, 349000, 291000, 296000, 11325000),
+  Increase_in_zoned_capacity = c("16.0x", "11.3x", "10.1x", "9.6x", "9.5x",
+                                "8.8x", "8.3x", "8.0x", "8.0x", "7.8x",
+                                "7.7x", "7.3x", "6.8x", "6.3x", "6.1x",
+                                "5.9x", "5.5x", "4.9x", "3.5x", "7.7x"),
+  Yearly_housing_target = c(4900, 2800, 2000, 1100, 3300,
+                           2100, 1200, 1900, 3000, 2500,
+                           2100, 2700, 2700, 200, 2300,
+                           600, 1600, 1500, 1500, 40000)
+)
+
+council_stations <-top_stations_by_lga(include_existing_25 = T, return_lga_with_n_sf = T) %>%
+  st_drop_geometry()
+
+# targets_df %>% 
+#   select(Council, Yearly_housing_target) %>%
+#   filter(Council != 'Total') %>%
+#   rename(LGA_NAME23 = "Council") %>%
+#   left_join(council_stations, by = 'LGA_NAME23') %>%
+#   arrange(desc(Yearly_housing_target)) %>%
+#   reactable(pagination = F)
+
+```
 
 ## Results by train line
 
@@ -472,8 +504,6 @@ ggplotly(p)
 
 ```
 
-
-
 This report provides the evidence base required for the Government to confidently scale their planning reform policy ambitions as we move our state forward.
 
 The great strength of upzoning is that it is low-cost and future-focused. It enables our city to remain dynamic and open. It lets communities grow and change over time, and it breathes life into our streets and the buildings that line them. It champions small business, vibrancy, and dynamism---it reminds us that our city is not a dusty museum, but a place where people come and choose to live.
@@ -485,6 +515,8 @@ You can explore the full network and see how your station scores via the map and
 Pages for each individual train station have also been produced to detail how each performed in the metrics.
 
 The map below is interactive and clickable. Scroll and find any train station and click the label for further information.
+
+Zoom in for further information and station labels.
 
 ::: column-body
 ```{r}
@@ -578,7 +610,7 @@ m <- leaflet(width = '100%', height = '600px') %>%
   leaflet::setView(lng = 144.9668, lat = -37.8181, zoom = 12) %>%
   addPolylines(data = lines_dissolved, color = ~colour, opacity = 0.8) %>%
   addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.3)) %>%
-  addCircleMarkers(lng = locations$lng, lat=locations$lat, radius = 5, color = 'black', fillColor = 'black', fillOpacity = 1, opacity = 0.7) %>%
+  addCircleMarkers(lng = locations$lng, lat=locations$lat, radius = 5, weight = 3.5, fillColor = "white", color = "#283696", fillOpacity = 1, opacity = 0.7) %>%
   addLabelOnlyMarkers(lng = locations$lng,
                       lat = locations$lat,
                       label = lapply(locations$message, htmltools::HTML),
@@ -629,21 +661,30 @@ The table below contains links to each individual station page.
 
  df_with_links = readRDS('../r_objects/transformed_scores.Rdata')  %>%
   as.data.frame() %>%
-  select(station) %>%
+   mutate(rank = row_number()) %>%
+  select(station, rank ) %>%
   mutate(safe_name = gsub("[^a-zA-Z0-9]", "_", station)) %>%
   mutate(win_url = paste0('../stations/', safe_name, '.html')) %>%
-  select(-safe_name)
+  select(-safe_name) %>%
+   mutate(rank = as.character(rank))
+ 
+ other_stations = readRDS('../r_objects/station_rankings.Rdata') %>% filter(!(station %in% df_with_links$station)) %>%
+   select(station) %>%
+   mutate(rank = "Not Ranked") 
+ 
+ # df_with_links = bind_rows(df_with_links, other_stations) 
 
 reactable(df_with_links,
-          filterable = T,
   columns = list(
     station = colDef(
       name = "Station",
+      filterable = T,
       cell = function(value, index) {
         url <- df_with_links$win_url[index]
         htmltools::a(href = url, value, target = "_blank")
       }
     ),
+    rank = colDef(name = "Rank"),
     win_url = colDef(show = FALSE)  # Hide the URL column
   )
 )
@@ -653,6 +694,7 @@ reactable(df_with_links,
 
 ::: column-body
 ## Exploring The Next 25
+
 Scroll down to explore The Next 25 stations in-depth.
 
 It will include a breakdown of how its score was formed, which uses the transformed scores discussed in the full report. These scores are bounded between zero and one.

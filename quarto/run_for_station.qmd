@@ -1,6 +1,6 @@
 ---
 params: 
-  station: "Jolimont"
+  station: "Brunswick"
 title: "`r params$station`"
 css:
  - ../quarto/index.css
@@ -121,13 +121,6 @@ if(!is_empty(rank)) {
 
 `r str`
 
-The remainder of this page steps through each factor listed below in no particular order.
-
-::: {.callout-note icon="false"}
-## Full Methodology
-
-The full methodology for how these scores are calculated and why they are important for consideration in upzoning is [available in the full report](../quarto/report_shiny.html).
-:::
 :::{.graph}
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
@@ -149,9 +142,16 @@ reactable(
 
 ```
 :::
+
+::: {.callout-note icon="false"}
+## Full Methodology
+
+The full methodology for how these scores are calculated and why they are important for consideration in upzoning is [available in the full report](../quarto/report_shiny.html).
+:::
+
 ## Service Frequency
 
-Service frequency is calculated as the mean number of services per hour in two time periods:
+Service frequency is calculated as the mean number of services per hour in two periods of travel:
 
 -   Between 7 and 10am towards Flinders Street, shown in blue.
 
@@ -247,7 +247,8 @@ The mean values of these two periods are shown as dashed lines, and the mean of 
 
 \
 
-The morning average freqency is `r morning_to_flinders`, the average evening frequency is `r evening_away_from_flinders`, which forms a mean score of **`r final_frequency_score`**.
+`r station` has a morning frequency of `r morning_to_flinders` and an evening frequency of `r evening_away_from_flinders`. The raw value is therefore **`r final_frequency_score`**
+
 
 ## Available Line Capacity
 
@@ -270,11 +271,7 @@ station_targets = readRDS('../r_objects/target_stations.Rdata') %>%
 
 <!-- ##### Patronage at `r station_targets` on the `r station_lines` line(s): -->
 
-The chart below shows the average patronage on the `r station_lines` line(s) at the last stop before the CBD (`r station_targets`). It is calculated for two times:
-
--   Between 7 and 10am towards Flinders Street, denoted as blue.
-
--   Between 4 and 7pm away from Flinders street, shown as green.
+The chart below shows the average patronage on the `r station_lines` line(s) at the last stop before the CBD (`r station_targets`). It is calculated for the same travel times as [#service-frequency] above.
 
 :::{.graph}
 ```{r warning=FALSE,message=FALSE}
@@ -349,130 +346,34 @@ div(class = 'plot', interactive_patronage)
 
 ```
 :::
-::: column-margin
-The chart is also split by direction of travel, which in Melbourne's radial network is either towards or away from Flinders street.
+
+
 
 \
 
-The mean values of these two periods are shown as dashed lines, and the mean of those two numbers is the final score.
+`r station` has an average morning service patronage of `r morning_to_flinders` and an average evening patronage of `r evening_away_from_flinders`. The raw value is **`r final_patronage_score`.**
+
+:::{.callout-note}
+Higher patronage value means lower line capacity score, reflected in the table at the top of this page and throughout this report.
 :::
 
-\
 
-The morning average patronage is `r morning_to_flinders`, the average evening patronage is `r evening_away_from_flinders`, which forms a mean score of **`r final_patronage_score`.**
-
-## Zoning Suitability
-
-The map below shows the properties within 1km of `r station` that are suitable for upzoning in orange, with unsuitable properties in black.
-
-::: column-margin
-Suitable properties are either neighbourhood residential or general residential and not under heritage restrictions.
-:::
+## Existing Transport Infrastructure
 
 ```{r warning=FALSE,message=FALSE}
 #| echo: false 
-#| fig-height: 6
 
-
-# grz_nrz = near_properties %>%
-#     filter(type_short %in% c('Neighbourhood residential', 'General residential')) %>%
-#     filter(heritage == F)
+#This is truly part of zoning suitabilit but the code broke so I had to move it
 
 grz_nrz = near_properties %>%
   mutate(isNRZGRZ = case_when((zone_short %in% c('Neighbourhood residential', 'General residential', 'Residential growth') & !heritage) ~ T, .default =  F ) ) %>%
-  mutate(colour = ifelse(isNRZGRZ, 'orange' ,'black'))
+  mutate(colour = ifelse(isNRZGRZ,   '#10461b', 'transparent'))
 
 bounds <- c(min(grz_nrz$lon, na.rm = T), min(grz_nrz$lat, na.rm = T),
             max(grz_nrz$lon, na.rm = T), max(grz_nrz$lat, na.rm = T))
 
-#fix panes
-
-leaflet(grz_nrz) %>%
-  fitBounds(bounds[1], bounds[2], bounds[3], bounds[4]) %>%
-  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = zoom_level) %>%
-  addMapPane("background_map", zIndex = 410) %>%  # Level 1: bottom
-  addMapPane("polygons", zIndex = 420) %>%        # Level 2: middle
-  addMapPane("labels", zIndex = 430) %>%  
-  addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.7, pane = "background_map")) %>%
-  addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(pane = "labels")) %>%
-  addPolygons(fillColor = ~colour, color = NA, weight = 0, fillOpacity = 0.7, options = pathOptions(pane = "polygons")) %>%
-  addLegend(position = 'bottomleft', colors = c('orange','black'), labels = c('Suitable lot for upzoning','Unsuitable lot'), title = "Lot Suitability")
-  
-n_suitable = grz_nrz %>%
-  st_drop_geometry() %>%
-  count(isNRZGRZ) %>%
-  filter(isNRZGRZ) %>%
-  pull(n)
-
-n_unsuitable = grz_nrz %>%
-  st_drop_geometry() %>%
-  count(isNRZGRZ) %>%
-  filter(!isNRZGRZ) %>%
-  pull(n)
-
-by_validity <- grz_nrz %>%
-  group_by(isNRZGRZ) %>%
-  summarise(total_area = sum(st_area(geom))) %>%
-  st_drop_geometry()
-
-area_ratio = ( ( by_validity %>% filter(isNRZGRZ) %>% pull(total_area) ) / sum(by_validity$total_area) %>% unname() %>% as.vector() ) %>% round(.,2)
 
 ```
-
-\
-
-Out of `r n_suitable + n_unsuitable` lots within `r radius`m radius of `r station`, `r n_suitable` are suitable for upzoning.
-
-In terms of area, the most suitable properties cover **`r area_ratio*100`**% of the total area.
-
-For more information, see the table below.
-
-:::{.graph}
-```{r warning=FALSE,message=FALSE}
-#| echo: false 
-
-by_zone_heritage <- near_properties %>%
-  st_drop_geometry() %>%
-  count(heritage, zone_short) %>%
-  dplyr::relocate(zone_short, .before = heritage) %>%
-  arrange(zone_short)
-
-# by_zone_heritage %>%
-#   mutate(heritage = ifelse(heritage, 'Yes','No')) %>%
-#   reactable(
-#     theme = sandstone(),
-#     pagination = F,
-#     columns = list(
-#       zone_short = colDef(name = "Zone"),
-#       heritage = colDef(name = "Heritage protected"),
-#       n = colDef(name = "Number of lots")
-#     )
-#   )
-
-by_zone_heritage %>%
-  group_by(zone_short) %>%
-  summarise(n_total = sum(n), percent = n[heritage] / n_total, n_heritage = n[heritage], n_not_heritage = n[!heritage]) %>%
-  mutate(percent = round(percent, 2)) %>%
-  mutate(percent = percent * 100) %>%
-  relocate(n_total, .after = n_not_heritage) %>%
-  reactable(
-    
-    pagination = F,
-    columns = list(
-      zone_short = colDef(name = "Zone"),
-      percent = colDef(name = "% Heritage"),
-      n_heritage = colDef(name = "# Heritage Lots"),
-      n_not_heritage = colDef(name = "# Non Heritage Lots"),
-      n_total = colDef(name = "Total")
-    )
-  )
-
-
-
-```
-:::
-
-## Existing Transport Infrastructure
 
 The map below shows tram routes and tram stops in green, as well as bus routes and bus stops in orange.
 
@@ -557,11 +458,11 @@ leaflet() %>%
   addMapPane("labels", zIndex = 430) %>%  
   addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.7, pane = "background_map")) %>%
     addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(pane = "labels")) %>%
-  addCircleMarkers(data = tram_stops_near_station, color = "black", radius = 3, fillColor = "#78BE20", fillOpacity = 1, options = pathOptions(pane = 'polygons'), stroke = 0.5, weight = 1, opacity = 1) %>%
-  addCircleMarkers(data = bus_stops_near_station, fillOpacity = 1, radius = 3, fillColor = "#FF8200", color = "black", stroke = 0.5, options = pathOptions(pane = 'polygons'), weight = 1, opacity = 1) %>%
   addPolylines(data = bus_routes_near_station, color = "#FF8200", options = pathOptions(pane = 'polygons'), fillOpacity = 0.7) %>%
   addPolylines(data = tram_routes_near_station, color = "#78BE20", options = pathOptions(pane = 'polygons'), fillOpacity = 0.7) %>%
-  addPolygons(data = buffer, color = 'black', fillColor = 'grey', fillOpacity = 0.3, options = pathOptions(pane = 'polygons'))
+  addPolygons(data = buffer, color = 'black', fillColor = 'grey', fillOpacity = 0.3, options = pathOptions(pane = 'polygons')) %>%
+ addCircleMarkers(data = tram_stops_near_station, color = "black", radius = 3, fillColor = "#78BE20", fillOpacity = 1, options = pathOptions(pane = 'polygons'), stroke = 0.5, weight = 1, opacity = 1) %>%
+  addCircleMarkers(data = bus_stops_near_station, fillOpacity = 1, radius = 3, fillColor = "#FF8200", color = "black", stroke = 0.5, options = pathOptions(pane = 'polygons'), weight = 1, opacity = 1)
 
 bus_f_df <- bus_stops_near_station %>%
   st_drop_geometry() %>%
@@ -693,11 +594,143 @@ merged_f_df %>%
 
 ```
 
-The final score for 'existing transport infrastructure' is computed by summing the average frequencies of each route and applying a weight to each mode.
 
-The current weights are intended to reflect the throughput each mode is capable of. At a minimum, trams can move twice as many people as buses at the same frequency, so trams are weighted twice as much as buses.
+The final transport connections score is computed by summing the average frequencies of each route and applying a weight to each mode. Tram routes are given twice the weight of bus routes.
 
-The final score is **`r round(total_score, 2)`**.
+The final raw value of `r station` transport connections is  **`r round(total_score, 2)`**.
+
+
+## Zoning Suitability
+
+The map below shows the properties within 1km of `r station` that are suitable for upzoning in dark green, with unsuitable properties in dark gray
+
+::: column-margin
+Suitable properties are either neighbourhood residential or general residential and not under heritage restrictions.
+:::
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+#| fig-height: 6
+
+
+# grz_nrz = near_properties %>%
+#     filter(type_short %in% c('Neighbourhood residential', 'General residential')) %>%
+#     filter(heritage == F)
+
+
+#fix panes
+
+leaflet(grz_nrz) %>%
+  fitBounds(bounds[1], bounds[2], bounds[3], bounds[4]) %>%
+  setView(lng = mean(c(bounds[1], bounds[3])), lat = mean(c(bounds[2], bounds[4])), zoom = zoom_level) %>%
+  addMapPane("background_map", zIndex = 410) %>%  # Level 1: bottom
+  addMapPane("polygons", zIndex = 420) %>%        # Level 2: middle
+  addMapPane("labels", zIndex = 430) %>%  
+  addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(opacity = 0.7, pane = "background_map")) %>%
+  addTiles('https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}.png?api_key=090a847c-32a2-4e35-99a9-543ad8f4ecc8', options = tileOptions(pane = "labels")) %>%
+  addPolygons(fillColor = ~colour, color = NA, weight = 0, fillOpacity = 0.7, options = pathOptions(pane = "polygons")) %>%
+  addLegend(position = 'bottomleft', colors = c('#10461b','darkgray'), labels = c('Suitable lot for upzoning','Unsuitable lot'), title = "Lot Suitability") %>%
+  addPolygons(data = buffer, color = 'black', fillColor = 'grey', fillOpacity = 0.3, options = pathOptions(pane = 'polygons'))
+  
+n_suitable = grz_nrz %>%
+  st_drop_geometry() %>%
+  count(isNRZGRZ) %>%
+  filter(isNRZGRZ) %>%
+  pull(n)
+
+n_unsuitable = grz_nrz %>%
+  st_drop_geometry() %>%
+  count(isNRZGRZ) %>%
+  filter(!isNRZGRZ) %>%
+  pull(n)
+
+by_validity <- grz_nrz %>%
+  group_by(isNRZGRZ) %>%
+  summarise(total_area = sum(st_area(geom))) %>%
+  st_drop_geometry()
+
+area_ratio = ( ( by_validity %>% filter(isNRZGRZ) %>% pull(total_area) ) / sum(by_validity$total_area) %>% unname() %>% as.vector() ) %>% round(.,2)
+
+```
+
+\
+
+Out of `r n_suitable + n_unsuitable` lots within `r radius`m radius of `r station`, `r n_suitable` are suitable for upzoning.
+
+In terms of area, the most suitable properties cover **`r area_ratio*100`**% of the total area.
+
+For more information, see the table below.
+
+:::{.graph}
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+# by_zone_heritage <- near_properties %>%
+#   st_drop_geometry() %>%
+#   count(heritage, zone_short) %>%
+#   dplyr::relocate(zone_short, .before = heritage) %>%
+#   arrange(zone_short)
+
+# by_zone_heritage %>%
+#   mutate(heritage = ifelse(heritage, 'Yes','No')) %>%
+#   reactable(
+#     theme = sandstone(),
+#     pagination = F,
+#     columns = list(
+#       zone_short = colDef(name = "Zone"),
+#       heritage = colDef(name = "Heritage protected"),
+#       n = colDef(name = "Number of lots")
+#     )
+#   )
+# 
+# by_zone_heritage %>%
+#   group_by(zone_short) %>%
+#   summarise(n_total = sum(n), percent = n[heritage] / n_total, n_heritage = n[heritage], n_not_heritage = n[!heritage]) %>%
+#   mutate(percent = round(percent, 2)) %>%
+#   mutate(percent = percent * 100) %>%
+#   relocate(n_total, .after = n_not_heritage) %>%
+#   reactable(
+#     
+#     pagination = F,
+#     columns = list(
+#       zone_short = colDef(name = "Zone"),
+#       percent = colDef(name = "% Heritage"),
+#       n_heritage = colDef(name = "# Heritage Lots"),
+#       n_not_heritage = colDef(name = "# Non Heritage Lots"),
+#       n_total = colDef(name = "Total")
+#     )
+#   )
+
+near_properties_ = get_near_properties('Brunswick', fromQuarto = T) %>%
+  mutate(area = st_area(geom)) %>%
+  mutate(area = as.vector(area))
+
+total_area <- near_properties_ %>%
+  pull(area) %>%
+  sum()
+
+# , pc_suitable = (1- heritage_pc_area) * pc_area 
+
+  
+  near_properties_ %>%
+    filter(zone_short %in% c('Neighbourhood residential', 'General residential', 'Residential growth')) %>% 
+  st_drop_geometry() %>%
+  group_by(zone_short) %>%
+  summarise(zone_total_area = sum(area), zone_pc_of_station = sum(area)/total_area, not_heritage_pc_in_zone = sum(area[!heritage])/zone_total_area) %>%
+ mutate(pc_total_area = not_heritage_pc_in_zone * zone_pc_of_station) %>%
+    select(!zone_total_area) %>%
+    mutate(across(where(is.numeric), ~round(.x * 100, 2))) %>%
+    reactable(
+      columns = list(
+        zone_short = colDef(name = "Zone"),
+       zone_pc_of_station = colDef(name = '% of Total Area'),
+       not_heritage_pc_in_zone = colDef(name = '% of Zone not Heritage'),
+       pc_total_area = colDef(name = "% of Total Area Suitable")
+      )
+    )
+
+```
+:::
 
 ## Local Amenities
 
@@ -757,7 +790,7 @@ Some amenities are within the same building, e.g. multiple shops in shopping cen
 
 \
 
-The plot below shows the number of local services within a `r radius`m radius. Data is drawn from OpenStreetMaps classifications. Black dotted lines represent the means across all stations that meet the criteria for ranking.
+The plot below visualises the number of local services within the station catchment. Data is drawn from OpenStreetMaps classifications. The black dotted lines represent the average for each category across all stations included in the model.
 
 :::{.graph}
 ```{r warning=FALSE,message=FALSE}
@@ -795,7 +828,7 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
   geom_segment(aes(x = as.numeric(factor(name)) - col_width/2,
                    xend = as.numeric(factor(name)) + col_width/2,
                    y = value.x, yend = value.x),
-               color = "black", size = 1, linetype = "dashed") ) %>%
+               color = "black", size = 1, linetype = "dotted") ) %>%
   ggplotly()
     
     
@@ -806,9 +839,17 @@ ymax = max( max(amenity_means$value.x), max(amenity_means$value.y)  )
 ```
 :::
 
-\
+
 
 Calculation of the final score for local services uses an index measure. It is described in more detail [in the full report](../quarto/report_shiny.html).
+
+## Distance to CBD
+
+`r station` is `r rankings %>% filter(name == "distance") %>% pull(value)` metres from Flinders Street Station, as the crow flies.
+
+___
+
+To learn more about these metrics and their calculation, visit the [report methodology](../quarto/report_shiny.html).
 
 <!-- ## Zoned Capacity -->
 

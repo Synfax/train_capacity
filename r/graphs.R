@@ -3,7 +3,7 @@ library(patchwork)
 
 
 
-top_stations_by_lga <- function(fromQuarto = T, n_slice = 25, include_existing_25 = F, debug = F) {
+top_stations_by_lga <- function(fromQuarto = T, n_slice = 25, include_existing_25 = F, debug = F, return_lga_with_n_sf = F) {
   
   prefix = ifelse(fromQuarto, '../', '')
   
@@ -76,6 +76,10 @@ top_stations_by_lga <- function(fromQuarto = T, n_slice = 25, include_existing_2
     filter(Station_Name %in% stations_to_include ) %>%
     group_by(LGA_NAME23) %>%
     summarise(n = n())
+  
+  if(return_lga_with_n_sf) {
+    return(lga_with_n_sf)
+  }
   
   list_not_yet_mapped <- setdiff(c(inner_lgas, middle_lgas), lga_with_n_sf$LGA_NAME23)
   

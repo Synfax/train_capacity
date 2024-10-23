@@ -8,13 +8,13 @@ try_render_stupid_quarto_files <- function() {
     str_replace_all(., ".html", "") %>%
     dplyr::intersect(., stations)
   
-  valid_stations <- readRDS('r_objects/transformed_scores.Rdata') %>% pull(station)
+  valid_stations <- readRDS('r_objects/station_rankings.Rdata') %>% pull(station)
   
   edited_station_list = setdiff(valid_stations, already_rendered)
   
   
   # Render a report for each station
-  for (station in edited_station_list) {
+  for (station in valid_stations) {
     print(station)
     # Create a safe filename
     safe_name <- gsub("[^a-zA-Z0-9]", "_", station)
