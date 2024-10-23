@@ -70,7 +70,9 @@ top_stations_by_lga <- function(fromQuarto = T, n_slice = 25, include_existing_2
   #   group_by(LGA_NAME23) %>%
   #   summarise(n = n())
   
-  stations_to_include <- stations_to_include %>% as.data.frame() %>% pull(Station_Name)
+  stations_to_include <- stations_to_include %>%
+    as.data.frame() %>% 
+    pull(Station_Name)
   
   lga_with_n_sf <- stations_in_lga %>%
     filter(Station_Name %in% stations_to_include ) %>%
