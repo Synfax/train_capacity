@@ -3,6 +3,7 @@ project:
   render:
     - quarto/index.qmd
     - quarto/run_for_station.qmd
+    - quarto/methodology.qmd
   output-dir: ../rankings_website/
   
 website: 

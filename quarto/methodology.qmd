@@ -1,0 +1,526 @@
+---
+params: 
+  station: "Brunswick"
+title: "The Next 25: Methodology"
+css:
+ - index.css
+ - nav_fixes.css
+format: 
+  html: 
+    grid: 
+      body-width: 900px
+    page-layout: article  
+    theme: zephr
+    code-fold: false
+    toc: true
+    toc-location: left
+    toc-expand: true
+    toc-depth: 3
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+library(knitr)
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(htmltools)
+library(htmlwidgets)
+library(reactablefmtr)
+library(plotly)
+library(RColorBrewer)
+library(ggridges)
+library(collapse)
+
+source('../r/constants.R')
+source('../r/theme.r')
+source('../r/station_functions.R')
+source('../r/transform.r')
+```
+
+We know that upzoning is an incredible value unlock for Victorians. We have explored this unlock throughout our previous reports including [Melbourne's Missing Middle](https://www.yimby.melbourne/missing-middle) and [Missing Middle Housing Targets](https://targets.yimby.melbourne/).
+
+Even the best policies have trade-offs. The purpose of this report is to tackle these trade-offs by building a robust and data-driven framework that identifies the Melbourne train stations that are best suited for this broad upzoning.
+
+To build this framework, we measure characteristics of each station, and all land within one kilometre of that station.
+
+## **Data sources**
+
+This report relies on key open data sources:
+
+-   Train patronage data, [released by DataVic](https://discover.data.vic.gov.au/dataset/train-service-passenger-counts), which informs service frequency and patronage information for each station
+
+-   [OpenStreetMap](https://www.openstreetmap.org/#map=5/-28.15/133.28), which informs the amenities present within each station's catchments
+
+-   [VicPlan](https://mapshare.vic.gov.au/vicplan/), which informs the prevailing zoning and heritage controls, and
+
+Timetable and Geographic Information (bus and tram), [released by DataVic as static GTFS files](https://discover.data.vic.gov.au/dataset/timetable-and-geographic-information-gtfs), which informs transport connection information for each train station
+
+## **Metrics**
+
+The metrics considered when ranking stations are:
+
+-   **Service frequency**: the number of trains per hour during peak travel times,
+
+-   **Line capacity**: the amount of spare train capacity during peak travel times,
+
+-   **Transport connections**: the frequency of nearby bus and tram services,
+
+-   **Zoning suitability**: the proportion of residential land with low-density zoning, excluding heritage overlays,
+
+-   **Local amenities**: the prevalence and diversity of infrastructure such as parks and schools, and
+
+-   **Distance to CBD**: the distance to the CBD
+
+Metrics were chosen based on two factors: data availability, and measurement simplicity.
+
+The rankings are intended to capture which stations should be upzoned as a priority right now---without having to amend any legislation, reform heritage, change public transport service frequencies, or build new infrastructure.
+
+This means that some metrics are a representation of the day they were calculated, and are likely to change over time. One notable example of an upcoming change not factored into this report is the opening of the Metro Tunnel, which will increase capacity across Melbourne's entire train network.
+
+For those reading in the future and interested in rerunning the numbers, the code is available on GitHub.
+
+### Service Frequency
+
+For each given station, the number of departures on standard business days is counted across the following two periods and directions:
+
+-   Towards Flinders Street, 7--10am
+
+-   Away from Flinders Street, 4--7pm
+
+The total number of services over these six hours is counted, and the per-hour average comprises the final score. For example, services an average of every 15 minutes corresponds to a score of 4 services per hour.
+
+A limitation of only capturing peak services is that it does not capture connectivity for those without a typical 9 to 5 office commute.
+
+On the other hand, peak hours are when most people use trains, and averaging services over the whole day may obscure important information regarding the service frequency when people use trains the most.
+
+### Line Capacity
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+station = 'Victoria Park'
+
+station_lines = readRDS('../r_objects/stations_with_lines.Rdata') %>%
+  filter(Station_Name == station) %>%
+  pull(lines) %>%
+  unlist() %>%
+  as.vector()
+
+station_targets = readRDS('../r_objects/target_stations.Rdata') %>%
+  filter(Station_Name == station) %>%
+  pull(targets) %>%
+  unlist() %>%
+  as.vector() %>%
+  first()
+
+
+
+```
+
+This metric measures the amount of space available on peak train services passing through each given station. After all, there is little point upzoning around a train station if that station has no capacity to move people.
+
+For stations in the middle of a train line, however, it is important to remember that passengers will typically continue to board the train until they reach the CBD.
+
+For this reason, it is best to measure line capacity by observing the average number of passengers on a train at the last station before the CBD, as this is when a given train should be at its most full. This measurement gives us a better understanding of how busy the line itself is overall.
+
+To explore this further, let's use Victoria Park as an example.
+
+##### **Example calculation: Victoria Park Station**
+
+1.  Identify the train line(s) that serve Victoria Park: Hurstbridge and Mernda.
+
+2.  For each line, find the station nearest to the CBD. In the case of all stations in the radial Melbourne network, all lines servicing a given station remain converged until the CBD, and so they share a single closest-to-CBD station. In the case of Victoria Park, that station is Jolimont.
+
+3.  For each pre-CBD station, calculate the average number of people on train services at that station, on each line identified in step 1.
+
+This process enables us to derive a single score for each combination of lines serving stations across Melbourne.
+
+::: {.graph .column-body}
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+
+
+station_lines = readRDS('../r_objects/stations_with_lines.Rdata')
+
+station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+  rename(Station_Name = "station") %>%
+  as.data.frame()
+
+(station_rankings %>%
+  filter_stations(., "Station_Name") %>%
+  left_join(station_lines, by = 'Station_Name') %>%
+  select(average_peak_service_cap, lines) %>%
+  unique() %>%
+  rowwise() %>%
+  mutate(lines = lines %>% unlist() %>% as.vector() %>% paste0(.,collapse = ',') ) %>%
+  ggplot(mapping = aes(y = reorder(lines, average_peak_service_cap), x = average_peak_service_cap, fill = average_peak_service_cap)) +
+  scale_fill_gradientn(colors = create_green_palette(11)) +
+  geom_col() +
+  theme_report() +
+  theme(legend.position = 'none') +
+  xlab("Mean number of people on peak train before flinders") +
+  ylab("Lines serving station")) %>%
+  ggplotly()
+
+```
+:::
+
+Stations served exclusively by the Sunbury line (Sunshine, West Footscray, etc) typically have the busiest trains, whereas Frankston line--only stations typically have the emptiest.
+
+### Existing Transport Infrastructure
+
+In addition to the train station itself, it is also important to measure the accessibility of other transport modes servicing the areas near the stations. In this case, we consider trams and buses.
+
+First, we identify the list of [bus stops](https://discover.data.vic.gov.au/dataset/ptv-metro-bus-stops) and [tram stops](https://discover.data.vic.gov.au/dataset/ptv-metro-tram-stops) within one kilometre of a given train station, and pull the list of routes that service any one of those stops.
+
+Then, for each of the routes, we access the service timetables for a typical weekday, and calculate the average number of departures per hour for each route within the one-kilometre station radius. 
+
+Because trams can typically carry twice as many passengers as a bus, tram routes are given twice the weighting of bus routes.
+
+This weighting is then applied to each route's average departures per hour, generating a final transport infrastructure score.
+
+A limitation of this method is it does not---and could not reasonably---consider the direction in which the services travel, or whether the services travel to useful places.
+
+### Zoning suitability
+
+This measure intends to capture the suitability of existing zoning surrounding train stations. An ideal station would have many low-density residential lots that are able to be redeveloped under current planning paradigms.
+
+Therefore, a 'suitable lot' is defined as one within a kilometre of a given train station that is currently:
+
+-   zoned either Neighbourhood Residential, General Residential or Residential Growth, and
+
+-   not affected by any heritage controls.
+
+The final zoning suitability score is the eligible land area in square metres, as a proportion of the total area.
+
+Train stations that score poorly in this metric are likely to be zoned for commercial or other non-residential purposes, or subject to an extreme regime of heritage controls.
+
+Stations that score highly have large areas of low-density, mostly detached housing.
+
+### Number of Local Services
+
+Train stations best-primed for upzoning have a diversity of local amenities ready to be shared by the new residents that more density enables.
+
+For this model, we choose a small subset of amenities. These are: school, childcare, park, supermarket, restaurant, cafe, bar.
+
+\[Sidenote: The choice of the amenities is arbitrary, and intended to measure necessities and amenities that make for highly walkable neighbourhoods. For the amenities chosen, OpenStreetMap contains reasonably accurate data. Data on more niche amenities may be limited by poor data.\]
+
+To derive a final score, one could simply sum all the amenities. However, this would result in no difference between a station surrounded by 50 cafes and no parks, and one surrounded by 50 parks and no cafes. Other methods, such as median number of amenities or mean number suffer from similar problems.
+
+To combine these amenity counts into a single value, an xmin-xmax transformation is used. Each column is transformed through the following function:
+
+$$
+x = \frac{x - \min{x} }{ \max{x} - \min{x} }
+$$
+
+The result of this transformation is a set of single values for each amenity per station, represented as a percentage of the range (max -- min) of all stations in the sample, bounded between zero and one. A zero corresponds to the lowest value out of all stations, and a one corresponds to the highest value.
+
+The transformed values for each amenity are then summed, forming a single per-station metric for the number and diversity of key amenities nearby.
+
+\[Sidenote: No weighting is applied for this sum. Each amenity type is treated equally as important as each other. It would be trivial to change the amenity weights in the code and re-run if desired.\]
+
+The scoring method takes into account the fact that raw numbers mean different things for different amenities, which a simple summation or mean would not consider. For example, having 10 cafes in an area is less important than having 10 schools, although without additional manual weighting, a mean or sum would be unable to distinguish the two.
+
+The final value may be less easy to immediately interpret, but in return it offers a more meaningful distinction between stations as they are ranked within the model.
+
+### Distance to CBD
+
+Stations closer to the CBD are likely to have higher land prices, making upzoning more feasible, more effective, and more important.
+
+Distance is measured 'as the crow flies' from Flinders Street Station to each given station, in metres.
+
+## Calculated values
+
+The searchable table below contains the raw values calculated for each station.
+
+::: {.table .column-page}
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+
+station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+  remove_null_weighted_cols() %>%
+  rename(!!!remove_null_weighted_translations(translations_simple_inv)) %>%
+  mutate(across(-station, as.numeric)) %>%
+  mutate(across(where(is.numeric), .fns = function(x) {round(x,2)}))
+
+station_rankings %>%
+  reactable( pagination = T,
+    defaultColDef = colDef(),
+    columns = list(
+      station = colDef(name = 'Station', filterable = T)
+    ))
+
+```
+:::
+
+## Transformation Process
+
+The model's final step is to transform the results of all metrics for each station into values that can be summed into a single comparable score.
+
+We use the same xmin-xmax transformation used to generate the \[local amenities\](#local-amenities) scores above to scale each metric to a value between 0 and 1. 
+
+$$
+x = \frac{x - \min{x} }{ \max{x} - \min{x} }
+$$
+
+One downside of the xmin-xmax scaler is its high sensitivity to outliers. A few very high or very low values within a given metric can flatten the remainder of the data and render the entire dataset less useful.
+
+This is why this report considers Melbourne's three Edge Stations (Richmond, South Yarra, and North Melbourne) separately from the rest of the networks. Their inclusion would distort the entire model due to their outlier service frequency values.
+
+### Inverted metrics
+
+For two of the metrics considered---line capacity and distance to CBD---higher values imply less suitability for upzoning, rather than more. 
+
+To account for this, these metrics are inverted  (x=1−x), ensuring that higher scores reflect greater upzoning suitability.
+
+### Variable Weighting
+
+Because Activity Centres are a housing policy first and foremost, within the report we have set the default weighting to favour proximity to the city and the potential for new housing around the station. As such, these variables are weighted as twice as important as the remaining variables.
+
+We provide a page where readers have the opportunity to decide which metrics are most important to them, and see which stations should be upzoned as a result.
+
+*See our interactive rankings tool [here](interactive_shiny.html "Interactive Rankings Tool").*
+
+
+These transformed scores are then summed to produce a final score.
+
+## Transformed Scores
+
+### Distributions
+
+The chart below shows the distribution of metrics after they have been transformed and weighted according to their importance.
+
+This is reflected in the fact that most variables are bound within 0 and 1, however more important variables range from 0 and 2.
+
+::: {.graph .column-body}
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+#| fig-width: 8
+#| fig-height: 7
+
+# translations = c(
+#   'grz_nrz_pc' = 'Zoning suitability',
+#   'capacity_delta' = 'Potential new homes',
+#   'average_peak_service_freq' = 'Train frequency',
+#   'average_peak_service_cap' = 'Available train capacity',
+#   'walkability_score' = 'Local services',
+#   'distance' = 'Distance to CBD',
+#   'n_bus_tram' = 'Other transport infrastructure'
+# )
+
+
+transformed_scores = readRDS('../r_objects/transformed_scores.Rdata') %>%
+  remove_null_weighted_cols() %>%
+  select(-score) %>%
+  pivot_longer(cols = -c('station')) %>%
+  mutate(name = remove_null_weighted_translations(translations_simple, inv = F)[name])
+
+  # mutate(name = str_wrap(name, width = 5))
+
+# <- ggplot(transformed_scores) + geom_density(aes( x = value)) + facet_grid(rows = vars(name), scales = 'free') + theme_bw()
+
+ggplot(transformed_scores, aes(x = value, y  = name, fill = name)) +
+  geom_density_ridges(alpha = 0.5, bins = 30, stat = 'binline') +
+  theme_ridges()  +
+  theme_report() +
+  theme(legend.position = "none") + xlab("Transformed Score") +
+  ylab("")
+
+
+# ggplot(transformed_scores, aes(x = value, y  = name, fill = name)) +
+#   geom_density_ridges(alpha = 0.5, bins = 30) +
+#   theme_ridges()  +
+#   theme(legend.position = "none")
+
+
+
+
+```
+:::
+
+::: column-margin
+Created with `ggridgeline`.
+:::
+
+The table below shows the final transformed scores for each station. 
+
+The table can be searched and ordered by the user.
+
+::: {.table .column-page}
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+transformed_scores = readRDS('../r_objects/transformed_scores.Rdata') %>%
+  remove_null_weighted_cols() %>%
+  mutate(across(-station, as.numeric)) %>%
+  mutate(across(where(is.numeric), .fns = function(x) {round(x,2)}))
+
+transformed_scores %>%
+  rename(!!!remove_null_weighted_translations(translations_simple_inv)) %>%
+  relocate(score, .after = 'station') %>%
+  reactable( 
+             defaultSorted = 'score',
+             defaultSortOrder = 'desc',
+             defaultColDef = colDef(),
+             columns = list(
+                station = colDef(name = 'Station', filterable = T)
+             ) )
+
+```
+:::
+
+# Additional Analysis
+
+The graph below shows the distribution of the metrics before they are transformed.
+
+#### Raw scores
+
+::: {.graph .column-body}
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+#| fig-width: 8
+
+raw_scores = readRDS('../r_objects/station_rankings.Rdata') %>%
+  filter_stations() %>%
+  remove_null_weighted_cols()
+
+  raw_scores = raw_scores %>%
+  pivot_longer(cols = -c('station')) %>%
+  mutate(name = remove_null_weighted_translations(translations_simple, inv = F)[name])
+
+
+ ( ggplot(raw_scores) + geom_density(aes( x = value)) +
+  facet_wrap(~ name, scales = 'free') +
+  theme_bw() +
+  theme_report() +
+  theme(axis.text.y = element_blank()) + xlab("Raw score") + ylab("Density") )
+
+```
+:::
+
+
+Train frequency has fewer unique values and a high peak at approximately 6 services per hour, giving it a unique shape compared to other variables.
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+# 
+# station_lines = readRDS('../r_objects/stations_with_lines.Rdata') 
+# 
+# station_rankings = readRDS('../r_objects/station_rankings.Rdata') %>%
+#   rename(Station_Name = "station") %>%
+#   as.data.frame()
+# 
+# 
+# (station_rankings %>%
+#   filter_stations(., "Station_Name") %>%
+#   left_join(station_lines, by = 'Station_Name') %>%
+#   select(average_peak_service_cap, lines) %>%
+#   unique() %>%
+#   rowwise() %>%
+#   mutate(lines = lines %>% unlist() %>% as.vector() %>% paste0(.,collapse = ',') ) %>%
+#   ggplot(mapping = aes(y = reorder(lines, average_peak_service_cap), x = average_peak_service_cap)) +
+#   geom_col() +
+#   theme_minimal() +
+#   xlab("Avg number of people on peak train before flinders") +
+#   ylab("Lines serving station")) %>%
+#   ggplotly()
+
+```
+
+## Best and Worst Stations
+
+The table below displays the stations that are the best and the worst for each metric used in the ranking process.
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+station_rankings = readRDS('../r_objects/station_rankings.Rdata')
+
+station_rankings %>%
+  filter_stations(name_var = 'station') %>%
+  remove_null_weighted_cols() %>%
+  select(station, where(is.numeric)) %>%
+  pivot_longer(cols = -station, names_to = "column", values_to = "value") %>%
+  group_by(column) %>%
+  summarise(
+    Highest_Value = station[which.max(value)],
+    Lowest_Value = station[which.min(value)]
+  ) %>%
+  select(Column = column, everything()) %>%
+  rowwise() %>%
+  mutate(Column = translations_simple[Column]) %>%
+  reactable(
+    columns = list(
+      Column = colDef(name = "Metric"),
+      Highest_Value = colDef(name = "Highest Value"),
+      Lowest_Value = colDef(name = "Lowest Value")
+    )
+  )
+
+```
+
+## Additional Information on Amenities
+
+Since the 'Local Amenities' measure is a composite measure itself, it is also possible to look at the best and worst stations for each amenity type.
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+station_walkability = readRDS('../r_objects/station_walkability.Rdata')
+
+
+station_walkability %>%
+  filter(station %in% (readRDS('../r_objects/transformed_scores.Rdata') %>% pull(station))) %>%
+  select(station, where(is.numeric)) %>%
+  pivot_longer(cols = -station, names_to = "column", values_to = "value") %>%
+  group_by(column) %>%
+  summarise(
+    Highest_Value = paste0(station[which.max(value)], ": ", max(value)),
+    Lowest_Value = paste0(station[which.min(value)], ": ", min(value))
+  ) %>%
+  select(Column = column, everything()) %>%
+  reactable(
+    columns = list(
+      Column = colDef(name = "Amenity"),
+      Highest_Value = colDef(name = "Highest Value"),
+      Lowest_Value = colDef(name = "Lowest Value")
+    )
+  )
+
+```
+
+\
+
+Collingwood leads the pack and is top of the class in bars, cafes, restaurants and supermarkets.
+
+For lowest values, there is more variance, with only Glen Iris being the lowest for two amenity types: bars and supermarkets.
+
+```{r warning=FALSE,message=FALSE}
+#| echo: false 
+
+# temp <- df %>%
+#   remove_null_weighted_cols() %>%
+#   remove_existing_stations() %>%
+#   transform_scores_xminxmax() %>%
+#   as.data.frame() %>%
+#   slice_head(n = 10) %>%
+#   select(-score) %>%
+#   pivot_longer(cols = -station, names_to = "column", values_to = "value")
+# 
+# ggplot(temp, aes(x = column, y = reorder(station, value), fill = value)) +
+#   geom_tile() +
+#   scale_fill_viridis_c() +
+#   labs(title = "Heatmap of Top 10 Train Stations",
+#        x = "Variables", y = "Stations", fill = "Score") +
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```

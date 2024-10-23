@@ -2,12 +2,12 @@
 #set weights manually, default is 1.
 
 weights = c(
-  "grz_nrz_pc" = 1,
+  "grz_nrz_pc" = 2,
   "capacity_delta" = 0,
   'average_peak_service_freq' = 1,
   'average_peak_service_cap' = 1,
   'walkability_score' = 1,
-  'distance' = 1, 
+  'distance' = 2, 
   'n_bus_tram' = 1
 )
 

@@ -153,7 +153,10 @@ Sidenote: A total of 60 Activity Centres have been announced. Of the initial 10,
 
 Here, we build upon previous work to answer a simple question: across Melbourne's transport network, which additional 25 train stations should be prioritised for inclusion in the Activity Centre Program?
 
-*See the full report [here](report.html "Full Report").*
+*See the methodology [here](methodology.html "Methodology").*
+
+*See our interactive rankings tool [here](interactive_shiny.html "Interactive Rankings Tool").*
+
 :::
 
 <!-- ### Methodology -->
@@ -297,7 +300,7 @@ For each station, and all land within one kilometre of that station, we measure:
 -   The prevalence and diversity of local amenities such as parks and schools
 -   The station's distance from the CBD
 
-A comprehensive explanation of the report's methodology is available [here](report_shiny.html).
+A comprehensive explanation of the report's methodology is available [here](methodology.html).
 
 <!-- Note: our rankings exclude SRL Precincts and stations located within the CBD such as List -->
 
